@@ -44,34 +44,34 @@ Figure  \@ref(fig:surface-sketch) is an illustration of the principle of directi
 ```{r surface-sketch, echo = FALSE,  include=TRUE, fig.cap='(ref:surface-sketch)', fig.align="center", fig.height=6, fig.width=6}
 
 knitr::include_graphics("illustration_of_directional_derivatives.png")
-
-#The commented code below was used to make the original surface illustration
-pars <- list(c = 2000,
-          t_1 = 0.1,
-          t_2 = -2,
-          s_1 = 0,
-          s_2 = 0,
-          ts_1 = 2)
-scaler <- 1/1000
-growth_rate_T_S <- function(T, S) {
-  pars$c +
-    pars$t_1 * T +
-    pars$t_2 * T^2 +
-    pars$s_1 * S +
-    pars$s_2 * S^2 +
-    pars$ts_1 * T * S
-}
-T_axis <- seq(5, 30, 1)
-S_axis <- seq(1, 80, 1)
-growth_rate_matrix = outer(X = T_axis,
-                           Y = S_axis,
-                           FUN = growth_rate_T_S) * scaler
-fig <- plot_ly(x = S_axis, y = T_axis, z = t(growth_rate_matrix)) %>%
-  add_surface() %>%
-  layout(scene = list(xaxis = list(title = 'Temperature'),
-                      yaxis = list(title = 'Salinity'),
-                      zaxis = list(title = "Growth rate")))
-htmlwidgets::saveWidget(fig, "3dsurface_widget.html")                       
+# 
+# #The commented code below was used to make the original surface illustration
+# pars <- list(c = 2000,
+#           t_1 = 0.1,
+#           t_2 = -2,
+#           s_1 = 0,
+#           s_2 = 0,
+#           ts_1 = 2)
+# scaler <- 1/1000
+# growth_rate_T_S <- function(T, S) {
+#   pars$c +
+#     pars$t_1 * T +
+#     pars$t_2 * T^2 +
+#     pars$s_1 * S +
+#     pars$s_2 * S^2 +
+#     pars$ts_1 * T * S
+# }
+# T_axis <- seq(5, 30, 1)
+# S_axis <- seq(1, 80, 1)
+# growth_rate_matrix = outer(X = T_axis,
+#                            Y = S_axis,
+#                            FUN = growth_rate_T_S) * scaler
+# fig <- plot_ly(x = S_axis, y = T_axis, z = t(growth_rate_matrix)) %>%
+#   add_surface() %>%
+#   layout(scene = list(xaxis = list(title = 'Temperature'),
+#                       yaxis = list(title = 'Salinity'),
+#                       zaxis = list(title = "Growth rate")))
+# htmlwidgets::saveWidget(fig, "3dsurface_widget.html")                       
 ```
 
 
