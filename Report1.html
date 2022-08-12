@@ -12,7 +12,7 @@
 <meta name="author" content="Owen Petchey, and please add" />
 
 
-<title>Measuring response diversity in the context of multifarious environmental change.</title>
+<title>Response diversity in the context of multifarious environmental change.</title>
 
 <script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
 // be compatible with the behavior of Pandoc < 2.8).
@@ -1589,9 +1589,9 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Measuring response diversity in the context of multifarious environmental change.</h1>
+<h1 class="title toc-ignore">Response diversity in the context of multifarious environmental change.</h1>
 <h4 class="author">Owen Petchey, and please add</h4>
-<h4 class="date">11 August, 2022</h4>
+<h4 class="date">12 August, 2022</h4>
 
 </div>
 
@@ -1605,9 +1605,15 @@ library(tidyverse)</code></pre>
 </div>
 <div id="the-principle" class="section level1" number="2">
 <h1><span class="header-section-number">2</span> The principle</h1>
+<p><em>Owen learned about the mathematical principles from these youtube videos:</em></p>
+<ul>
+<li><a href="https://www.youtube.com/watch?v=k4wNIZr8GU4">Surfaces and Partial Derivatives</a></li>
+<li><a href="https://www.youtube.com/watch?v=wfjipWmyRYg">54. Slope of the Surface in Any Direction - Directional Derivative, and Properties of the Gradient</a></li>
+</ul>
 <p>Imagine that the growth rate of a population depends on two environmental factors, e.g. temperature and salinity. We can represent the dependency as <span class="math inline">\(G = f(T, S)\)</span>, where <span class="math inline">\(G\)</span> is growth rate, <span class="math inline">\(T\)</span> is temperature, and <span class="math inline">\(S\)</span> is salinity. It may be that the dependencies are linear, nonlinear, and with an interaction between temperature and salinity, hence our approach needs to be able to accommodate this phenomena.</p>
 <p>The response of growth rate to change in temperature and salinity is the gradient / slope of this surface, with units of growth rate [per time] per temperature [degrees C] per salinity [parts per thousand]. Because the slope (first derivative) of the surface can (when dependencies are nonlinear) vary across the surface (location on the surface), and can vary in different directions on the surface, to calculate a slope we must specify the current environment (location on the surface) and the direction of change in the environment. The location on the curve is the current environmental condition, <span class="math inline">\((T_0, S_0)\)</span>, and the direction of environmental change is the unit vector <span class="math inline">\(\hat{u} = \langle U_T, U_S \rangle\)</span>.</p>
 <p>Put another way, we calculate a directional derivative at a point on the response surface. We can write this as <span class="math inline">\(D_{\hat{u}}f(T_0, S_0)\)</span> and can calculate it as <span class="math inline">\(f_T(T_0, S_0)U_T + f_S(T_0, S_0)U_S\)</span>, where <span class="math inline">\(f_T\)</span> is the partial derivative of <span class="math inline">\(f(T, S)\)</span> with respect to <span class="math inline">\(T\)</span> and <span class="math inline">\(f_S\)</span> is the partial derivative of <span class="math inline">\(f(T, S)\)</span> with respect to <span class="math inline">\(S\)</span>.</p>
+<p>Efficient evaluating in <span class="math inline">\(n\)</span> dimensions can be done by taking the dot product of the partial derivatives at the location and the direction unit vector: <span class="math inline">\(D_{\hat{u}}f(T_0, S_0) = \triangledown f \cdot \hat{u}\)</span> where, <span class="math inline">\(\triangledown f = \langle f_T, f_S \rangle\)</span>. (In R, the dot product of <code>a</code> and <code>b</code> is <code>sum(a*b)</code>)</p>
 <p>Figure <a href="#fig:surface-sketch">2.1</a> is an illustration of the principle of directional derivatives on a surface.</p>
 
 <div class="figure" style="text-align: center"><span style="display:block;" id="fig:surface-sketch"></span>
@@ -1619,6 +1625,7 @@ Figure 2.1: This figure needs considerable improvement! It is currently a keynot
 </div>
 <div id="a-simulated-empirical-example" class="section level1" number="3">
 <h1><span class="header-section-number">3</span> A simulated empirical example</h1>
+<p><em>To do.</em></p>
 <ul>
 <li>Collect data on response of growth rate to temperature and salinity for a collection of species. [We will simulate this, including response surfaces with combinations of linear and nonlinear responses, and without and with interactions among temperature and salinity.]</li>
 <li>Fit a response surface to that data. [Do with GAMs with interactions.]</li>
@@ -1635,6 +1642,7 @@ Figure 2.1: This figure needs considerable improvement! It is currently a keynot
 <div id="left-over-text" class="section level1" number="5">
 <h1><span class="header-section-number">5</span> Left-over text</h1>
 <p>Also imagine that we are studying an ecosystem that can experience simultaneous change in temperature and salinity. For example, at a particular time, the temperature might be increasing by 0.1 C per day and salinity increasing by 0.2 parts per thousand per day.</p>
+<p><em>Here some text that Sam wrote for a previous ms, that we removed from there, though please confirm this before using it in here</em> The framework proposed herein allows derivation of environment-dependent performance responses. Yet, when species are exposed to multiple environmental stressors simultaneously—a situation common in empirical systems (Bowler et al. 2020)—it is not trivial to derive performance responses. Conceptually, the principles of measuring response diversity should still apply in multiple dimensions, but the analytical formulation must necessarily differ. If multiple environmental stressors act additively, then it should be mathematically straightforward to produce a multivariate response surface with performance varying as a function of two (or more) environmental conditions. However, where multiple stressors interact, nonadditivity adds additional layers of complication to the formulation of multivariate response surfaces (e.g., Yang et al. 2022). In such cases, a different analytical approach to estimating multivariate response diversity is needed. Future work should extend the univariate response diversity principles we suggest here into a multivariate framework for measuring response diversity to multiple environmental stressors. In doing so, multivariate response diversity may link conceptually to the study of co-tolerance to multiple stressors and stress-induced community sensitivity (see Vinebrooke et al. 2004) and should prove more operationalizable than univariate approaches given the propensity for multiple environmental stressors to not only co-occur but to interact nonadditively in nature (Dieleman et al. 2012).</p>
 </div>
 
 

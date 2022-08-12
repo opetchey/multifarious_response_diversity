@@ -31,11 +31,19 @@ Researchers have previous suggested that the response diversity of a community b
 
 # The principle
 
+*Owen learned about the mathematical principles from these youtube videos:*
+
+* [Surfaces and Partial Derivatives](https://www.youtube.com/watch?v=k4wNIZr8GU4)
+* [54. Slope of the Surface in Any Direction - Directional Derivative, and Properties of the Gradient](https://www.youtube.com/watch?v=wfjipWmyRYg)
+
+
 Imagine that the growth rate of a population depends on two environmental factors, e.g. temperature and salinity. We can represent the dependency as $G = f(T, S)$, where $G$ is growth rate, $T$ is temperature, and $S$ is salinity. It may be that the dependencies are linear, nonlinear, and with an interaction between temperature and salinity, hence our approach needs to be able to accommodate this phenomena.
 
 The response of growth rate to change in temperature and salinity is the gradient / slope of this surface, with units of growth rate [per time] per temperature [degrees C] per salinity [parts per thousand]. Because the slope (first derivative) of the surface can (when dependencies are nonlinear) vary across the surface (location on the surface), and can vary in different directions on the surface, to calculate a slope we must specify the current environment (location on the surface) and the direction of change in the environment. The location on the curve is the current environmental condition, $(T_0, S_0)$, and the direction of environmental change is the unit vector $\hat{u} = \langle U_T, U_S \rangle$.
 
 Put another way, we calculate a directional derivative at a point on the response surface. We can write this as $D_{\hat{u}}f(T_0, S_0)$ and can calculate it as $f_T(T_0, S_0)U_T + f_S(T_0, S_0)U_S$, where $f_T$ is the partial derivative of $f(T, S)$ with respect to $T$ and $f_S$ is the partial derivative of $f(T, S)$ with respect to $S$.
+
+Efficient evaluating in $n$ dimensions can be done by taking the dot product of the partial derivatives at the location and the direction unit vector: $D_{\hat{u}}f(T_0, S_0) = \triangledown f \cdot \hat{u}$ where, $\triangledown f  = \langle f_T, f_S \rangle$. (In R, the dot product of `a` and `b` is `sum(a*b)`)
 
 Figure  \@ref(fig:surface-sketch) is an illustration of the principle of directional derivatives on a surface.
 
@@ -76,10 +84,9 @@ knitr::include_graphics("illustration_of_directional_derivatives.png")
 
 
 
-
 # A simulated empirical example
 
-
+*To do.*
 
 * Collect data on response of growth rate to temperature and salinity for a collection of species. [We will simulate this, including response surfaces with combinations of linear and nonlinear responses, and without and with interactions among temperature and salinity.]
 * Fit a response surface to that data. [Do with GAMs with interactions.]
