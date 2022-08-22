@@ -49,8 +49,29 @@ Figure  \@ref(fig:surface-sketch) is an illustration of the principle of directi
 
 (ref:surface-sketch) This figure needs considerable improvement! It is currently a keynote illustration.
 
-```{r surface-sketch, echo = FALSE,  include=TRUE, fig.cap='(ref:surface-sketch)', fig.align="center", fig.height=6, fig.width=6}
+```{r definitions1}
+## Definitions
+pars <- list(c = 2000,
+          t_1 = 0.1,
+          t_2 = -2,
+          s_1 = 0,
+          s_2 = 0,
+          ts_1 = 2)
+scaler <- 1/1000
+growth_rate_T_S <- function(T, S) {
+  pars$c +
+    pars$t_1 * T +
+    pars$t_2 * T^2 +
+    pars$s_1 * S +
+    pars$s_2 * S^2 +
+    pars$ts_1 * T * S
+}
+T_axis <- seq(5, 30, 1)
+S_axis <- seq(1, 80, 1)
+```
 
+
+```{r surface-sketch, echo = FALSE,  include=TRUE, fig.cap='(ref:surface-sketch)', fig.align="center", fig.height=6, fig.width=6}
 knitr::include_graphics("illustration_of_directional_derivatives.png")
 # 
 # #The commented code below was used to make the original surface illustration
@@ -82,6 +103,14 @@ knitr::include_graphics("illustration_of_directional_derivatives.png")
 # htmlwidgets::saveWidget(fig, "3dsurface_widget.html")                       
 ```
 
+```{r eval = FALSE}
+## Here is an alternate method for creating growth rates
+## This is the approach we will use (the one above using the outer function is only for making a nice visualisation)
+## Must have run definitions1 chunk above
+expt <- crossing(Temperature = T_axis,
+                 Salinity = S_axis) %>%
+  mutate(Growth_rate = growth_rate_T_S(Temperature, Salinity) * scaler)
+```
 
 
 # A simulated empirical example
