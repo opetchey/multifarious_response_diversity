@@ -1,0 +1,240 @@
+---
+title: "Response diversity in the context of multifarious environmental change."
+author: "Owen Petchey, and please add"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  bookdown::html_document2:
+    toc: true
+    toc_float:
+      collapsed: true
+      smooth_scroll: true
+    code_folding: hide
+---
+
+```{r include = FALSE, echo = FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      include = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      cache = FALSE)
+```
+
+
+```{r}
+library(plotly)
+library(tidyverse)
+library(here)
+library(patchwork)
+source(list.files(here("r"), full.names = TRUE))
+```
+
+# Introduction
+
+Researchers have previous suggested that the response diversity of a community be measured by the diversity of responses to environmental change. For example, one can measure the response of each of the species' intrinsic growth rate to temperature, quantify the strength and direction of these responses (e.g., as the first derivative of the response curve), and calculate the diversity of responses (e.g., by calculating variation in the first derivatives among the species in a community). When responses are nonlinear, the response diversity will be a function of the environmental state (i.e. the first derivative is a function of the value of the environmental state). So far we demonstrated this approach for quantifying response diversity in the context of a single environmental factor, but given that multiple environmental factors can change simultaneously, we need an approach that works in that context.
+
+# The principle
+
+*Owen learned about the mathematical principles from these youtube videos:*
+
+* [Surfaces and Partial Derivatives](https://www.youtube.com/watch?v=k4wNIZr8GU4)
+* [54. Slope of the Surface in Any Direction - Directional Derivative, and Properties of the Gradient](https://www.youtube.com/watch?v=wfjipWmyRYg)
+
+
+Imagine that the growth rate of a population depends on two environmental factors, e.g. temperature and salinity. We can represent the dependency as $G = f(T, S)$, where $G$ is growth rate, $T$ is temperature, and $S$ is salinity. It may be that the dependencies are linear, nonlinear, and with an interaction between temperature and salinity, hence our approach needs to be able to accommodate this phenomena.
+
+The response of growth rate to change in temperature and salinity is the gradient / slope of this surface, with units of growth rate [per time] per temperature [degrees C] per salinity [parts per thousand]. Because the slope (first derivative) of the surface can (when dependencies are nonlinear) vary across the surface (location on the surface), and can vary in different directions on the surface, to calculate a slope we must specify the current environment (location on the surface) and the direction of change in the environment. The location on the curve is the current environmental condition, $(T_0, S_0)$, and the direction of environmental change is the unit vector $\hat{u} = \langle U_T, U_S \rangle$.
+
+Put another way, we calculate a directional derivative at a point on the response surface. We can write this as $D_{\hat{u}}f(T_0, S_0)$ and can calculate it as $f_T(T_0, S_0)U_T + f_S(T_0, S_0)U_S$, where $f_T$ is the partial derivative of $f(T, S)$ with respect to $T$ and $f_S$ is the partial derivative of $f(T, S)$ with respect to $S$.
+
+Efficient evaluating in $n$ dimensions can be done by taking the dot product of the partial derivatives at the location and the direction unit vector: $D_{\hat{u}}f(T_0, S_0) = \triangledown f \cdot \hat{u}$ where, $\triangledown f  = \langle f_T, f_S \rangle$. (In R, the dot product of `a` and `b` is `sum(a*b)`)
+
+Figure  \@ref(fig:surface-sketch) is an illustration of the principle of directional derivatives on a surface.
+
+(ref:surface-sketch) This figure needs considerable improvement! It is currently a keynote illustration.
+
+```{r surface-sketch, echo = FALSE,  include=TRUE, fig.cap='(ref:surface-sketch)', fig.align="center", fig.height=6, fig.width=6}
+knitr::include_graphics(here("report/assets/illustration_of_directional_derivatives.png"))
+```
+
+
+# A simulated empirical example
+
+## Simulating performance curves
+
+Let us use the Epply performance curve, which was used, for example, in this paper [https://royalsocietypublishing.org/doi/10.1098/rspb.2018.1076](Bernhardt et al 2018).
+
+With one environmental variable, the performance (i.e., rate) is given by:
+
+$rate(E) = ae^{bE}(1 - (\frac{E - z}{w/2})^2$
+
+$E$ is the values of the environmental factor.
+
+$z$ controls location of maximum.
+
+$w$ controls range of $E$ over which the rate is positive.
+
+$a$ scaling constant.
+
+$b$ controls rate of increase towards the maximum rate, as $E$ increases.
+
+Adding a second environmental variable gives:
+
+$rate(E_1, E_2) = a_1e^{b_1E_1}(1 - (\frac{E_1 - z_1}{w_1/2})^2 + a_2e^{b_2E_2}(1 - (\frac{E_2 - z_2}{w_2/2})^2$
+
+In this case, it is clear the effect of $E_1$ and $E_2$ is defined as being additive. For example, the value of $E_2$ does not affect the value of $E_2$ at which the rate is maximised ($z_1$), and vice-versa (see also Figure \@ref(fig:add-epp-fig)) 
+
+```{r}
+pars <- list(a1 = 1e-9,
+             b1 = 0.063,
+             z1 = 298,
+             w1 = 35,
+             a2 = 1e-3,
+             b2 = 0.02,
+             z2 = 20,
+             w2 = 10,
+             bint = 0,
+             zint = 0,
+             wint = 0,
+             sd_rate = 0)
+expt <- crossing(E1 = 273.15 + seq(0, 40, 1),
+                 E2 = seq(0, 40, 1)) %>%
+  mutate(rate = Eppley_2d(E1, E2, pars))
+    
+these_E2 <- expt$E2[seq(1, length(expt$E2), length=5)]
+temp <- expt %>%
+  filter(E2 %in% these_E2) %>%
+  mutate(E2 = as.factor(E2))
+fig1 <- ggplot(temp, aes(x = E1, y = rate, col = E2)) +
+  geom_line()   
+
+these_E1 <- expt$E1[seq(1, length(expt$E2), length=5)]
+temp <- expt %>%
+  filter(E1 %in% these_E1) %>%
+  mutate(E1 = as.factor(E1))
+fig2 <- ggplot(temp, aes(x = E2, y = rate, col = E1)) +
+  geom_line()
+```
+
+(ref:add-epp-fig) Nonlinear and additive dependence of a rate on two environmental variables. (a) The value of $E_1$ at which the rate is maximised is independent of the value of $E_2$. (b) The value of $E_2$ at which the rate is maximised is independent of the value of $E_1$. 
+
+```{r add-epp-fig, fig.cap='(ref:add-epp-fig)', fig.align="center", fig.height=3, fig.width=8}
+fig1 + fig2 + plot_annotation(tag_levels = 'a',
+                              tag_prefix = '(',
+                              tag_suffix = ')')
+```
+
+*Including an interaction*. One way to do this is to make the value of $E_1$ at which the rate is maximised depend on the value of $E_2$:
+
+$rate(E_1, E_2) = a_1e^{b_1E_1}(1 - (\frac{(E_1 - z_1) + z_{int}(E_1 - z_1)(E_2 - z_2)}{w_1/2})^2 + a_2e^{b_2E_2}(1 - (\frac{E_2 - z_2}{w_2/2})^2$
+
+When $z_{int} = 0$ then this equation becomes the previously mentioned additive one. When $z_{int} \neq 0$ then the value of $E_1$ at which the rate is maximised is a function of the distance of $E_2$ from its optimum value $z_2$. In this particular equation, it is still the case that the value of $E_2$ at which the rate is maximised is independent of the value of $E_1$. 
+
+```{r}
+pars <- list(a1 = 1e-9,
+             b1 = 0.063,
+             z1 = 298,
+             w1 = 35,
+             a2 = 1e-3,
+             b2 = 0.02,
+             z2 = 20,
+             w2 = 10,
+             bint = 0,
+             zint = 0.1,
+             wint = 0,
+             sd_rate = 0)
+expt <- crossing(E1 = 273.15 + seq(0, 40, 1),
+                 E2 = seq(0, 40, 1)) %>%
+  mutate(rate = Eppley_2d(E1, E2, pars))
+    
+these_E2 <- expt$E2[seq(1, length(expt$E2), length=5)]
+temp <- expt %>%
+  filter(E2 %in% these_E2) %>%
+  mutate(E2 = as.factor(E2))
+fig1 <- ggplot(temp, aes(x = E1, y = rate, col = E2)) +
+  geom_line()   
+
+these_E1 <- expt$E1[seq(1, length(expt$E2), length=5)]
+temp <- expt %>%
+  filter(E1 %in% these_E1) %>%
+  mutate(E1 = as.factor(E1))
+fig2 <- ggplot(temp, aes(x = E2, y = rate, col = E1)) +
+  geom_line()
+```
+
+(ref:int-epp-fig) Nonlinear and non-additive dependence of a rate on two environmental variables. (a) The value of $E_1$ at which the rate is maximised depends on the value of $E_2$. (b) The value of $E_2$ at which the rate is maximised is independent of the value of $E_1$. 
+
+```{r int-epp-fig, fig.cap='(ref:add-epp-fig)', fig.align="center", fig.height=3, fig.width=8}
+fig1 + fig2 + plot_annotation(tag_levels = 'a',
+                              tag_prefix = '(',
+                              tag_suffix = ')')
+```
+
+
+
+## To do
+
+* The mathematical formulation of the interaction term is not very good. Too much changes when the $z_int$ term is changed.
+* Collect data on response of growth rate to temperature and salinity for a collection of species. [We will simulate this, including response surfaces with combinations of linear and nonlinear responses, and without and with interactions among temperature and salinity.]
+* Fit a response surface to that data. [Do with GAMs with interactions.]
+* Specify the species present in a community and the temperature and salinity environment it occurs in. [We will simulate this, with different directions of change in temperature and salinity, e.g. independent, positively correlated, negatively correlated.]
+* Show examples of response diversity for the simulated environmental change scenarios and community compositions. [ Make function to calculate directional derivative at location, and calculate diversity of this across the species present in a specific community.]
+
+# Issues
+
+* The scales of the environmental change factors are different, and so some standardisation will be needed.
+
+# Left-overs
+
+Also imagine that we are studying an ecosystem that can experience simultaneous change in temperature and salinity. For example, at a particular time, the temperature might be increasing by 0.1 C per day and salinity increasing by 0.2 parts per thousand per day.
+
+*Here some text that Sam wrote for a previous ms, that we removed from there, though please confirm this before using it in here* The framework proposed herein allows derivation of environment-dependent performance responses. Yet, when species are exposed to multiple environmental stressors simultaneously—a situation common in empirical systems (Bowler et al. 2020)—it is not trivial to derive performance responses. Conceptually, the principles of measuring response diversity should still apply in multiple dimensions, but the analytical formulation must necessarily differ. If multiple environmental stressors act additively, then it should be mathematically straightforward to produce a multivariate response surface with performance varying as a function of two (or more) environmental conditions. However, where multiple stressors interact, nonadditivity adds additional layers of complication to the formulation of multivariate response surfaces (e.g., Yang et al. 2022). In such cases, a different analytical approach to estimating multivariate response diversity is needed. Future work should extend the univariate response diversity principles we suggest here into a multivariate framework for measuring response diversity to multiple environmental stressors. In doing so, multivariate response diversity may link conceptually to the study of co-tolerance to multiple stressors and stress-induced community sensitivity (see Vinebrooke et al. 2004) and should prove more operationalizable than univariate approaches given the propensity for multiple environmental stressors to not only co-occur but to interact nonadditively in nature (Dieleman et al. 2012).
+
+
+```{r eval = FALSE}
+## code to plot a surface
+expt_wide <- pivot_wider(expt, values_from = rate, names_from = E2)
+plot_matrix <- as.matrix(expt_wide[,-1])
+axis1 <- as.vector(expt_wide[,1])
+axis2 <- names(expt_wide)[-1]
+fig <- plot_ly(x = axis1, y = axis2, z = t(plot_matrix)) %>%
+   add_surface() %>%
+   layout(scene = list(xaxis = list(title = 'Temperature'),
+                       yaxis = list(title = 'Salinity'),
+                       zaxis = list(title = "Growth rate")))
+fig
+# htmlwidgets::saveWidget(fig, "3dsurface_widget.html")      
+```
+
+
+
+```{r eval = FALSE}
+# #The commented code below was used to make the original surface illustration
+# pars <- list(c = 2000,
+#           t_1 = 0.1,
+#           t_2 = -2,
+#           s_1 = 0,
+#           s_2 = 0,
+#           ts_1 = 2)
+# scaler <- 1/1000
+# growth_rate_T_S <- function(T, S) {
+#   pars$c +
+#     pars$t_1 * T +
+#     pars$t_2 * T^2 +
+#     pars$s_1 * S +
+#     pars$s_2 * S^2 +
+#     pars$ts_1 * T * S
+# }
+# T_axis <- seq(5, 30, 1)
+# S_axis <- seq(1, 80, 1)
+# growth_rate_matrix = outer(X = T_axis,
+#                            Y = S_axis,
+#                            FUN = growth_rate_T_S) * scaler
+# fig <- plot_ly(x = S_axis, y = T_axis, z = t(growth_rate_matrix)) %>%
+#   add_surface() %>%
+#   layout(scene = list(xaxis = list(title = 'Temperature'),
+#                       yaxis = list(title = 'Salinity'),
+#                       zaxis = list(title = "Growth rate")))
+# htmlwidgets::saveWidget(fig, "3dsurface_widget.html")                       
+```
+
+
