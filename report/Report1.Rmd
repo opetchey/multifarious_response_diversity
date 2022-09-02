@@ -20,12 +20,17 @@ knitr::opts_chunk$set(echo = FALSE,
 ```
 
 
-```{r}
+```{r results='hide'}
+rm(list = ls())
 library(plotly)
 library(tidyverse)
 library(here)
 library(patchwork)
-source(list.files(here("r"), full.names = TRUE))
+library(DT)
+library(mgcv)
+library(gratia)
+source.files <- list.files(here("r"), full.names = TRUE)
+sapply(source.files, source, .GlobalEnv)
 ```
 
 # Introduction
@@ -65,17 +70,12 @@ Let us use the Epply performance curve, which was used, for example, in this pap
 
 With one environmental variable, the performance (i.e., rate) is given by:
 
-$rate(E) = ae^{bE}(1 - (\frac{E - z}{w/2})^2$
-
-$E$ is the values of the environmental factor.
-
-$z$ controls location of maximum.
-
-$w$ controls range of $E$ over which the rate is positive.
-
-$a$ scaling constant.
-
-$b$ controls rate of increase towards the maximum rate, as $E$ increases.
+* $rate(E) = ae^{bE}(1 - (\frac{E - z}{w/2})^2$
+* $E$ is the values of the environmental factor.
+* $z$ controls location of maximum.
+* $w$ controls range of $E$ over which the rate is positive.
+* $a$ scaling constant.
+* $b$ controls rate of increase towards the maximum rate, as $E$ increases.
 
 Adding a second environmental variable gives:
 
@@ -84,6 +84,13 @@ $rate(E_1, E_2) = a_1e^{b_1E_1}(1 - (\frac{E_1 - z_1}{w_1/2})^2 + a_2e^{b_2E_2}(
 In this case, it is clear the effect of $E_1$ and $E_2$ is defined as being additive. For example, the value of $E_2$ does not affect the value of $E_2$ at which the rate is maximised ($z_1$), and vice-versa (see also Figure \@ref(fig:add-epp-fig)) 
 
 ```{r}
+## define the series of values of the environmental variables
+E1_series <- 273.15 + seq(0, 50, 1)
+E2_series <- seq(0, 50, 1)
+```
+
+```{r}
+## Set parameter values
 pars <- list(a1 = 1e-9,
              b1 = 0.063,
              z1 = 298,
@@ -92,33 +99,19 @@ pars <- list(a1 = 1e-9,
              b2 = 0.02,
              z2 = 20,
              w2 = 10,
-             bint = 0,
              zint = 0,
              wint = 0,
              sd_rate = 0)
-expt <- crossing(E1 = 273.15 + seq(0, 40, 1),
-                 E2 = seq(0, 40, 1)) %>%
-  mutate(rate = Eppley_2d(E1, E2, pars))
-    
-these_E2 <- expt$E2[seq(1, length(expt$E2), length=5)]
-temp <- expt %>%
-  filter(E2 %in% these_E2) %>%
-  mutate(E2 = as.factor(E2))
-fig1 <- ggplot(temp, aes(x = E1, y = rate, col = E2)) +
-  geom_line()   
-
-these_E1 <- expt$E1[seq(1, length(expt$E2), length=5)]
-temp <- expt %>%
-  filter(E1 %in% these_E1) %>%
-  mutate(E1 = as.factor(E1))
-fig2 <- ggplot(temp, aes(x = E2, y = rate, col = E1)) +
-  geom_line()
+## Make a surface / experiment
+expt <- Make_expt(E1_series, E2_series, pars)
 ```
 
 (ref:add-epp-fig) Nonlinear and additive dependence of a rate on two environmental variables. (a) The value of $E_1$ at which the rate is maximised is independent of the value of $E_2$. (b) The value of $E_2$ at which the rate is maximised is independent of the value of $E_1$. 
 
 ```{r add-epp-fig, fig.cap='(ref:add-epp-fig)', fig.align="center", fig.height=3, fig.width=8}
-fig1 + fig2 + plot_annotation(tag_levels = 'a',
+## Visualise the performance surface of a species
+pc_figs <- Plot_performance_curves(expt[[1]])
+pc_figs[[1]] + pc_figs[[2]] + plot_annotation(tag_levels = 'a',
                               tag_prefix = '(',
                               tag_suffix = ')')
 ```
@@ -130,6 +123,7 @@ $rate(E_1, E_2) = a_1e^{b_1E_1}(1 - (\frac{(E_1 - z_1) + z_{int}(E_1 - z_1)(E_2 
 When $z_{int} = 0$ then this equation becomes the previously mentioned additive one. When $z_{int} \neq 0$ then the value of $E_1$ at which the rate is maximised is a function of the distance of $E_2$ from its optimum value $z_2$. In this particular equation, it is still the case that the value of $E_2$ at which the rate is maximised is independent of the value of $E_1$. 
 
 ```{r}
+## Set parameters
 pars <- list(a1 = 1e-9,
              b1 = 0.063,
              z1 = 298,
@@ -142,32 +136,351 @@ pars <- list(a1 = 1e-9,
              zint = 0.1,
              wint = 0,
              sd_rate = 0)
-expt <- crossing(E1 = 273.15 + seq(0, 40, 1),
-                 E2 = seq(0, 40, 1)) %>%
-  mutate(rate = Eppley_2d(E1, E2, pars))
-    
-these_E2 <- expt$E2[seq(1, length(expt$E2), length=5)]
-temp <- expt %>%
-  filter(E2 %in% these_E2) %>%
-  mutate(E2 = as.factor(E2))
-fig1 <- ggplot(temp, aes(x = E1, y = rate, col = E2)) +
-  geom_line()   
-
-these_E1 <- expt$E1[seq(1, length(expt$E2), length=5)]
-temp <- expt %>%
-  filter(E1 %in% these_E1) %>%
-  mutate(E1 = as.factor(E1))
-fig2 <- ggplot(temp, aes(x = E2, y = rate, col = E1)) +
-  geom_line()
+## Make a surface / experiment
+expt <- Make_expt(E1_series, E2_series, pars)
 ```
 
 (ref:int-epp-fig) Nonlinear and non-additive dependence of a rate on two environmental variables. (a) The value of $E_1$ at which the rate is maximised depends on the value of $E_2$. (b) The value of $E_2$ at which the rate is maximised is independent of the value of $E_1$. 
 
 ```{r int-epp-fig, fig.cap='(ref:add-epp-fig)', fig.align="center", fig.height=3, fig.width=8}
-fig1 + fig2 + plot_annotation(tag_levels = 'a',
+## Visualise the performance surface of a species
+pc_figs <- Plot_performance_curves(expt[[1]])
+pc_figs[[1]] + pc_figs[[2]] + plot_annotation(tag_levels = 'a',
                               tag_prefix = '(',
                               tag_suffix = ')')
 ```
+
+## Simulating multiple species' performance curves
+
+### No interacting environmental effects
+
+First we create (or import) a table of parameter values of each species, with species in the rows and parameters in the columns. In the following example, only values of the $z$ parameters differ among the species (which determine the location of the maximum rate).
+
+```{r}
+set.seed(8456) ## To make the random number generation repeatable
+s <- 10 # Number of species
+## Set the mean parameter values
+a1_mean <- 1e-9
+b1_mean <- 0.063
+z1_mean <- 298
+w1_mean <- 35
+a2_mean <- 1e-3
+b2_mean <- 0.02
+z2_mean <- 20
+w2_mean <- 10
+zint_mean <- 0
+sd_rate_mean <- 0
+z1_range <- 30
+z2_range <- 20
+## Make a table of parameter values, one row for each species,
+## drawing parameter values from a normal distribution with
+## specified standard deviation.
+par_table <- tibble(a1 = rnorm(s, a1_mean, 0),#a1_mean/100),
+                    b1 = rnorm(s, b1_mean, 0),#b1_mean/100),
+                    z1 = runif(s, min = z1_mean - z1_range/2, max = z1_mean + z1_range / 2),
+                    w1 = rnorm(s, w1_mean, 0),#w1_mean/100),
+                    a2 = rnorm(s, a2_mean, 0),#a2_mean/100),
+                    b2 = rnorm(s, b2_mean, 0),#b2_mean/100),
+                    z2 = runif(s, min = z2_mean - z2_range/2, max = z2_mean + z2_range / 2),
+                    w2 = rnorm(s, w2_mean, 0),#w2_mean/100),
+                    zint = rnorm(s, zint_mean, zint_mean/10),
+                    sd_rate = rnorm(s, sd_rate_mean, sd_rate_mean/10)
+                    )
+```
+
+```{r results='asis', message=FALSE, warning=FALSE}
+## Display the parameter table
+DT::datatable(par_table,
+              filter="top")
+```
+
+For convenience we then convert the table of parameters into a [list-column](https://dcl-prog.stanford.edu/list-columns.html). We can then easily make performance curves of each of the species, and put those into a list-column in the same table.
+
+```{r echo = TRUE}
+## convert parameter table to a list-column of a tibble
+par_list <- Partable_2_parlist(par_table)
+## add performance curves
+species_pars <- tibble(species = paste0("s", 1:s), pars = par_list) %>%
+  rowwise() %>%
+  mutate(expt = Make_expt(E1_series, E2_series, pars))
+```
+
+Here are some examples of the species' performance curves (only with additive effects of $E_1$ and $E_2$).
+
+(ref:lowE1-opt-species) Performance curves for a species with maximum growth at **low** values of $E_1$.  Without interacting environmental effects.
+
+```{r lowE1-opt-species, fig.cap='(ref:lowE1-opt-species)', fig.align="center", fig.height=3, fig.width=8}
+## Visualise the performance surface of a species
+this_one <- which(par_table$z1 == min(par_table$z1))
+pc_figs <- Plot_performance_curves(species_pars$expt[[this_one]])
+pc_figs[[1]] + pc_figs[[2]] + plot_annotation(tag_levels = 'a',
+                              tag_prefix = '(',
+                              tag_suffix = ')')
+
+```
+
+(ref:highE1-opt-species) Performance curves for a species with maximum growth at **high** values of $E_1$. Without interacting environmental effects.
+
+```{r highE1-opt-species, fig.cap='(ref:highE1-opt-species)', fig.align="center", fig.height=3, fig.width=8}
+## Visualise the performance surface of a species
+this_one <- which(par_table$z1 == max(par_table$z1))
+pc_figs <- Plot_performance_curves(species_pars$expt[[this_one]])
+pc_figs[[1]] + pc_figs[[2]] + plot_annotation(tag_levels = 'a',
+                              tag_prefix = '(',
+                              tag_suffix = ')')
+```
+
+(ref:lowE2-opt-species) Performance curves for a species with maximum growth at **low** values of $E_2$. Without interacting environmental effects.
+
+```{r lowE2-opt-species, fig.cap='(ref:lowE2-opt-species)', fig.align="center", fig.height=3, fig.width=8}
+## Visualise the performance surface of a species
+this_one <- which(par_table$z2 == min(par_table$z2))
+pc_figs <- Plot_performance_curves(species_pars$expt[[this_one]])
+pc_figs[[1]] + pc_figs[[2]] + plot_annotation(tag_levels = 'a',
+                              tag_prefix = '(',
+                              tag_suffix = ')')
+
+```
+
+(ref:highE2-opt-species) Performance curves for a species with maximum growth at **high** values of $E_2$. Without interacting environmental effects.
+
+```{r highE2-opt-species, fig.cap='(ref:highE2-opt-species)', fig.align="center", fig.height=3, fig.width=8}
+## Visualise the performance surface of a species
+this_one <- which(par_table$z2 == max(par_table$z2))
+pc_figs <- Plot_performance_curves(species_pars$expt[[this_one]])
+pc_figs[[1]] + pc_figs[[2]] + plot_annotation(tag_levels = 'a',
+                              tag_prefix = '(',
+                              tag_suffix = ')')
+```
+
+
+### Interacting environmental effects
+
+And now with interacting environmental effects...
+
+```{r}
+set.seed(18456)
+s <- 10 # Number of species
+a1_mean <- 1e-9
+b1_mean <- 0.063
+z1_mean <- 298
+w1_mean <- 35
+a2_mean <- 1e-3
+b2_mean <- 0.02
+z2_mean <- 20
+w2_mean <- 10
+zint_mean <- 0.1
+sd_rate_mean <- 0
+z1_range <- 30
+z2_range <- 20
+
+par_table <- tibble(a1 = rnorm(s, a1_mean, 0),#a1_mean/100),
+                    b1 = rnorm(s, b1_mean, 0),#b1_mean/100),
+                    z1 = runif(s, min = z1_mean - z1_range/2, max = z1_mean + z1_range / 2),
+                    w1 = rnorm(s, w1_mean, 0),#w1_mean/100),
+                    a2 = rnorm(s, a2_mean, 0),#a2_mean/100),
+                    b2 = rnorm(s, b2_mean, 0),#b2_mean/100),
+                    z2 = runif(s, min = z2_mean - z2_range/2, max = z2_mean + z2_range / 2),
+                    w2 = rnorm(s, w2_mean, 0),#w2_mean/100),
+                    zint = rnorm(s, zint_mean, zint_mean/10),
+                    sd_rate = rnorm(s, sd_rate_mean, sd_rate_mean/10)
+                    )
+```
+
+```{r results='asis', message=FALSE, warning=FALSE}
+DT::datatable(par_table,
+              filter="top")
+```
+
+For convenience we then convert the table of parameters into a [list-column](https://dcl-prog.stanford.edu/list-columns.html). We can then easily make performance curves of each of the species, and put those into a list-column in the same table.
+
+```{r echo = TRUE}
+## convert parameter table to a list-column of a tibble
+par_list <- Partable_2_parlist(par_table)
+## add performance curves
+species_pars <- tibble(species = paste0("s", 1:s), pars = par_list) %>%
+  rowwise() %>%
+  mutate(expt = Make_expt(E1_series, E2_series, pars))
+```
+
+Here are some examples of the species' performance curves (with interacting effects of $E_1$ and $E_2$).
+
+(ref:lowE1-opt-species1) Performance curves for a species with maximum growth at **low** values of $E_1$. With interacting environmental effects.
+
+```{r lowE1-opt-species1, fig.cap='(ref:lowE1-opt-species1)', fig.align="center", fig.height=3, fig.width=8}
+## Visualise the performance surface of a species
+this_one <- which(par_table$z1 == min(par_table$z1))
+pc_figs <- Plot_performance_curves(species_pars$expt[[this_one]])
+pc_figs[[1]] + pc_figs[[2]] + plot_annotation(tag_levels = 'a',
+                              tag_prefix = '(',
+                              tag_suffix = ')')
+
+```
+
+(ref:highE1-opt-species2) Performance curves for a species with maximum growth at **high** values of $E_1$.  With interacting environmental effects.
+
+```{r highE1-opt-species2, fig.cap='(ref:highE1-opt-species2)', fig.align="center", fig.height=3, fig.width=8}
+## Visualise the performance surface of a species
+this_one <- which(par_table$z1 == max(par_table$z1))
+pc_figs <- Plot_performance_curves(species_pars$expt[[this_one]])
+pc_figs[[1]] + pc_figs[[2]] + plot_annotation(tag_levels = 'a',
+                              tag_prefix = '(',
+                              tag_suffix = ')')
+```
+
+(ref:lowE2-opt-species2) Performance curves for a species with maximum growth at **low** values of $E_2$. With interacting environmental effects.
+
+```{r lowE2-opt-species2, fig.cap='(ref:lowE2-opt-species2)', fig.align="center", fig.height=3, fig.width=8}
+## Visualise the performance surface of a species
+this_one <- which(par_table$z2 == min(par_table$z2))
+pc_figs <- Plot_performance_curves(species_pars$expt[[this_one]])
+pc_figs[[1]] + pc_figs[[2]] + plot_annotation(tag_levels = 'a',
+                              tag_prefix = '(',
+                              tag_suffix = ')')
+
+```
+
+(ref:highE2-opt-species2) Performance curves for a species with maximum growth at **high** values of $E_2$. With interacting environmental effects.
+
+```{r highE2-opt-species2, fig.cap='(ref:highE2-opt-species2)', fig.align="center", fig.height=3, fig.width=8}
+## Visualise the performance surface of a species
+this_one <- which(par_table$z2 == max(par_table$z2))
+pc_figs <- Plot_performance_curves(species_pars$expt[[this_one]])
+pc_figs[[1]] + pc_figs[[2]] + plot_annotation(tag_levels = 'a',
+                              tag_prefix = '(',
+                              tag_suffix = ')')
+```
+
+
+## Fitting GAMs to noisy rate observations
+
+Try with and without an interaction. Therefore make two species, one with no interaction `z_int = 0` and the other with `z_int = 0.1`. All other parameters are the same. Note that noise is added to the rate observations.
+
+Bottom line is that the gam picks up an interaction when we have included in the parameters used to generation the rates, and does not pick one up when we have not made an interaction. This confirms that our more mechanistic thinking and methods are matching our statistical thinking and methods, and confirms that each are promising, so far.
+
+```{r}
+set.seed(2456)
+s <- 2 ## number of species
+a1_mean <- 1e-9
+b1_mean <- 0.063
+z1_mean <- 298
+w1_mean <- 35
+a2_mean <- 1e-3
+b2_mean <- 0.02
+z2_mean <- 20
+w2_mean <- 10
+zint_mean <- 0 ## set in the preceding chunk
+sd_rate_mean <- 0.02
+z1_range <- 0
+z2_range <- 0
+par_table <- tibble(a1 = rnorm(s, a1_mean, 0),#a1_mean/100),
+                    b1 = rnorm(s, b1_mean, 0),#b1_mean/100),
+                    z1 = runif(s, min = z1_mean - z1_range/2, max = z1_mean + z1_range / 2),
+                    w1 = rnorm(s, w1_mean, 0),#w1_mean/100),
+                    a2 = rnorm(s, a2_mean, 0),#a2_mean/100),
+                    b2 = rnorm(s, b2_mean, 0),#b2_mean/100),
+                    z2 = runif(s, min = z2_mean - z2_range/2, max = z2_mean + z2_range / 2),
+                    w2 = rnorm(s, w2_mean, 0),#w2_mean/100),
+                    zint = rnorm(s, zint_mean, zint_mean/10),
+                    sd_rate = rnorm(s, sd_rate_mean, 0)
+                    )
+## set z_int of the second species to non-zero value
+par_table$zint[2] <- 0.1
+
+## The normal house keeping
+par_list <- Partable_2_parlist(par_table)
+species_pars <- tibble(species = paste0("s", 1:s), pars = par_list) %>%
+  rowwise() %>%
+  mutate(expt = Make_expt(E1_series, E2_series, pars))
+```
+
+```{r results='asis', message=FALSE, warning=FALSE}
+DT::datatable(par_table,
+              filter="top")
+```
+
+### Without interaction
+
+```{r}
+which_species <- 1 ## 1 is without interaction, 2 is with
+```
+
+(ref:gamtest-species1) Performance curves for a species *without* interacting environmental effects and with some noise in the rate.
+
+```{r gamtest-species1, fig.cap='(ref:gamtest-species1)', fig.align="center", fig.height=3, fig.width=8}
+## Visualise the performance surface of a species
+pc_figs <- Plot_performance_obs(species_pars$expt[[which_species]])
+pc_figs[[1]] + pc_figs[[2]] + plot_annotation(tag_levels = 'a',
+                              tag_prefix = '(',
+                              tag_suffix = ')')
+```
+
+
+
+```{r eval = TRUE}
+## gam with interaction
+gam1 <- gam(rate ~ ti(E1) + ti(E2) + ti(E1, E2),
+                              data = species_pars$expt[[which_species]])
+summary(gam1)
+```
+
+```{r eval = TRUE}
+## gam without interaction
+gam2 <- gam(rate ~ s(E1) + s(E2),
+                              data = species_pars$expt[[which_species]])
+summary(gam2)
+```
+
+
+### With interaction
+
+```{r}
+which_species <- 2 ## 1 is without interaction, 2 is with
+```
+
+(ref:gamtest-species2) Performance curves for a species *with* interacting environmental effects and with some noise in the rate.
+
+```{r gamtest-species2, fig.cap='(ref:gamtest-species2)', fig.align="center", fig.height=3, fig.width=8}
+## Visualise the performance surface of a species
+pc_figs <- Plot_performance_obs(species_pars$expt[[which_species]])
+pc_figs[[1]] + pc_figs[[2]] + plot_annotation(tag_levels = 'a',
+                              tag_prefix = '(',
+                              tag_suffix = ')')
+```
+
+
+
+```{r eval = TRUE}
+## gam with interaction
+gam3 <- gam(rate ~ ti(E1) + ti(E2) + ti(E1, E2),
+                              data = species_pars$expt[[which_species]])
+summary(gam3)
+```
+
+```{r eval = TRUE}
+## gam without interaction
+gam4 <- gam(rate ~ ti(E1) + ti(E2),
+                              data = species_pars$expt[[which_species]])
+summary(gam4)
+```
+
+
+## Getting the directional derivative
+
+First step is estimate the two partial derivatives $f_{E1}(E1_0, E2_0)$ and $f_{E2}(E1_0, E2_0)$ (please review the section [The principle] if necessary). This is not currently working. Please look at and perhaps run the R code for more details.
+
+```{r eval = FALSE}
+## Specify the values of E1 and E2 at which to evaluation the partial derivatives
+E1E2_locs <- tibble(E1 = 300,
+                    E2 = 20)
+## not necessary, but try predicting the rate at that location
+pred_rate <- predict.gam(gam1, newdata = E1E2_locs) # works
+## now try getting the partial derivative
+try(derivs1 <- derivatives(gam1, data = E1E2_locs)) ## does not work for gam1, which includes the term ti(E1, E2)
+derivs1 <- derivatives(gam2, data = E1E2_locs) ## does work for gam2, which has no interaction term, though had to chance the main effects to s()
+```
+
+
 
 
 

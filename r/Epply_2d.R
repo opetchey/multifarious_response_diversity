@@ -20,8 +20,7 @@ Eppley_2d <- function(E1, E2, pars) {
          rate <- a1 * exp(b1 * E1) *
                          (1 - (((E1 - z1) + zint*(E1 - z1)*(E2 - z2)) / (w1/2))^2) +
                  a2 * exp(b2 * E2) *
-                         (1 - ((E2 - z2) / (w2/2))^2) +
-           rnorm(1, 0, sd_rate)
+                         (1 - ((E2 - z2) / (w2/2))^2) 
          rate
        }
   )
