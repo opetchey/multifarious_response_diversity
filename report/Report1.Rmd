@@ -356,6 +356,18 @@ pc_figs[[1]] + pc_figs[[2]] + plot_annotation(tag_levels = 'a',
 
 Try with and without an interaction. Therefore make two species, one with no interaction `z_int = 0` and the other with `z_int = 0.1`. All other parameters are the same. Note that noise is added to the rate observations.
 
+GAM notes:
+
+* Owen watched this youtube video [Introduction to Generalized Additive Models with R and mgcv](https://youtu.be/sgw4cu8hrZM) by Gavin Simpson (author of the `gratia` package that we've been using to calculate derivatives of GAMs.). By the way, there is a part of this video about Model Selection, about Confidence Intervals, and about p-values for smooths (about 1h:57m to 2h:26) which I think is less useful for our purposes.
+* In the video mentioned above [at about 54m:30s](https://youtu.be/sgw4cu8hrZM?t=2730), there is the recommendation to estimate the penalisation parameter ($\lambda$) via restricted maximum likelihood, which is done by giving the the argument `method = "REML` in the `gam()` call (the default in `mgcv` version 1.8-36 is `method="GCV.Cp"`).
+* Default smoother is a *low rank thin plate spline* (`bs = "tp"`)
+* `s(E1, E2) will fit a *bivariate isotropic thin plate spline*. *Isoptropic* means there is a single smoothness parameter for the smooth. It is sensitive to the scale of $E1$ and $E2$.
+* Tensor products (`te(E1, E2`) have separate marginal basis, and therefore separate smoothness parameters. They are invariant to scales of $E1$ and $E2$. Therefore we should be using tensor products.
+* Specifying a model with `te(E1, E2`) does not then allow inspection of the main effects and interaction term--there is essentially only one smoother which contains the main effects and interaction. So it is difficult to know if the interaction term is required. An alternative is to specify the model as `s(E1) + s(E2) + ti(E1, E2)`, in which the third term is then only the interaction part and allows a decomposition into the different effects. Useful for examining if the interaction is required.
+* To use cubic splines use `bs = "cr"`.
+* There are many smoothers in `mgcv`
+* Choosing *k* (the *basis complexity*, which is the maximum wiggliness) is a bit of an art. The penalty then shrinks the used basis complexity, reducing the effective degrees of freedom. Must check that large enough *k* is provided; use `gam.check()`. Only cost to large $k$ is computational effort.
+
 Bottom line is that the gam picks up an interaction when we have included in the parameters used to generation the rates, and does not pick one up when we have not made an interaction. This confirms that our more mechanistic thinking and methods are matching our statistical thinking and methods, and confirms that each are promising, so far.
 
 ```{r}
@@ -420,16 +432,34 @@ pc_figs[[1]] + pc_figs[[2]] + plot_annotation(tag_levels = 'a',
 ```{r eval = TRUE}
 ## gam with interaction
 gam1 <- gam(rate ~ ti(E1) + ti(E2) + ti(E1, E2),
-                              data = species_pars$expt[[which_species]])
+            data = species_pars$expt[[which_species]],
+            method = "REML")
 summary(gam1)
+new_data <- expand_grid(E1 = E1_series,
+                        E2 = E2_series)
+fit1 <- predict(gam1, new_data)
+pred1 <- bind_cols(new_data, rate = fit1)
+gam1_plots <- Plot_performance_curves(pred1)
+gam1_plots[[1]] + gam1_plots[[2]] + plot_annotation(tag_levels = 'a',
+                              tag_prefix = '(',
+                              tag_suffix = ')')
 ```
 
 ```{r eval = TRUE}
 ## gam without interaction
 gam2 <- gam(rate ~ s(E1) + s(E2),
-                              data = species_pars$expt[[which_species]])
+            data = species_pars$expt[[which_species]],
+            method = "REML")
 summary(gam2)
+fit2 <- predict(gam2, new_data)
+pred2 <- bind_cols(new_data, rate = fit2)
+gam2_plots <- Plot_performance_curves(pred2)
+gam2_plots[[1]] + gam2_plots[[2]] + plot_annotation(tag_levels = 'a',
+                              tag_prefix = '(',
+                              tag_suffix = ')')
 ```
+
+
 
 
 ### With interaction
@@ -453,15 +483,28 @@ pc_figs[[1]] + pc_figs[[2]] + plot_annotation(tag_levels = 'a',
 ```{r eval = TRUE}
 ## gam with interaction
 gam3 <- gam(rate ~ ti(E1) + ti(E2) + ti(E1, E2),
-                              data = species_pars$expt[[which_species]])
+            data = species_pars$expt[[which_species]],
+            method = "REML")
 summary(gam3)
+fit3 <- predict(gam3, new_data)
+pred3 <- bind_cols(new_data, rate = fit3)
+gam3_plots <- Plot_performance_curves(pred3)
+gam3_plots[[1]] + gam3_plots[[2]] + plot_annotation(tag_levels = 'a',
+                              tag_prefix = '(',
+                              tag_suffix = ')')
 ```
 
 ```{r eval = TRUE}
 ## gam without interaction
-gam4 <- gam(rate ~ ti(E1) + ti(E2),
-                              data = species_pars$expt[[which_species]])
+gam4 <- gam(rate ~ s(E1) + s(E2),
+            data = species_pars$expt[[which_species]])
 summary(gam4)
+fit4 <- predict(gam4, new_data)
+pred4 <- bind_cols(new_data, rate = fit4)
+gam4_plots <- Plot_performance_curves(pred4)
+gam4_plots[[1]] + gam4_plots[[2]] + plot_annotation(tag_levels = 'a',
+                              tag_prefix = '(',
+                              tag_suffix = ')')
 ```
 
 
