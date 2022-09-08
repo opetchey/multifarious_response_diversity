@@ -66,11 +66,11 @@ knitr::include_graphics(here("report/assets/illustration_of_directional_derivati
 
 ## Simulating performance curves
 
-Let us use the Epply performance curve, which was used, for example, in this paper [https://royalsocietypublishing.org/doi/10.1098/rspb.2018.1076](Bernhardt et al 2018).
+Let us use the Epply performance curve, which was used, for example, in this paper [Bernhardt et al. 2018](https://royalsocietypublishing.org/doi/10.1098/rspb.2018.1076).
 
 With one environmental variable, the performance (i.e., rate) is given by:
 
-* $rate(E) = ae^{bE}(1 - (\frac{E - z}{w/2})^2$
+* $rate(E) = ae^{bE}(1 - (\frac{E - z}{w/2})^2)$
 * $E$ is the values of the environmental factor.
 * $z$ controls location of maximum.
 * $w$ controls range of $E$ over which the rate is positive.
@@ -79,9 +79,9 @@ With one environmental variable, the performance (i.e., rate) is given by:
 
 Adding a second environmental variable gives:
 
-$rate(E_1, E_2) = a_1e^{b_1E_1}(1 - (\frac{E_1 - z_1}{w_1/2})^2 + a_2e^{b_2E_2}(1 - (\frac{E_2 - z_2}{w_2/2})^2$
+$rate(E_1, E_2) = a_1e^{b_1E_1}(1 - (\frac{E_1 - z_1}{w_1/2})^2) + a_2e^{b_2E_2}(1 - (\frac{E_2 - z_2}{w_2/2})^2)$
 
-In this case, it is clear the effect of $E_1$ and $E_2$ is defined as being additive. For example, the value of $E_2$ does not affect the value of $E_2$ at which the rate is maximised ($z_1$), and vice-versa (see also Figure \@ref(fig:add-epp-fig)) 
+In this case, it is clear the effect of $E_1$ and $E_2$ is defined as being additive. For example, the value of $E_2$ does not affect the value of $E_1$ at which the rate is maximised ($z_1$), and vice-versa (see also Figure \@ref(fig:add-epp-fig)) 
 
 ```{r}
 ## define the series of values of the environmental variables
