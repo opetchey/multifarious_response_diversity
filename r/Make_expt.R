@@ -7,11 +7,11 @@
 #' @param pars The parameter list for the Eppley function
 #' @return A data frame with three columns: E1, E2, and rate.
 #' @export
-Make_expt <- function(E1_series, E2_series, pars)
+Make_expt <- function(E1_series, E2_series, pars = pars, perf_func = Eppley_2d_v2)
 {
   expt <- crossing(E1 = E1_series,
                    E2 = E2_series) %>%
-    mutate(temp_rate = Eppley_2d(E1, E2, pars),
+    mutate(temp_rate = perf_func(E1, E2, pars),
            noise = rnorm(length(temp_rate), 0, pars$sd_rate),
            rate = temp_rate + noise) %>%
     select(-temp_rate, -noise)
