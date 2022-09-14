@@ -68,7 +68,7 @@ Numerous mathematical functions have been used to represent how organismal perfo
 
 ## Simulating performance curves
 
-Let us use the Epply performance curve, which was used, for example, in this paper [Bernhardt et al. 2018](https://royalsocietypublishing.org/doi/10.1098/rspb.2018.1076).
+Let us use the Eppley performance curve, which was used, for example, in this paper [Bernhardt et al. 2018](https://royalsocietypublishing.org/doi/10.1098/rspb.2018.1076).
 
 With one environmental variable, the performance (i.e., rate) is given by:
 
@@ -358,6 +358,8 @@ pc_figs[[1]] + pc_figs[[2]] + plot_annotation(tag_levels = 'a',
 
 Try with and without an interaction. Therefore make two species, one with no interaction `z_int = 0` and the other with `z_int = 0.1`. All other parameters are the same. Note that noise is added to the rate observations.
 
+Bottom line is that the gam picks up an interaction when we have included one in the parameters used to generate the rates, and does not pick one up when we have not. This confirms that our more mechanistic thinking and methods are matching our statistical thinking and methods, and confirms that each are promising, so far.
+
 GAM notes:
 
 * Owen watched this youtube video [Introduction to Generalized Additive Models with R and mgcv](https://youtu.be/sgw4cu8hrZM) by Gavin Simpson (author of the `gratia` package that we've been using to calculate derivatives of GAMs.). By the way, there is a part of this video about Model Selection, about Confidence Intervals, and about p-values for smooths (about 1h:57m to 2h:26) which I think is less useful for our purposes.
@@ -370,7 +372,7 @@ GAM notes:
 * There are many smoothers in `mgcv`
 * Choosing *k* (the *basis complexity*, which is the maximum wiggliness) is a bit of an art. The penalty then shrinks the used basis complexity, reducing the effective degrees of freedom. Must check that large enough *k* is provided; use `gam.check()`. Only cost to large $k$ is computational effort.
 
-Bottom line is that the gam picks up an interaction when we have included in the parameters used to generation the rates, and does not pick one up when we have not made an interaction. This confirms that our more mechanistic thinking and methods are matching our statistical thinking and methods, and confirms that each are promising, so far.
+
 
 ```{r}
 set.seed(2456)
