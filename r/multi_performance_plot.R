@@ -7,7 +7,7 @@ multi_performance_plot <- function(comm){
     ggplot( aes(x = E1, y = rate, group = as.factor(E2), col = as.factor(E2))) +
     geom_point()+
     geom_smooth(se = FALSE) +
-    facet_wrap(~species, ncol = s/2, nrow = s/2) +
+    facet_wrap(~species, ncol = 1, nrow = s) +
     theme_bw()+
     scale_color_viridis_d(end = 0.2,begin = 0.9, option = 'inferno') +
     labs(x = "E1", y = "rate", tag = "(a)")
@@ -20,10 +20,10 @@ multi_performance_plot <- function(comm){
     ggplot( aes(x = E2, y = rate, group = as.factor(E1), col = as.factor(E1))) +
     geom_point()+
     geom_smooth(se = FALSE) +
-    facet_wrap(~species, ncol = s/2, nrow = s/2) +
+    facet_wrap(~species, ncol = 1, nrow = s) +
     theme_bw()+
     scale_color_viridis_d(end = 0.2,begin = 0.9, option = 'inferno') +
-    labs(x = "E1", y = "rate", tag = "(b)")
+    labs(x = "E2", y = "rate", tag = "(b)")
   
   
   performance_comm1 <- fig1 + fig2
