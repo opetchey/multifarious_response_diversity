@@ -2,4 +2,6 @@
 .Rhistory
 .RData
 .Ruserdata
+report/.DS_Store
+.DS_Store
 .RDataTmp
