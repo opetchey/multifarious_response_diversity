@@ -3,7 +3,7 @@ get_directionals <- function(com, new_data, refs){
   nested_gams <- comm %>% 
     nest(cols =-species) %>% 
     mutate(
-      gams = map(cols, ~ gam(rate ~ ti(E1) + ti(E2) + te(E1, E2),
+      gams = map(cols, ~ gam(rate ~  te(E1, E2),
                              data = .x,
                              method = "REML")),
       predicted = map(gams, ~ predict(.x, newdata = new_data))
@@ -37,6 +37,7 @@ get_directionals <- function(com, new_data, refs){
                     uv_E1 = del_E1 / unit_vec_mag,
                     uv_E2 = del_E2 / unit_vec_mag,
                     dir_deriv = pd_E1 * uv_E1 +  pd_E2 * uv_E2) %>% 
+      filter(time != 20) %>% 
       dplyr::select(sp, time, E1_ref, E2_ref, dir_deriv))
   
 }

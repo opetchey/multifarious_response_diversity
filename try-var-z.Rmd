@@ -165,7 +165,8 @@ comm <- get_community(s, species_pars)
 # Visualise spp performances 
 performance_comm1 <- multi_performance_plot(comm)
 performance_comm1
-# Get directional dreivatives
+
+# Get directional derivatives
 dir_1 <- get_directionals(comm, new_data, refs)
 
 ```
