@@ -442,7 +442,7 @@ pc_figs[[1]] + pc_figs[[2]] + plot_annotation(tag_levels = 'a',
 
 ```{r eval = TRUE}
 ## gam with interaction
-gam1 <- gam(rate ~ ti(E1) + ti(E2) + ti(E1, E2),
+gam1 <- gam(rate ~ ti(E1) + ti(E2) + te(E1, E2),
             data = species_pars$expt[[which_species]],
             method = "REML")
 summary(gam1)
@@ -493,7 +493,7 @@ pc_figs[[1]] + pc_figs[[2]] + plot_annotation(tag_levels = 'a',
 
 ```{r eval = TRUE}
 ## gam with interaction
-gam3 <- gam(rate ~ ti(E1) + ti(E2) + ti(E1, E2),
+gam3 <- gam(rate ~ ti(E1) + ti(E2) + te(E1, E2),
             data = species_pars$expt[[which_species]],
             method = "REML")
 summary(gam3)
@@ -1082,7 +1082,7 @@ new_data <- tibble(E1 = 273.15 + seq(0, 50, 0.2),
 nested_gams_no_inter <- species_pars_no_inter[,c(1,3,4,5)] %>% 
   nest(cols =-species) %>% 
   mutate(
-    gams = map(cols, ~ gam(rate ~ ti(E1) + ti(E2) + te(E1, E2),
+    gams = map(cols, ~ gam(rate ~ te(E1, E2, k = c(10, 10)),
                            data = .x,
                            method = "REML")),
     predicted = map(gams, ~ predict(.x, newdata = new_data))
@@ -1363,7 +1363,8 @@ p_E1 + p_E2
                   unit_vec_mag =  sqrt(del_E1^2 + del_E2^2),
                   uv_E1 = del_E1 / unit_vec_mag,
                   uv_E2 = del_E2 / unit_vec_mag,
-                  dir_deriv = pd_E1 * uv_E1 +  pd_E2 * uv_E2))
+                  dir_deriv = pd_E1 * uv_E1 +  pd_E2 * uv_E2) %>% 
+      filter(time != max(time)))
 
 
 #community 2
@@ -1390,7 +1391,8 @@ p_E1 + p_E2
                   unit_vec_mag =  sqrt(del_E1^2 + del_E2^2),
                   uv_E1 = del_E1 / unit_vec_mag,
                   uv_E2 = del_E2 / unit_vec_mag,
-                  dir_deriv = pd_E1 * uv_E1 +  pd_E2 * uv_E2))
+                  dir_deriv = pd_E1 * uv_E1 +  pd_E2 * uv_E2) %>% 
+      filter(time != max(time)))
 
 ```
 
@@ -1548,7 +1550,8 @@ p_E1 + p_E2
                   unit_vec_mag =  sqrt(del_E1^2 + del_E2^2),
                   uv_E1 = del_E1 / unit_vec_mag,
                   uv_E2 = del_E2 / unit_vec_mag,
-                  dir_deriv = pd_E1 * uv_E1 +  pd_E2 * uv_E2))
+                  dir_deriv = pd_E1 * uv_E1 +  pd_E2 * uv_E2) %>% 
+      filter(time != max(time)))
 
 # community 2 
 # get partial derivatives
@@ -1574,7 +1577,8 @@ p_E1 + p_E2
                   unit_vec_mag =  sqrt(del_E1^2 + del_E2^2),
                   uv_E1 = del_E1 / unit_vec_mag,
                   uv_E2 = del_E2 / unit_vec_mag,
-                  dir_deriv = pd_E1 * uv_E1 +  pd_E2 * uv_E2))
+                  dir_deriv = pd_E1 * uv_E1 +  pd_E2 * uv_E2) %>% 
+      filter(time != max(time)))
 
 ```
 
@@ -1739,7 +1743,8 @@ p_E1 + p_E2
                   unit_vec_mag =  sqrt(del_E1^2 + del_E2^2),
                   uv_E1 = del_E1 / unit_vec_mag,
                   uv_E2 = del_E2 / unit_vec_mag,
-                  dir_deriv = pd_E1 * uv_E1 +  pd_E2 * uv_E2))
+                  dir_deriv = pd_E1 * uv_E1 +  pd_E2 * uv_E2) %>% 
+      filter(time != max(time)))
 
 # community 2 
 # get partial derivatives
@@ -1765,7 +1770,8 @@ p_E1 + p_E2
                   unit_vec_mag =  sqrt(del_E1^2 + del_E2^2),
                   uv_E1 = del_E1 / unit_vec_mag,
                   uv_E2 = del_E2 / unit_vec_mag,
-                  dir_deriv = pd_E1 * uv_E1 +  pd_E2 * uv_E2))
+                  dir_deriv = pd_E1 * uv_E1 +  pd_E2 * uv_E2) %>% 
+      filter(time != max(time))) 
 
 ```
 
@@ -2032,13 +2038,13 @@ nested_gams <- dd[,c(3:6)] %>% dplyr::rename(E1 = "PPM_conc",
   dplyr::mutate(E2 = as.numeric(gsub("%","",as.character(E2)))) %>% 
   nest(cols =-species) %>% 
   mutate(
-    gams = map(cols, ~ gam(density ~ ti(E1, k = 10) + ti(E2, k = 4) + te(E1, E2, k = 4),
+    gams = map(cols, ~ gam(density ~ te(E1, E2, k = c(10, 4)),
                            data = .x,
                            method = "REML")),
     predicted = map(gams, ~ predict(.x, newdata = new_data))
   )
     
-
+### 17/3/2022 changed this ti(E1, k = 10) + ti(E2, k = 4) + te(E1, E2, k = 4), in the GAMS with the current
     
 # Get gams coefficients
 coeff <- nested_gams %>% 
@@ -2321,7 +2327,8 @@ First, we need to calculate the directional derivatives in the direction of the 
                   unit_vec_mag =  sqrt(del_E1^2 + del_E2^2),
                   uv_E1 = del_E1 / unit_vec_mag,
                   uv_E2 = del_E2 / unit_vec_mag,
-                  dir_deriv = pd_E1 * uv_E1 +  pd_E2 * uv_E2))
+                  dir_deriv = pd_E1 * uv_E1 +  pd_E2 * uv_E2) %>% 
+      filter(time != max(time)))
 ```
 
 ```{r results='asis', message=FALSE, warning=FALSE}

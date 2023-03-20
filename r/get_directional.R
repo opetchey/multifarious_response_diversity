@@ -37,7 +37,7 @@ get_directionals <- function(com, new_data, refs){
                     uv_E1 = del_E1 / unit_vec_mag,
                     uv_E2 = del_E2 / unit_vec_mag,
                     dir_deriv = pd_E1 * uv_E1 +  pd_E2 * uv_E2) %>% 
-      filter(time != 20) %>% 
+      filter(time != max(time)) %>% 
       dplyr::select(sp, time, E1_ref, E2_ref, dir_deriv))
   
 }

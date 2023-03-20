@@ -2,7 +2,9 @@
 # ad hoc function for the exploration analysis assessing the effects of diversity in z
 
 plot_RD <- function(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3) {
-  smax<-max(rdiv_1$rdiv,rdiv_2$rdiv,rdiv_3$rdiv);smin<-1
+
+  rmax<-max(rdiv_1$rdiv,rdiv_2$rdiv,rdiv_3$rdiv); rmin<-1
+  dmax<-max(rdiv_1$sign,rdiv_2$sign,rdiv_3$sign); dmin<-0
   
   Fig_1_comm1 <-dir_1 %>%
     ggplot(aes(x=time, y=dir_deriv, col = sp)) +
@@ -33,11 +35,11 @@ plot_RD <- function(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3) {
     geom_hline(yintercept = rdiv_1$Med,lty=2) +
     geom_line() + 
     geom_richtext(x = 7,
-                  mapping = aes(y = rdiv_1$Med + 0.25),
+                  mapping = aes(y = rmax),
                   size=4.5,
                   label.color = NA,
                   label = paste("RDiv^Mean =",paste0(round(rdiv_1$Med,digits = 2))))+
-    lims(y = c(smin,smax))
+    lims(y = c(rmin,rmax))
   
   Fig2_comm2 <- rdiv_2 %>% 
     ggplot(mapping = aes(x = time,y = rdiv)) +
@@ -46,11 +48,11 @@ plot_RD <- function(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3) {
     geom_hline(yintercept = rdiv_2$Med,lty=2) +
     geom_line() + 
     geom_richtext(x = 7,
-                  mapping = aes(y = rdiv_2$Med + 0.25),
+                  mapping = aes(y = rmax),
                   size=4.5,
                   label.color = NA,
                   label = paste("RDiv^Mean =",paste0(round(rdiv_2$Med,digits = 2))))+
-    lims(y = c(smin,smax))
+    lims(y = c(rmin,rmax))
   
   Fig2_comm3 <- rdiv_3 %>% 
     ggplot(mapping = aes(x = time,y = rdiv)) +
@@ -59,11 +61,11 @@ plot_RD <- function(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3) {
     geom_hline(yintercept = rdiv_3$Med,lty=2) +
     geom_line() + 
     geom_richtext(x = 7,
-                  mapping = aes(y = rdiv_3$Med + 0.25),
+                  mapping = aes(y = rmax),
                   size=4.5,
                   label.color = NA,
                   label = paste("RDiv^Mean =",paste0(round(rdiv_3$Med,digits = 2))))+
-    lims(y = c(smin,smax))
+    lims(y = c(rmin,rmax))
   
   
   Fig3_comm1 <- rdiv_1 %>% 
@@ -74,10 +76,11 @@ plot_RD <- function(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3) {
     geom_hline(yintercept = rdiv_1$Med_sing,lty=2) +
     geom_line() + 
     geom_richtext(x = 7,
-                  mapping = aes(y = rdiv_1$Med_sing + 0.25),
+                  mapping = aes(y = dmax),
                   size=4.5,
                   label.color = NA,
-                  label = paste("RDiv^Mean =",paste0(round(rdiv_1$Med_sing,digits = 2))))
+                  label = paste("RDiv^Mean =",paste0(round(rdiv_1$Med_sing,digits = 2))))+
+    lims(y = c(dmin,dmax))
   
   Fig3_comm2 <- rdiv_2 %>% 
     ggplot(mapping = aes(x = time,y = sign)) +
@@ -87,10 +90,11 @@ plot_RD <- function(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3) {
     geom_hline(yintercept = rdiv_2$Med_sing,lty=2) +
     geom_line() + 
     geom_richtext(x = 7,
-                  mapping = aes(y = rdiv_2$Med_sing + 0.25),
+                  mapping = aes(y = dmax),
                   size=4.5,
                   label.color = NA,
-                  label = paste("RDiv^Mean =",paste0(round(rdiv_2$Med_sing,digits = 2))))
+                  label = paste("RDiv^Mean =",paste0(round(rdiv_2$Med_sing,digits = 2))))+
+    lims(y = c(dmin,dmax))
   
   Fig3_comm3 <- rdiv_3 %>% 
     ggplot(mapping = aes(x = time,y = sign)) +
@@ -100,10 +104,11 @@ plot_RD <- function(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3) {
     geom_hline(yintercept = rdiv_3$Med_sing,lty=2) +
     geom_line() + 
     geom_richtext(x = 7,
-                  mapping = aes(y = rdiv_3$Med_sing + 0.25),
+                  mapping = aes(y = dmax),
                   size=4.5,
                   label.color = NA,
-                  label = paste("RDiv^Mean =",paste0(round(rdiv_3$Med_sing,digits = 2))))
+                  label = paste("RDiv^Mean =",paste0(round(rdiv_3$Med_sing,digits = 2))))+
+    lims(y = c(dmin,dmax))
   
   
   
