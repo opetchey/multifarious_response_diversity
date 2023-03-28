@@ -38,7 +38,7 @@ plot_RD <- function(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3) {
                   mapping = aes(y = rmax),
                   size=4.5,
                   label.color = NA,
-                  label = paste("RDiv^Mean =",paste0(round(rdiv_1$Med,digits = 3))))+
+                  label = paste("RDiv^Median =",paste0(round(rdiv_1$Med,digits = 3))))+
     lims(y = c(rmin,rmax))
   
   Fig2_comm2 <- rdiv_2 %>% 
@@ -51,7 +51,7 @@ plot_RD <- function(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3) {
                   mapping = aes(y = rmax),
                   size=4.5,
                   label.color = NA,
-                  label = paste("RDiv^Mean =",paste0(round(rdiv_2$Med,digits = 3))))+
+                  label = paste("RDiv^Median =",paste0(round(rdiv_2$Med,digits = 3))))+
     lims(y = c(rmin,rmax))
   
   Fig2_comm3 <- rdiv_3 %>% 
@@ -64,7 +64,7 @@ plot_RD <- function(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3) {
                   mapping = aes(y = rmax),
                   size=4.5,
                   label.color = NA,
-                  label = paste("RDiv^Mean =",paste0(round(rdiv_3$Med,digits = 3))))+
+                  label = paste("RDiv^Median =",paste0(round(rdiv_3$Med,digits = 3))))+
     lims(y = c(rmin,rmax))
   
   
@@ -79,7 +79,7 @@ plot_RD <- function(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3) {
                   mapping = aes(y = dmax),
                   size=4.5,
                   label.color = NA,
-                  label = paste("RDiv^Mean =",paste0(round(rdiv_1$Med_sing,digits = 2))))+
+                  label = paste("RDiv^Median =",paste0(round(rdiv_1$Med_sing,digits = 2))))+
     lims(y = c(dmin,dmax))
   
   Fig3_comm2 <- rdiv_2 %>% 
@@ -93,7 +93,7 @@ plot_RD <- function(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3) {
                   mapping = aes(y = dmax),
                   size=4.5,
                   label.color = NA,
-                  label = paste("RDiv^Mean =",paste0(round(rdiv_2$Med_sing,digits = 2))))+
+                  label = paste("RDiv^Median =",paste0(round(rdiv_2$Med_sing,digits = 2))))+
     lims(y = c(dmin,dmax))
   
   Fig3_comm3 <- rdiv_3 %>% 
@@ -107,7 +107,7 @@ plot_RD <- function(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3) {
                   mapping = aes(y = dmax),
                   size=4.5,
                   label.color = NA,
-                  label = paste("RDiv^Mean =",paste0(round(rdiv_3$Med_sing,digits = 2))))+
+                  label = paste("RDiv^Median =",paste0(round(rdiv_3$Med_sing,digits = 2))))+
     lims(y = c(dmin,dmax))
   
   

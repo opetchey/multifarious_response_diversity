@@ -1,6 +1,7 @@
 # Function to get directional derivatives from GAMS
-get_directionals <- function(com, new_data, refs){ 
-  nested_gams <- comm %>% 
+## x is a community with the following columns: species (chr), pars (list), E1 (dbl), E2 (dbl), and rate (dbl)
+get_directionals <- function(x, new_data, refs){ 
+  nested_gams <- x %>% 
     nest(cols =-species) %>% 
     mutate(
       gams = map(cols, ~ gam(rate ~  te(E1, E2),
