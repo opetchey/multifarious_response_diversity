@@ -150,31 +150,11 @@ species_pars <- list(a1_mean = 1e-9,
 
 
 
-```{r plotcomm1_neg, fig.cap='Community 1, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=12, fig.width=12}
-s <- 4
+```{r plotcomm1_neg, fig.cap='Community 1, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=20, fig.width=12}
+s <- 10
 # community 1 - low variation in z1. 
 species_pars$z1_range <- 1.5
 species_pars$z2_range <- 15
-
-
-par_table_com1 <- with(species_pars, {
-      tibble(a1 = rnorm(s, a1_mean, 0),#a1_mean/100),
-                           b1 = rnorm(s, b1_mean, 0),#b1_mean/100),
-                           z1 = runif(s, min = z1_mean - z1_range/2, max = z1_mean + z1_range / 2),
-                           w1 = rnorm(s, w1_mean, 0),#w1_mean/100),
-                           a2 = rnorm(s, a2_mean, 0),#a2_mean/100),
-                           b2 = rnorm(s, b2_mean, 0),#b2_mean/100),
-                           z2 = runif(s, min = z2_mean - z2_range/2, max = z2_mean + z2_range / 2),
-                           w2 = rnorm(s, w2_mean, 0),#w2_mean/100),
-                           z_int21 = rnorm(s, zint_mean, zint_mean/10),
-                           sd_rate = rnorm(s, sd_rate_mean, sd_rate_mean/10)
-       )
-  })
-
-
-par_table_com1 <- par_table_com1 %>% dplyr::select(z1, z2) %>%  dplyr::mutate(species = paste0("s", 1:s),
-                                                                              community = 1)
-
 
 # create reproducible community
 set.seed(2456)
@@ -186,37 +166,19 @@ performance_comm1
 
 # Get directional derivatives
 dir_1 <- get_directionals(comm, new_data, refs)
-
 ```
 
-
+```{r}
+# Find optimum for E1 and E1 for each sp 
+optima_com1 <- get_optima(comm, new_data)
+optima_com1$community <- 1
+```
 
 ### Community 2 - medium diversity in z1. 
 
-```{r plotcomm2_neg, fig.cap='Community 2, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=12, fig.width=12}
+```{r plotcomm2_neg, fig.cap='Community 2, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=20, fig.width=12}
 species_pars$z1_range <- 25
 species_pars$z2_range <- 15
-# b1_range <- 0.009
-# b2_range <- 0.001
-
-par_table_com2 <- with(species_pars, {
-      tibble(a1 = rnorm(s, a1_mean, 0),#a1_mean/100),
-                           b1 = rnorm(s, b1_mean, 0),#b1_mean/100),
-                           z1 = runif(s, min = z1_mean - z1_range/2, max = z1_mean + z1_range / 2),
-                           w1 = rnorm(s, w1_mean, 0),#w1_mean/100),
-                           a2 = rnorm(s, a2_mean, 0),#a2_mean/100),
-                           b2 = rnorm(s, b2_mean, 0),#b2_mean/100),
-                           z2 = runif(s, min = z2_mean - z2_range/2, max = z2_mean + z2_range / 2),
-                           w2 = rnorm(s, w2_mean, 0),#w2_mean/100),
-                           z_int21 = rnorm(s, zint_mean, zint_mean/10),
-                           sd_rate = rnorm(s, sd_rate_mean, sd_rate_mean/10)
-       )
-  })
-
-
-par_table_com2 <- par_table_com2 %>% dplyr::select(z1, z2) %>%  dplyr::mutate(species = paste0("s", 1:s),
-                                                                              community = 2)
-
 
 # create reproducible community
 set.seed(2456)
@@ -230,33 +192,17 @@ dir_2 <- get_directionals(comm, new_data, refs)
 
 ```
 
+```{r}
+# Find optimum for E1 and E1 for each sp 
+optima_com2 <- get_optima(comm, new_data)
+optima_com2$community <- 2
+```
 
 ### Community 3 - high diversity in z1. 
 
-```{r plotcomm3_neg, fig.cap=' Community 3, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=12, fig.width=12}
+```{r plotcomm3_neg, fig.cap=' Community 3, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=20, fig.width=12}
 species_pars$z1_range <- 50
 species_pars$z2_range <- 15
-# b1_range <- 0.009
-# b2_range <- 0.001
-
-par_table_com3 <- with(species_pars, {
-      tibble(a1 = rnorm(s, a1_mean, 0),#a1_mean/100),
-                           b1 = rnorm(s, b1_mean, 0),#b1_mean/100),
-                           z1 = runif(s, min = z1_mean - z1_range/2, max = z1_mean + z1_range / 2),
-                           w1 = rnorm(s, w1_mean, 0),#w1_mean/100),
-                           a2 = rnorm(s, a2_mean, 0),#a2_mean/100),
-                           b2 = rnorm(s, b2_mean, 0),#b2_mean/100),
-                           z2 = runif(s, min = z2_mean - z2_range/2, max = z2_mean + z2_range / 2),
-                           w2 = rnorm(s, w2_mean, 0),#w2_mean/100),
-                           z_int21 = rnorm(s, zint_mean, zint_mean/10),
-                           sd_rate = rnorm(s, sd_rate_mean, sd_rate_mean/10)
-       )
-  })
-
-
-par_table_com3 <- par_table_com3 %>% dplyr::select(z1, z2) %>%  dplyr::mutate(species = paste0("s", 1:s),
-                                                                              community = 3)
-
 
 # create reproducible community
 set.seed(2456)
@@ -269,12 +215,19 @@ performance_comm3
 dir_3 <- get_directionals(comm, new_data, refs)
 ```
 
+```{r}
+# Find optimum for E1 and E1 for each sp 
+optima_com3 <- get_optima(comm, new_data)
+optima_com3$community <- 3
+```
 
 ### Position of the optimum 
-```{r plotoptimum1, fig.cap='Position of the optimum for z1 and z2 in the 3 different communities', fig.align="center", fig.height=6, fig.width=8}
-par_table_com <- rbind(par_table_com1, par_table_com2, par_table_com3)
-par_table_com %>%  ggplot(aes(x = z1, y = z2, col = as.factor(community))) +
-  geom_point()
+Here and elsewhere in this document, the position of the optima has been estimated as the environmental location (E1 and E2 values) for which the rate is maximum. 
+```{r plotoptimum5, fig.cap='Position of the optimum for E1 and E2 in the 3 different communities', fig.align="center", fig.height=6, fig.width=8}
+optima <- rbind(optima_com1, optima_com2, optima_com3)
+optima %>%  ggplot(aes(x = E1, y = E2, col = as.factor(community))) +
+  geom_point() +
+  labs(x = "Optimum E1", y = "Optimum E2")
 ```
 
 
@@ -290,10 +243,10 @@ rdiv_1 <- dir_1 %>%
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
 
 
 # community 2  - calculation RD
@@ -303,10 +256,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -315,10 +268,10 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
 
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
@@ -326,15 +279,15 @@ plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 
 
 ```{r}
-dd1 <- data.frame(rdiv_1[, c(8:9)]) 
+dd1 <- data.frame(rdiv_1[, c("rdiv", "sign")]) 
 dd1$cor <- "negative"
 dd1$z1 <- "low"
 
-dd2 <- data.frame(rdiv_2[, c(8:9)]) 
+dd2 <- data.frame(rdiv_2[, c("rdiv", "sign")]) 
 dd2$cor <- "negative"
 dd2$z1 <- "medium"
 
-dd3 <- data.frame(rdiv_3[, c(8:9)]) 
+dd3 <- data.frame(rdiv_3[, c("rdiv", "sign")]) 
 dd3$cor <- "negative"
 dd3$z1 <- "high"
 ```
@@ -429,17 +382,16 @@ dir_3 <- get_directionals(comm, new_data, refs)
 
 ```{r RDplot2, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
 
 
 # community 2  - calculation RD
@@ -449,10 +401,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -461,10 +413,10 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
 
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
@@ -473,8 +425,8 @@ plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 
 
 ```{r}
-new_rdiv <- rdiv_1[, c(8)]
-new_sign <- rdiv_1[, c(9)]
+new_rdiv <- rdiv_1[, c("rdiv")]
+new_sign <- rdiv_1[, c("sign")]
 
 dd1 <- dd1 %>% rows_insert(tibble(rdiv = new_rdiv,
                         sign = new_sign))
@@ -482,20 +434,20 @@ dd1$cor <- "negative"
 dd1$z1 <- "low"
 
 
-new_rdiv <- rdiv_2[, c(8)]
-new_sign <- rdiv_2[, c(9)]
+new_rdiv <- rdiv_2[, c("rdiv")]
+new_sign <- rdiv_2[, c("sign")]
 
 dd2 <- dd2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd2$cor <- "negative"
 dd2$z1 <- "medium"
 
 
-new_rdiv <- rdiv_3[, c(8)]
-new_sign <- rdiv_3[, c(9)]
+new_rdiv <- rdiv_3[, c("rdiv")]
+new_sign <- rdiv_3[, c("sign")]
 
 dd3 <- dd3 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd3$cor <- "negative"
 dd3$z1 <- "high"
 ```
@@ -592,17 +544,16 @@ dir_3 <- get_directionals(comm, new_data, refs)
 
 ```{r RDplot3, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
 
 
 # community 2  - calculation RD
@@ -612,10 +563,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -624,11 +575,10 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
-
+rdiv_3$Med_sign<-median(rdiv_3$sign)
 
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
@@ -636,15 +586,15 @@ plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 
 
 ```{r}
-dd4 <- data.frame(rdiv_1[, c(8:9)]) 
+dd4 <- data.frame(rdiv_1[, c("rdiv", "sign")]) 
 dd4$cor <- "positive"
 dd4$z1 <- "low"
 
-dd5 <- data.frame(rdiv_2[, c(8:9)]) 
+dd5 <- data.frame(rdiv_2[,c("rdiv", "sign")]) 
 dd5$cor <- "positive"
 dd5$z1 <- "medium"
 
-dd6 <- data.frame(rdiv_3[, c(8:9)]) 
+dd6 <- data.frame(rdiv_3[, c("rdiv", "sign")]) 
 dd6$cor <- "positive"
 dd6$z1 <- "high"
 ```
@@ -739,17 +689,16 @@ dir_3 <- get_directionals(comm, new_data, refs)
 ```{r RDplot4, fig.cap=' Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
 
 
 # community 2  - calculation RD
@@ -759,10 +708,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -771,39 +720,39 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
 
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 ```
 
 ```{r}
-new_rdiv <- rdiv_1[, c(8)]
-new_sign <- rdiv_1[, c(9)]
+new_rdiv <- rdiv_1[, c("rdiv")]
+new_sign <- rdiv_1[, c("sign")]
 
 dd4 <- dd4 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd4$cor <- "positive"
 dd4$z1 <- "low"
 
 
-new_rdiv <- rdiv_2[, c(8)]
-new_sign <- rdiv_2[, c(9)]
+new_rdiv <- rdiv_2[, c("rdiv")]
+new_sign <- rdiv_2[, c("sign")]
 
 dd5 <- dd5 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd5$cor <- "positive"
 dd5$z1 <- "medium"
 
 
-new_rdiv <- rdiv_3[, c(8)]
-new_sign <- rdiv_3[, c(9)]
+new_rdiv <- rdiv_3[, c("rdiv")]
+new_sign <- rdiv_3[, c("sign")]
 
 dd6 <- dd6 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd6$cor <- "positive"
 dd6$z1 <- "high"
 ```
@@ -894,17 +843,17 @@ dir_3 <- get_directionals(comm, new_data, refs)
 
 ```{r RDplot5, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -913,10 +862,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -925,10 +874,11 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
+
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 ```
@@ -936,15 +886,15 @@ plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 
 
 ```{r}
-dd7 <- data.frame(rdiv_1[, c(8:9)]) 
+dd7 <- data.frame(rdiv_1[, c("rdiv", "sign")]) 
 dd7$cor <- "no_cor"
 dd7$z1 <- "low"
 
-dd8 <- data.frame(rdiv_2[, c(8:9)]) 
+dd8 <- data.frame(rdiv_2[, c("rdiv", "sign")]) 
 dd8$cor <- "no_cor"
 dd8$z1 <- "medium"
 
-dd9 <- data.frame(rdiv_3[, c(8:9)]) 
+dd9 <- data.frame(rdiv_3[, c("rdiv", "sign")]) 
 dd9$cor <- "no_cor"
 dd9$z1 <- "high"
 ```
@@ -1036,17 +986,17 @@ dir_3 <- get_directionals(comm, new_data, refs)
 
 ```{r RDplot6, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -1055,10 +1005,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -1067,10 +1017,11 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
+
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 ```
@@ -1078,29 +1029,29 @@ plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 
 
 ```{r}
-new_rdiv <- rdiv_1[, c(8)]
-new_sign <- rdiv_1[, c(9)]
+new_rdiv <- rdiv_1[, c("rdiv")]
+new_sign <- rdiv_1[, c("sign")]
 
 dd7 <- dd7 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd7$cor <- "no_cor"
 dd7$z1 <- "low"
 
 
-new_rdiv <- rdiv_2[, c(8)]
-new_sign <- rdiv_2[, c(9)]
+new_rdiv <- rdiv_2[, c("rdiv")]
+new_sign <- rdiv_2[, c("sign")]
 
 dd8 <- dd8 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd8$cor <- "no_cor"
 dd8$z1 <- "medium"
 
 
-new_rdiv <- rdiv_3[, c(8)]
-new_sign <- rdiv_3[, c(9)]
+new_rdiv <- rdiv_3[, c("rdiv")]
+new_sign <- rdiv_3[, c("sign")]
 
 dd9 <- dd9 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd9$cor <- "no_cor"
 dd9$z1 <- "high"
 ```
@@ -1209,31 +1160,11 @@ detach("package:MASS", unload=TRUE)
 
 ### Community 1 - low diversity in z1 and z2. 
 
-```{r plotcomm1.2_neg, fig.cap='Community 1, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=6, fig.width=12}
-s <- 4
+```{r plotcomm1.2_neg, fig.cap='Community 1, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=20, fig.width=12}
+s <- 10
 # community 1 - low variation in z1. 
 species_pars$z1_range <- 1.5
 species_pars$z2_range <- 1.5
-
-par_table_com1 <- with(species_pars, {
-      tibble(a1 = rnorm(s, a1_mean, 0),#a1_mean/100),
-                           b1 = rnorm(s, b1_mean, 0),#b1_mean/100),
-                           z1 = runif(s, min = z1_mean - z1_range/2, max = z1_mean + z1_range / 2),
-                           w1 = rnorm(s, w1_mean, 0),#w1_mean/100),
-                           a2 = rnorm(s, a2_mean, 0),#a2_mean/100),
-                           b2 = rnorm(s, b2_mean, 0),#b2_mean/100),
-                           z2 = runif(s, min = z2_mean - z2_range/2, max = z2_mean + z2_range / 2),
-                           w2 = rnorm(s, w2_mean, 0),#w2_mean/100),
-                           z_int21 = rnorm(s, zint_mean, zint_mean/10),
-                           sd_rate = rnorm(s, sd_rate_mean, sd_rate_mean/10)
-       )
-  })
-
-
-par_table_com1 <- par_table_com1 %>% dplyr::select(z1, z2) %>%  dplyr::mutate(species = paste0("s", 1:s),
-                                                                              community = 1)
-
-
 
 # create reproducible community
 set.seed(2456)
@@ -1248,33 +1179,18 @@ dir_1 <- get_directionals(comm, new_data, refs)
 ```
 
 
+```{r}
+# Find optimum for E1 and E1 for each sp 
+optima_com1 <- get_optima(comm, new_data)
+optima_com1$community <- 1
+```
+
 ### Community 2 - medium diversity in z1 and z2. 
 
-```{r plotcomm2.1_neg, fig.cap='Community 2, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=6, fig.width=12}
+```{r plotcomm2.1_neg, fig.cap='Community 2, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=20, fig.width=12}
 
 species_pars$z1_range <- 25
 species_pars$z2_range <- 25
-# b1_range <- 0.009
-# b2_range <- 0.001
-
-par_table_com2 <- with(species_pars, {
-      tibble(a1 = rnorm(s, a1_mean, 0),#a1_mean/100),
-                           b1 = rnorm(s, b1_mean, 0),#b1_mean/100),
-                           z1 = runif(s, min = z1_mean - z1_range/2, max = z1_mean + z1_range / 2),
-                           w1 = rnorm(s, w1_mean, 0),#w1_mean/100),
-                           a2 = rnorm(s, a2_mean, 0),#a2_mean/100),
-                           b2 = rnorm(s, b2_mean, 0),#b2_mean/100),
-                           z2 = runif(s, min = z2_mean - z2_range/2, max = z2_mean + z2_range / 2),
-                           w2 = rnorm(s, w2_mean, 0),#w2_mean/100),
-                           z_int21 = rnorm(s, zint_mean, zint_mean/10),
-                           sd_rate = rnorm(s, sd_rate_mean, sd_rate_mean/10)
-       )
-  })
-
-
-par_table_com2 <- par_table_com2 %>% dplyr::select(z1, z2) %>%  dplyr::mutate(species = paste0("s", 1:s),
-                                                                              community = 2)
-
 
 
 # create reproducible community
@@ -1290,34 +1206,17 @@ dir_2 <- get_directionals(comm, new_data, refs)
 ```
 
 
+```{r}
+# Find optimum for E1 and E1 for each sp 
+optima_com2 <- get_optima(comm, new_data)
+optima_com2$community <- 2
+```
 
 ### Community 3 - high diversity in z1 and z2. 
 
-```{r plotcomm3.2_neg, fig.cap='Community 3, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=6, fig.width=12}
+```{r plotcomm3.2_neg, fig.cap='Community 3, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=20, fig.width=12}
 species_pars$z1_range <- 50
 species_pars$z2_range <- 50
-# b1_range <- 0.009
-# b2_range <- 0.001
-
-par_table_com3 <- with(species_pars, {
-      tibble(a1 = rnorm(s, a1_mean, 0),#a1_mean/100),
-                           b1 = rnorm(s, b1_mean, 0),#b1_mean/100),
-                           z1 = runif(s, min = z1_mean - z1_range/2, max = z1_mean + z1_range / 2),
-                           w1 = rnorm(s, w1_mean, 0),#w1_mean/100),
-                           a2 = rnorm(s, a2_mean, 0),#a2_mean/100),
-                           b2 = rnorm(s, b2_mean, 0),#b2_mean/100),
-                           z2 = runif(s, min = z2_mean - z2_range/2, max = z2_mean + z2_range / 2),
-                           w2 = rnorm(s, w2_mean, 0),#w2_mean/100),
-                           z_int21 = rnorm(s, zint_mean, zint_mean/10),
-                           sd_rate = rnorm(s, sd_rate_mean, sd_rate_mean/10)
-       )
-  })
-
-
-par_table_com3 <- par_table_com3 %>% dplyr::select(z1, z2) %>%  dplyr::mutate(species = paste0("s", 1:s),
-                                                                              community = 3)
-
-
 
 # create reproducible community
 set.seed(2456)
@@ -1332,11 +1231,18 @@ dir_3 <- get_directionals(comm, new_data, refs)
 
 
 
+```{r}
+# Find optimum for E1 and E1 for each sp 
+optima_com3 <- get_optima(comm, new_data)
+optima_com3$community <- 3
+```
+
 ### Position of the optimum 
-```{r plotoptimum2, fig.cap='Position of the optimum for z1 and z2 in the 3 different communities', fig.align="center", fig.height=6, fig.width=8}
-par_table_com <- rbind(par_table_com1, par_table_com2, par_table_com3)
-par_table_com %>%  ggplot(aes(x = z1, y = z2, col = as.factor(community))) +
-  geom_point()
+```{r plotoptimum2, fig.cap='Position of the optimum for E1 and E2 in the 3 different communities', fig.align="center", fig.height=6, fig.width=8}
+optima <- rbind(optima_com1, optima_com2, optima_com3)
+optima %>%  ggplot(aes(x = E1, y = E2, col = as.factor(community))) +
+  geom_point() +
+  labs(x = "Optimum E1", y = "Optimum E2")
 ```
 
 ### Response diversity calculation 
@@ -1344,17 +1250,17 @@ par_table_com %>%  ggplot(aes(x = z1, y = z2, col = as.factor(community))) +
 ```{r RDplot7, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -1363,10 +1269,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -1375,24 +1281,25 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
+
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 ```
 
 ```{r}
-dd1 <- data.frame(rdiv_1[, c(8:9)]) 
+dd1 <- data.frame(rdiv_1[, c("rdiv", "sign")]) 
 dd1$cor <- "negative"
 dd1$z1 <- "low"
 
-dd2 <- data.frame(rdiv_2[, c(8:9)]) 
+dd2 <- data.frame(rdiv_2[, c("rdiv", "sign")]) 
 dd2$cor <- "negative"
 dd2$z1 <- "medium"
 
-dd3 <- data.frame(rdiv_3[, c(8:9)]) 
+dd3 <- data.frame(rdiv_3[, c("rdiv", "sign")]) 
 dd3$cor <- "negative"
 dd3$z1 <- "high"
 ```
@@ -1482,17 +1389,17 @@ dir_3 <- get_directionals(comm, new_data, refs)
 
 ```{r RDplot8, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -1501,10 +1408,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -1513,39 +1420,40 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
+
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 ```
 
 
 ```{r}
-new_rdiv <- rdiv_1[, c(8)]
-new_sign <- rdiv_1[, c(9)]
+new_rdiv <- rdiv_1[, c("rdiv")]
+new_sign <- rdiv_1[, c("sign")]
 
 dd1 <- dd1 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd1$cor <- "negative"
 dd1$z1 <- "low"
 
 
-new_rdiv <- rdiv_2[, c(8)]
-new_sign <- rdiv_2[, c(9)]
+new_rdiv <- rdiv_2[, c("rdiv")]
+new_sign <- rdiv_2[, c("sign")]
 
 dd2 <- dd2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd2$cor <- "negative"
 dd2$z1 <- "medium"
 
 
-new_rdiv <- rdiv_3[, c(8)]
-new_sign <- rdiv_3[, c(9)]
+new_rdiv <- rdiv_3[, c("rdiv")]
+new_sign <- rdiv_3[, c("sign")]
 
 dd3 <- dd3 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd3$cor <- "negative"
 dd3$z1 <- "high"
 ```
@@ -1642,17 +1550,17 @@ dir_3 <- get_directionals(comm, new_data, refs)
 ```{r RDplot9, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -1661,10 +1569,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -1673,25 +1581,26 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
+
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 ```
 
 
 ```{r}
-dd4 <- data.frame(rdiv_1[, c(8:9)]) 
+dd4 <- data.frame(rdiv_1[, c("rdiv", "sign")]) 
 dd4$cor <- "positive"
 dd4$z1 <- "low"
 
-dd5 <- data.frame(rdiv_2[, c(8:9)]) 
+dd5 <- data.frame(rdiv_2[, c("rdiv", "sign")]) 
 dd5$cor <- "positive"
 dd5$z1 <- "medium"
 
-dd6 <- data.frame(rdiv_3[, c(8:9)]) 
+dd6 <- data.frame(rdiv_3[, c("rdiv", "sign")]) 
 dd6$cor <- "positive"
 dd6$z1 <- "high"
 ```
@@ -1780,17 +1689,17 @@ dir_3 <- get_directionals(comm, new_data, refs)
  
 ```{r RDplot10, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -1799,10 +1708,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -1811,10 +1720,11 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
+
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 ```
@@ -1822,29 +1732,29 @@ plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 
 
 ```{r}
-new_rdiv <- rdiv_1[, c(8)]
-new_sign <- rdiv_1[, c(9)]
+new_rdiv <- rdiv_1[, c("rdiv")]
+new_sign <- rdiv_1[, c("sign")]
 
 dd4 <- dd4 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd4$cor <- "positive"
 dd4$z1 <- "low"
 
 
-new_rdiv <- rdiv_2[, c(8)]
-new_sign <- rdiv_2[, c(9)]
+new_rdiv <- rdiv_2[, c("rdiv")]
+new_sign <- rdiv_2[, c("sign")]
 
 dd5 <- dd5 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd5$cor <- "positive"
 dd5$z1 <- "medium"
 
 
-new_rdiv <- rdiv_3[, c(8)]
-new_sign <- rdiv_3[, c(9)]
+new_rdiv <- rdiv_3[, c("rdiv")]
+new_sign <- rdiv_3[, c("sign")]
 
 dd6 <- dd6 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd6$cor <- "positive"
 dd6$z1 <- "high"
 ```
@@ -1934,17 +1844,17 @@ dir_3 <- get_directionals(comm, new_data, refs)
 ```{r RDplot11, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -1953,10 +1863,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -1965,10 +1875,11 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
+
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 ```
@@ -1976,15 +1887,15 @@ plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 
 
 ```{r}
-dd7 <- data.frame(rdiv_1[, c(8:9)]) 
+dd7 <- data.frame(rdiv_1[, c("rdiv", "sign")]) 
 dd7$cor <- "no_cor"
 dd7$z1 <- "low"
 
-dd8 <- data.frame(rdiv_2[, c(8:9)]) 
+dd8 <- data.frame(rdiv_2[, c("rdiv", "sign")]) 
 dd8$cor <- "no_cor"
 dd8$z1 <- "medium"
 
-dd9 <- data.frame(rdiv_3[, c(8:9)]) 
+dd9 <- data.frame(rdiv_3[, c("rdiv", "sign")]) 
 dd9$cor <- "no_cor"
 dd9$z1 <- "high"
 ```
@@ -2078,10 +1989,11 @@ rdiv_1 <- dir_1 %>%
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -2090,10 +2002,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -2102,10 +2014,10 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
 
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
@@ -2113,29 +2025,29 @@ plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 
 
 ```{r}
-new_rdiv <- rdiv_1[, c(8)]
-new_sign <- rdiv_1[, c(9)]
+new_rdiv <- rdiv_1[, c("rdiv")]
+new_sign <- rdiv_1[, c("sign")]
 
 dd7 <- dd7 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd7$cor <- "no_cor"
 dd7$z1 <- "low"
 
 
-new_rdiv <- rdiv_2[, c(8)]
-new_sign <- rdiv_2[, c(9)]
+new_rdiv <- rdiv_2[, c("rdiv")]
+new_sign <- rdiv_2[, c("sign")]
 
 dd8 <- dd8 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd8$cor <- "no_cor"
 dd8$z1 <- "medium"
 
 
-new_rdiv <- rdiv_3[, c(8)]
-new_sign <- rdiv_3[, c(9)]
+new_rdiv <- rdiv_3[, c("rdiv")]
+new_sign <- rdiv_3[, c("sign")]
 
 dd9 <- dd9 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd9$cor <- "no_cor"
 dd9$z1 <- "high"
 ```
@@ -2236,29 +2148,11 @@ detach("package:MASS", unload=TRUE)
 
 ### Community 1 - low diversity in z1 and high diversity in z2. 
 
-```{r plotcomm1.3_neg, fig.cap='Community 1, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=6, fig.width=12}
-s <- 4
+```{r plotcomm1.3_neg, fig.cap='Community 1, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=20, fig.width=12}
+s <- 10
 # community 1 - low variation in z1 high in z2. 
 species_pars$z1_range <- 1.5
 species_pars$z2_range <- 50
-
-par_table_com1 <- with(species_pars, {
-      tibble(a1 = rnorm(s, a1_mean, 0),#a1_mean/100),
-                           b1 = rnorm(s, b1_mean, 0),#b1_mean/100),
-                           z1 = runif(s, min = z1_mean - z1_range/2, max = z1_mean + z1_range / 2),
-                           w1 = rnorm(s, w1_mean, 0),#w1_mean/100),
-                           a2 = rnorm(s, a2_mean, 0),#a2_mean/100),
-                           b2 = rnorm(s, b2_mean, 0),#b2_mean/100),
-                           z2 = runif(s, min = z2_mean - z2_range/2, max = z2_mean + z2_range / 2),
-                           w2 = rnorm(s, w2_mean, 0),#w2_mean/100),
-                           z_int21 = rnorm(s, zint_mean, zint_mean/10),
-                           sd_rate = rnorm(s, sd_rate_mean, sd_rate_mean/10)
-       )
-  })
-
-
-par_table_com1 <- par_table_com1 %>% dplyr::select(z1, z2) %>%  dplyr::mutate(species = paste0("s", 1:s),
-                                                                              community = 1)
 
 
 # create reproducible community
@@ -2272,33 +2166,17 @@ performance_comm1
 dir_1 <- get_directionals(comm, new_data, refs)
 ```
 
+```{r}
+# Find optimum for E1 and E1 for each sp 
+optima_com1 <- get_optima(comm, new_data)
+optima_com1$community <- 1
+```
 
 ### Community 2 - medium diversity in z1 and z2. 
 
-```{r plotcomm2.3_neg, fig.cap='Community 2, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=6, fig.width=12}
+```{r plotcomm2.3_neg, fig.cap='Community 2, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=20, fig.width=12}
 species_pars$z1_range <- 25
 species_pars$z2_range <- 25
-# b1_range <- 0.009
-# b2_range <- 0.001
-
-par_table_com2 <- with(species_pars, {
-      tibble(a1 = rnorm(s, a1_mean, 0),#a1_mean/100),
-                           b1 = rnorm(s, b1_mean, 0),#b1_mean/100),
-                           z1 = runif(s, min = z1_mean - z1_range/2, max = z1_mean + z1_range / 2),
-                           w1 = rnorm(s, w1_mean, 0),#w1_mean/100),
-                           a2 = rnorm(s, a2_mean, 0),#a2_mean/100),
-                           b2 = rnorm(s, b2_mean, 0),#b2_mean/100),
-                           z2 = runif(s, min = z2_mean - z2_range/2, max = z2_mean + z2_range / 2),
-                           w2 = rnorm(s, w2_mean, 0),#w2_mean/100),
-                           z_int21 = rnorm(s, zint_mean, zint_mean/10),
-                           sd_rate = rnorm(s, sd_rate_mean, sd_rate_mean/10)
-       )
-  })
-
-
-par_table_com2 <- par_table_com2 %>% dplyr::select(z1, z2) %>%  dplyr::mutate(species = paste0("s", 1:s),
-                                                                              community = 2)
-
 
 # create reproducible community
 set.seed(2456)
@@ -2311,32 +2189,19 @@ performance_comm2
 dir_2 <- get_directionals(comm, new_data, refs)
 ```
 
+
+```{r}
+# Find optimum for E1 and E1 for each sp 
+optima_com2 <- get_optima(comm, new_data)
+optima_com2$community <- 2
+```
+
+
 ### Community 3 - high diversity in z1 and low in z2. 
 
-```{r plotcomm3.3_neg, fig.cap='Community 3, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=6, fig.width=12}
+```{r plotcomm3.3_neg, fig.cap='Community 3, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=20, fig.width=12}
 species_pars$z1_range <- 50
-vz2_range <- 1.5
-# b1_range <- 0.009
-# b2_range <- 0.001
-
-par_table_com3 <- with(species_pars, {
-      tibble(a1 = rnorm(s, a1_mean, 0),#a1_mean/100),
-                           b1 = rnorm(s, b1_mean, 0),#b1_mean/100),
-                           z1 = runif(s, min = z1_mean - z1_range/2, max = z1_mean + z1_range / 2),
-                           w1 = rnorm(s, w1_mean, 0),#w1_mean/100),
-                           a2 = rnorm(s, a2_mean, 0),#a2_mean/100),
-                           b2 = rnorm(s, b2_mean, 0),#b2_mean/100),
-                           z2 = runif(s, min = z2_mean - z2_range/2, max = z2_mean + z2_range / 2),
-                           w2 = rnorm(s, w2_mean, 0),#w2_mean/100),
-                           z_int21 = rnorm(s, zint_mean, zint_mean/10),
-                           sd_rate = rnorm(s, sd_rate_mean, sd_rate_mean/10)
-       )
-  })
-
-
-par_table_com3 <- par_table_com3 %>% dplyr::select(z1, z2) %>%  dplyr::mutate(species = paste0("s", 1:s),
-                                                                              community = 3)
-
+species_pars$z2_range  <- 1.5
 
 # create reproducible community
 set.seed(2456)
@@ -2351,29 +2216,35 @@ dir_3 <- get_directionals(comm, new_data, refs)
 
 
 
-### Position of the optimum 
-```{r plotoptimum3, fig.cap='Position of the optimum for z1 and z2 in the 3 different communities', fig.align="center", fig.height=6, fig.width=8}
-par_table_com <- rbind(par_table_com1, par_table_com2, par_table_com3)
-par_table_com %>%  ggplot(aes(x = z1, y = z2, col = as.factor(community))) +
-  geom_point()
+```{r}
+# Find optimum for E1 and E1 for each sp 
+optima_com3 <- get_optima(comm, new_data)
+optima_com3$community <- 3
 ```
 
+### Position of the optimum 
+```{r plotoptimum3, fig.cap='Position of the optimum for E1 and E2 in the 3 different communities', fig.align="center", fig.height=6, fig.width=8}
+optima <- rbind(optima_com1, optima_com2, optima_com3)
+optima %>%  ggplot(aes(x = E1, y = E2, col = as.factor(community))) +
+  geom_point() +
+  labs(x = "Optimum E1", y = "Optimum E2")
+```
 
 ### Response diversity calculation 
 
 ```{r RDplot13, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -2382,10 +2253,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -2394,10 +2265,11 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
+
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 ```
@@ -2405,29 +2277,29 @@ plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 
 
 ```{r}
-dd1 <- data.frame(rdiv_1[, c(8:9)]) 
+dd1 <- data.frame(rdiv_1[, c("rdiv", "sign")]) 
 dd1$cor <- "negative"
 dd1$z1 <- "low"
 
-dd2 <- data.frame(rdiv_2[, c(8:9)]) 
+dd2 <- data.frame(rdiv_2[, c("rdiv", "sign")]) 
 dd2$cor <- "negative"
 dd2$z1 <- "medium"
 
-dd3 <- data.frame(rdiv_3[, c(8:9)]) 
+dd3 <- data.frame(rdiv_3[, c("rdiv", "sign")]) 
 dd3$cor <- "negative"
 dd3$z1 <- "high"
 ```
 
 ```{r}
-dd1z2 <- data.frame(rdiv_1[, c(8:9)]) 
+dd1z2 <- data.frame(rdiv_1[, c("rdiv", "sign")]) 
 dd1z2$cor <- "negative"
 dd1z2$z2 <- "high"
 
-dd2z2 <- data.frame(rdiv_2[, c(8:9)]) 
+dd2z2 <- data.frame(rdiv_2[, c("rdiv", "sign")]) 
 dd2z2$cor <- "negative"
 dd2z2$z2 <- "medium"
 
-dd3z2 <- data.frame(rdiv_3[, c(8:9)]) 
+dd3z2 <- data.frame(rdiv_3[, c("rdiv", "sign")]) 
 dd3z2$cor <- "negative"
 dd3z2$z2 <- "low"
 ```
@@ -2522,17 +2394,17 @@ dir_3 <- get_directionals(comm, new_data, refs)
 
 ```{r RDplot14, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -2541,10 +2413,11 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
+
 # community 3  - calculation RD
 # from long to wide
 rdiv_3 <- dir_3 %>%
@@ -2552,41 +2425,41 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
+
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
-
 ```
 
 
 
 ```{r}
-new_rdiv <- rdiv_1[, c(8)]
-new_sign <- rdiv_1[, c(9)]
+new_rdiv <- rdiv_1[, c("rdiv")]
+new_sign <- rdiv_1[, c("sign")]
 
 dd1 <- dd1 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd1$cor <- "negative"
 dd1$z1 <- "low"
 
 
-new_rdiv <- rdiv_2[, c(8)]
-new_sign <- rdiv_2[, c(9)]
+new_rdiv <- rdiv_2[, c("rdiv")]
+new_sign <- rdiv_2[, c("sign")]
 
 dd2 <- dd2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd2$cor <- "negative"
 dd2$z1 <- "medium"
 
 
-new_rdiv <- rdiv_3[, c(8)]
-new_sign <- rdiv_3[, c(9)]
+new_rdiv <- rdiv_3[, c("rdiv")]
+new_sign <- rdiv_3[, c("sign")]
 
 dd3 <- dd3 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd3$cor <- "negative"
 dd3$z1 <- "high"
 ```
@@ -2595,29 +2468,29 @@ dd3$z1 <- "high"
 
 
 ```{r}
-new_rdiv <- rdiv_1[, c(8)]
-new_sign <- rdiv_1[, c(9)]
+new_rdiv <- rdiv_1[, c("rdiv")]
+new_sign <- rdiv_1[, c("sign")]
 
 dd1z2 <- dd1z2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd1z2$cor <- "negative"
 dd1z2$z2 <- "high"
 
 
-new_rdiv <- rdiv_2[, c(8)]
-new_sign <- rdiv_2[, c(9)]
+new_rdiv <- rdiv_2[, c("rdiv")]
+new_sign <- rdiv_2[, c("sign")]
 
 dd2z2 <- dd2z2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd2z2$cor <- "negative"
 dd2z2$z2 <- "medium"
 
 
-new_rdiv <- rdiv_3[, c(8)]
-new_sign <- rdiv_3[, c(9)]
+new_rdiv <- rdiv_3[, c("rdiv")]
+new_sign <- rdiv_3[, c("sign")]
 
 dd3z2 <- dd3z2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd3z2$cor <- "negative"
 dd3z2$z2 <- "low"
 ```
@@ -2713,17 +2586,17 @@ dir_3 <- get_directionals(comm, new_data, refs)
 
 ```{r RDplot15, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -2732,10 +2605,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -2744,10 +2617,11 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
+
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 ```
@@ -2755,30 +2629,30 @@ plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 
 
 ```{r}
-dd4 <- data.frame(rdiv_1[, c(8:9)]) 
+dd4 <- data.frame(rdiv_1[, c("rdiv", "sign")]) 
 dd4$cor <- "positive"
 dd4$z1 <- "low"
 
-dd5 <- data.frame(rdiv_2[, c(8:9)]) 
+dd5 <- data.frame(rdiv_2[, c("rdiv", "sign")]) 
 dd5$cor <- "positive"
 dd5$z1 <- "medium"
 
-dd6 <- data.frame(rdiv_3[, c(8:9)]) 
+dd6 <- data.frame(rdiv_3[, c("rdiv", "sign")]) 
 dd6$cor <- "positive"
 dd6$z1 <- "high"
 ```
 
 
 ```{r}
-dd4z2 <- data.frame(rdiv_1[, c(8:9)]) 
+dd4z2 <- data.frame(rdiv_1[, c("rdiv", "sign")]) 
 dd4z2$cor <- "positive"
 dd4z2$z2 <- "high"
 
-dd5z2 <- data.frame(rdiv_2[, c(8:9)]) 
+dd5z2 <- data.frame(rdiv_2[, c("rdiv", "sign")]) 
 dd5z2$cor <- "positive"
 dd5z2$z2 <- "medium"
 
-dd6z2 <- data.frame(rdiv_3[, c(8:9)]) 
+dd6z2 <- data.frame(rdiv_3[, c("rdiv", "sign")]) 
 dd6z2$cor <- "positive"
 dd6z2$z2 <- "low"
 ```
@@ -2874,17 +2748,17 @@ dir_3 <- get_directionals(comm, new_data, refs)
 
 ```{r RDplot16, fig.cap=' Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -2893,10 +2767,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -2905,68 +2779,69 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
+
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 ```
 
 
 ```{r}
-new_rdiv <- rdiv_1[, c(8)]
-new_sign <- rdiv_1[, c(9)]
+new_rdiv <- rdiv_1[, c("rdiv")]
+new_sign <- rdiv_1[, c("sign")]
 
 dd4 <- dd4 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd4$cor <- "positive"
 dd4$z1 <- "low"
 
 
-new_rdiv <- rdiv_2[, c(8)]
-new_sign <- rdiv_2[, c(9)]
+new_rdiv <- rdiv_2[, c("rdiv")]
+new_sign <- rdiv_2[, c("sign")]
 
 dd5 <- dd5 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd5$cor <- "positive"
 dd5$z1 <- "medium"
 
 
-new_rdiv <- rdiv_3[, c(8)]
-new_sign <- rdiv_3[, c(9)]
+new_rdiv <- rdiv_3[, c("rdiv")]
+new_sign <- rdiv_3[, c("sign")]
 
 dd6 <- dd6 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd6$cor <- "positive"
 dd6$z1 <- "high"
 ```
 
 
 ```{r}
-new_rdiv <- rdiv_1[, c(8)]
-new_sign <- rdiv_1[, c(9)]
+new_rdiv <- rdiv_1[, c("rdiv")]
+new_sign <- rdiv_1[, c("sign")]
 
 dd4z2 <- dd4z2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd4z2$cor <- "positive"
 dd4z2$z2 <- "high"
 
 
-new_rdiv <- rdiv_2[, c(8)]
-new_sign <- rdiv_2[, c(9)]
+new_rdiv <- rdiv_2[, c("rdiv")]
+new_sign <- rdiv_2[, c("sign")]
 
 dd5z2 <- dd5z2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd5z2$cor <- "positive"
 dd5z2$z2 <- "medium"
 
 
-new_rdiv <- rdiv_3[, c(8)]
-new_sign <- rdiv_3[, c(9)]
+new_rdiv <- rdiv_3[, c("rdiv")]
+new_sign <- rdiv_3[, c("sign")]
 
 dd6z2 <- dd6z2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd6z2$cor <- "positive"
 dd6z2$z2 <- "low"
 ```
@@ -3058,17 +2933,17 @@ dir_3 <- get_directionals(comm, new_data, refs)
  
 ```{r RDplot17, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -3077,10 +2952,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -3089,40 +2964,41 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
+
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 ```
 
 
 ```{r}
-dd7 <- data.frame(rdiv_1[, c(8:9)]) 
+dd7 <- data.frame(rdiv_1[, c("rdiv", "sign")]) 
 dd7$cor <- "no_cor"
 dd7$z1 <- "low"
 
-dd8 <- data.frame(rdiv_2[, c(8:9)]) 
+dd8 <- data.frame(rdiv_2[, c("rdiv", "sign")]) 
 dd8$cor <- "positive"
 dd8$z1 <- "medium"
 
-dd9 <- data.frame(rdiv_3[, c(8:9)]) 
+dd9 <- data.frame(rdiv_3[, c("rdiv", "sign")]) 
 dd9$cor <- "positive"
 dd9$z1 <- "high"
 ```
 
 
 ```{r}
-dd7z2 <- data.frame(rdiv_1[, c(8:9)]) 
+dd7z2 <- data.frame(rdiv_1[, c("rdiv", "sign")]) 
 dd7z2$cor <- "no_cor"
 dd7z2$z2 <- "high"
 
-dd8z2 <- data.frame(rdiv_2[, c(8:9)]) 
+dd8z2 <- data.frame(rdiv_2[, c("rdiv", "sign")]) 
 dd8z2$cor <- "positive"
 dd8z2$z2 <- "medium"
 
-dd9z2 <- data.frame(rdiv_3[, c(8:9)]) 
+dd9z2 <- data.frame(rdiv_3[, c("rdiv", "sign")]) 
 dd9z2$cor <- "positive"
 dd9z2$z2 <- "low"
 ```
@@ -3217,17 +3093,17 @@ dir_3 <- get_directionals(comm, new_data, refs)
 
 ```{r RDplot18, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -3236,10 +3112,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -3248,68 +3124,68 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
+
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
-
 ```
 
 
 ```{r}
-new_rdiv <- rdiv_1[, c(8)]
-new_sign <- rdiv_1[, c(9)]
+new_rdiv <- rdiv_1[, c("rdiv")]
+new_sign <- rdiv_1[, c("sign")]
 
 dd7 <- dd7 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd7$cor <- "no_cor"
 dd7$z1 <- "low"
 
 
-new_rdiv <- rdiv_2[, c(8)]
-new_sign <- rdiv_2[, c(9)]
+new_rdiv <- rdiv_2[, c("rdiv")]
+new_sign <- rdiv_2[, c("sign")]
 
 dd8 <- dd8 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd8$cor <- "no_cor"
 dd8$z1 <- "medium"
 
 
-new_rdiv <- rdiv_3[, c(8)]
-new_sign <- rdiv_3[, c(9)]
+new_rdiv <- rdiv_3[, c("rdiv")]
+new_sign <- rdiv_3[, c("sign")]
 
 dd9 <- dd9 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd9$cor <- "no_cor"
 dd9$z1 <- "high"
 ```
 
 ```{r}
-new_rdiv <- rdiv_1[, c(8)]
-new_sign <- rdiv_1[, c(9)]
+new_rdiv <- rdiv_1[, c("rdiv")]
+new_sign <- rdiv_1[, c("sign")]
 
 dd7z2 <- dd7z2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd7z2$cor <- "no_cor"
 dd7z2$z2 <- "high"
 
 
-new_rdiv <- rdiv_2[, c(8)]
-new_sign <- rdiv_2[, c(9)]
+new_rdiv <- rdiv_2[, c("rdiv")]
+new_sign <- rdiv_2[, c("sign")]
 
 dd8z2 <- dd8z2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd8z2$cor <- "no_cor"
 dd8z2$z2 <- "medium"
 
 
-new_rdiv <- rdiv_3[, c(8)]
-new_sign <- rdiv_3[, c(9)]
+new_rdiv <- rdiv_3[, c("rdiv")]
+new_sign <- rdiv_3[, c("sign")]
 
 dd9z2 <- dd9z2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd9z2$cor <- "no_cor"
 dd9z2$z2 <- "low"
 ```
@@ -3450,8 +3326,10 @@ species_pars <- list(a1_mean = 1e-9,
 
 ```
 
+Fixing  z2_mean = 5, with variation according to the different scenarios
 
-# Variation in diversity in z1 and z2
+
+## Variation in diversity in z1 and z2
 Now we do the same, but having also z2 changing together with z1 with negative correlation. So, diversity in z1 is increasing gradually from low to high in the 3 communities, while z2 decreases gradually in the 3 communities (anti-tolerance scenario?).
 
 
@@ -3496,31 +3374,11 @@ detach("package:MASS", unload=TRUE)
 
 ### Community 1 - low diversity in z1 and high diversity in z2. 
 
-```{r plotcomm1.3_negz2, fig.cap='Community 1, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=6, fig.width=12}
-s <- 4
+```{r plotcomm1.3_negz2, fig.cap='Community 1, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=20, fig.width=12}
+s <- 10
 # community 1 - low variation in z1 high in z2. 
 species_pars$z1_range <- 1.5
 species_pars$z2_range <- 50
-
-
-par_table_com1 <- with(species_pars, {
-      tibble(a1 = rnorm(s, a1_mean, 0),#a1_mean/100),
-                           b1 = rnorm(s, b1_mean, 0),#b1_mean/100),
-                           z1 = runif(s, min = z1_mean - z1_range/2, max = z1_mean + z1_range / 2),
-                           w1 = rnorm(s, w1_mean, 0),#w1_mean/100),
-                           a2 = rnorm(s, a2_mean, 0),#a2_mean/100),
-                           b2 = rnorm(s, b2_mean, 0),#b2_mean/100),
-                           z2 = runif(s, min = z2_mean - z2_range/2, max = z2_mean + z2_range / 2),
-                           w2 = rnorm(s, w2_mean, 0),#w2_mean/100),
-                           z_int21 = rnorm(s, zint_mean, zint_mean/10),
-                           sd_rate = rnorm(s, sd_rate_mean, sd_rate_mean/10)
-       )
-  })
-
-
-par_table_com1 <- par_table_com1 %>% dplyr::select(z1, z2) %>%  dplyr::mutate(species = paste0("s", 1:s),
-                                                                              community = 1)
-
 
 
 # create reproducible community
@@ -3534,35 +3392,18 @@ performance_comm1
 dir_1 <- get_directionals(comm, new_data, refs)
 ```
 
+```{r}
+# Find optimum for E1 and E1 for each sp 
+optima_com1 <- get_optima(comm, new_data)
+optima_com1$community <- 1
+```
+
 
 ### Community 2 - medium diversity in z1 and z2. 
 
-```{r plotcomm2.3_negz2, fig.cap='Community 2, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=6, fig.width=12}
+```{r plotcomm2.3_negz2, fig.cap='Community 2, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=20, fig.width=12}
 species_pars$z1_range <- 25
 species_pars$z2_range <- 25
-# b1_range <- 0.009
-# b2_range <- 0.001
-
-
-par_table_com2 <- with(species_pars, {
-      tibble(a1 = rnorm(s, a1_mean, 0),#a1_mean/100),
-                           b1 = rnorm(s, b1_mean, 0),#b1_mean/100),
-                           z1 = runif(s, min = z1_mean - z1_range/2, max = z1_mean + z1_range / 2),
-                           w1 = rnorm(s, w1_mean, 0),#w1_mean/100),
-                           a2 = rnorm(s, a2_mean, 0),#a2_mean/100),
-                           b2 = rnorm(s, b2_mean, 0),#b2_mean/100),
-                           z2 = runif(s, min = z2_mean - z2_range/2, max = z2_mean + z2_range / 2),
-                           w2 = rnorm(s, w2_mean, 0),#w2_mean/100),
-                           z_int21 = rnorm(s, zint_mean, zint_mean/10),
-                           sd_rate = rnorm(s, sd_rate_mean, sd_rate_mean/10)
-       )
-  })
-
-
-par_table_com2 <- par_table_com2 %>% dplyr::select(z1, z2) %>%  dplyr::mutate(species = paste0("s", 1:s),
-                                                                              community = 2)
-
-
 
 # create reproducible community
 set.seed(2456)
@@ -3575,34 +3416,18 @@ performance_comm2
 dir_2 <- get_directionals(comm, new_data, refs)
 ```
 
+
+```{r}
+# Find optimum for E1 and E1 for each sp 
+optima_com2 <- get_optima(comm, new_data)
+optima_com2$community <- 2
+```
+
 ### Community 3 - high diversity in z1 and low in z2. 
 
-```{r plotcomm3.3_negz2, fig.cap='Community 3, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=6, fig.width=12}
+```{r plotcomm3.3_negz2, fig.cap='Community 3, single species responses. (a) Species responses to the gradient of E1. Different colour lines show the dependency of the rate to the second environmental variable (E2). (b) Species responses to the gradient of E2. Different colour lines show the dependency of the rate to the second environmental variable (E1).', fig.align="center", fig.height=20, fig.width=12}
 species_pars$z1_range <- 50
 vz2_range <- 1.5
-# b1_range <- 0.009
-# b2_range <- 0.001
-
-
-par_table_com3 <- with(species_pars, {
-      tibble(a1 = rnorm(s, a1_mean, 0),#a1_mean/100),
-                           b1 = rnorm(s, b1_mean, 0),#b1_mean/100),
-                           z1 = runif(s, min = z1_mean - z1_range/2, max = z1_mean + z1_range / 2),
-                           w1 = rnorm(s, w1_mean, 0),#w1_mean/100),
-                           a2 = rnorm(s, a2_mean, 0),#a2_mean/100),
-                           b2 = rnorm(s, b2_mean, 0),#b2_mean/100),
-                           z2 = runif(s, min = z2_mean - z2_range/2, max = z2_mean + z2_range / 2),
-                           w2 = rnorm(s, w2_mean, 0),#w2_mean/100),
-                           z_int21 = rnorm(s, zint_mean, zint_mean/10),
-                           sd_rate = rnorm(s, sd_rate_mean, sd_rate_mean/10)
-       )
-  })
-
-
-par_table_com3 <- par_table_com3 %>% dplyr::select(z1, z2) %>%  dplyr::mutate(species = paste0("s", 1:s),
-                                                                              community = 3)
-
-
 
 # create reproducible community
 set.seed(2456)
@@ -3616,29 +3441,35 @@ dir_3 <- get_directionals(comm, new_data, refs)
 ```
 
 
-### Position of the optimum 
-```{r plotoptimum4, fig.cap='Position of the optimum for z1 and z2 in the 3 different communities', fig.align="center", fig.height=6, fig.width=8}
-par_table_com <- rbind(par_table_com1, par_table_com2, par_table_com3)
-par_table_com %>%  ggplot(aes(x = z1, y = z2, col = as.factor(community))) +
-  geom_point()
+```{r}
+# Find optimum for E1 and E1 for each sp 
+optima_com3 <- get_optima(comm, new_data)
+optima_com3$community <- 3
 ```
 
+### Position of the optimum 
+```{r plotoptimum4, fig.cap='Position of the optimum for E1 and E2 in the 3 different communities', fig.align="center", fig.height=6, fig.width=8}
+optima <- rbind(optima_com1, optima_com2, optima_com3)
+optima %>%  ggplot(aes(x = E1, y = E2, col = as.factor(community))) +
+  geom_point() +
+  labs(x = "Optimum E1", y = "Optimum E2")
+```
 
 ### Response diversity calculation 
 
-```{r RDplot20, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
+```{r RDplot20, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=20, fig.width=16}
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -3647,10 +3478,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -3659,10 +3490,11 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
+
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 ```
@@ -3670,29 +3502,29 @@ plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 
 
 ```{r}
-dd1 <- data.frame(rdiv_1[, c(8:9)]) 
+dd1 <- data.frame(rdiv_1[, c("rdiv", "sign")]) 
 dd1$cor <- "negative"
 dd1$z1 <- "low"
 
-dd2 <- data.frame(rdiv_2[, c(8:9)]) 
+dd2 <- data.frame(rdiv_2[, c("rdiv", "sign")]) 
 dd2$cor <- "negative"
 dd2$z1 <- "medium"
 
-dd3 <- data.frame(rdiv_3[, c(8:9)]) 
+dd3 <- data.frame(rdiv_3[, c("rdiv", "sign")]) 
 dd3$cor <- "negative"
 dd3$z1 <- "high"
 ```
 
 ```{r}
-dd1z2 <- data.frame(rdiv_1[, c(8:9)]) 
+dd1z2 <- data.frame(rdiv_1[, c("rdiv", "sign")]) 
 dd1z2$cor <- "negative"
 dd1z2$z2 <- "high"
 
-dd2z2 <- data.frame(rdiv_2[, c(8:9)]) 
+dd2z2 <- data.frame(rdiv_2[, c("rdiv", "sign")]) 
 dd2z2$cor <- "negative"
 dd2z2$z2 <- "medium"
 
-dd3z2 <- data.frame(rdiv_3[, c(8:9)]) 
+dd3z2 <- data.frame(rdiv_3[, c("rdiv", "sign")]) 
 dd3z2$cor <- "negative"
 dd3z2$z2 <- "low"
 ```
@@ -3787,17 +3619,17 @@ dir_3 <- get_directionals(comm, new_data, refs)
 
 ```{r RDplot14z2, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -3806,10 +3638,11 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
+
 # community 3  - calculation RD
 # from long to wide
 rdiv_3 <- dir_3 %>%
@@ -3817,74 +3650,72 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
+
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
-
-```
-
-
-
-```{r}
-new_rdiv <- rdiv_1[, c(8)]
-new_sign <- rdiv_1[, c(9)]
-
-dd1 <- dd1 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
-dd1$cor <- "negative"
-dd1$z1 <- "low"
-
-
-new_rdiv <- rdiv_2[, c(8)]
-new_sign <- rdiv_2[, c(9)]
-
-dd2 <- dd2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
-dd2$cor <- "negative"
-dd2$z1 <- "medium"
-
-
-new_rdiv <- rdiv_3[, c(8)]
-new_sign <- rdiv_3[, c(9)]
-
-dd3 <- dd3 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
-dd3$cor <- "negative"
-dd3$z1 <- "high"
 ```
 
 
 
 
 ```{r}
-new_rdiv <- rdiv_1[, c(8)]
-new_sign <- rdiv_1[, c(9)]
+new_rdiv <- rdiv_1[, c("rdiv")]
+new_sign <- rdiv_1[, c("sign")]
 
-dd1z2 <- dd1z2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
-dd1z2$cor <- "negative"
-dd1z2$z2 <- "high"
-
-
-new_rdiv <- rdiv_2[, c(8)]
-new_sign <- rdiv_2[, c(9)]
-
-dd2z2 <- dd2z2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
-dd2z2$cor <- "negative"
-dd2z2$z2 <- "medium"
+dd7 <- dd7 %>% rows_insert(tibble(rdiv = new_rdiv,
+                        sign = new_sign), conflict = "ignore")
+dd7$cor <- "no_cor"
+dd7$z1 <- "low"
 
 
-new_rdiv <- rdiv_3[, c(8)]
-new_sign <- rdiv_3[, c(9)]
+new_rdiv <- rdiv_2[, c("rdiv")]
+new_sign <- rdiv_2[, c("sign")]
 
-dd3z2 <- dd3z2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
-dd3z2$cor <- "negative"
-dd3z2$z2 <- "low"
+dd8 <- dd8 %>% rows_insert(tibble(rdiv = new_rdiv,
+                        sign = new_sign), conflict = "ignore")
+dd8$cor <- "no_cor"
+dd8$z1 <- "medium"
+
+
+new_rdiv <- rdiv_3[, c("rdiv")]
+new_sign <- rdiv_3[, c("sign")]
+
+dd9 <- dd9 %>% rows_insert(tibble(rdiv = new_rdiv,
+                        sign = new_sign), conflict = "ignore")
+dd9$cor <- "no_cor"
+dd9$z1 <- "high"
+```
+
+```{r}
+new_rdiv <- rdiv_1[, c("rdiv")]
+new_sign <- rdiv_1[, c("sign")]
+
+dd7z2 <- dd7z2 %>% rows_insert(tibble(rdiv = new_rdiv,
+                        sign = new_sign), conflict = "ignore")
+dd7z2$cor <- "no_cor"
+dd7z2$z2 <- "high"
+
+
+new_rdiv <- rdiv_2[, c("rdiv")]
+new_sign <- rdiv_2[, c("sign")]
+
+dd8z2 <- dd8z2 %>% rows_insert(tibble(rdiv = new_rdiv,
+                        sign = new_sign), conflict = "ignore")
+dd8z2$cor <- "no_cor"
+dd8z2$z2 <- "medium"
+
+
+new_rdiv <- rdiv_3[, c("rdiv")]
+new_sign <- rdiv_3[, c("sign")]
+
+dd9z2 <- dd9z2 %>% rows_insert(tibble(rdiv = new_rdiv,
+                        sign = new_sign), conflict = "ignore")
+dd9z2$cor <- "no_cor"
+dd9z2$z2 <- "low"
 ```
 ## High fluctuation in environmental change - positive correlation
 Increasing variance in z1 and decreasing in z2 - positive correlation between env variables (E1 and E2) with *high* fluctuations
@@ -3978,17 +3809,17 @@ dir_3 <- get_directionals(comm, new_data, refs)
 
 ```{r RDplot15z2, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -3997,10 +3828,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -4009,10 +3840,11 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
+
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 ```
@@ -4020,30 +3852,30 @@ plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 
 
 ```{r}
-dd4 <- data.frame(rdiv_1[, c(8:9)]) 
+dd4 <- data.frame(rdiv_1[, c("rdiv", "sign")]) 
 dd4$cor <- "positive"
 dd4$z1 <- "low"
 
-dd5 <- data.frame(rdiv_2[, c(8:9)]) 
+dd5 <- data.frame(rdiv_2[, c("rdiv", "sign")]) 
 dd5$cor <- "positive"
 dd5$z1 <- "medium"
 
-dd6 <- data.frame(rdiv_3[, c(8:9)]) 
+dd6 <- data.frame(rdiv_3[, c("rdiv", "sign")]) 
 dd6$cor <- "positive"
 dd6$z1 <- "high"
 ```
 
 
 ```{r}
-dd4z2 <- data.frame(rdiv_1[, c(8:9)]) 
+dd4z2 <- data.frame(rdiv_1[, c("rdiv", "sign")]) 
 dd4z2$cor <- "positive"
 dd4z2$z2 <- "high"
 
-dd5z2 <- data.frame(rdiv_2[, c(8:9)]) 
+dd5z2 <- data.frame(rdiv_2[, c("rdiv", "sign")]) 
 dd5z2$cor <- "positive"
 dd5z2$z2 <- "medium"
 
-dd6z2 <- data.frame(rdiv_3[, c(8:9)]) 
+dd6z2 <- data.frame(rdiv_3[, c("rdiv", "sign")]) 
 dd6z2$cor <- "positive"
 dd6z2$z2 <- "low"
 ```
@@ -4139,17 +3971,17 @@ dir_3 <- get_directionals(comm, new_data, refs)
 
 ```{r RDplot16z2, fig.cap=' Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -4158,10 +3990,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -4170,10 +4002,11 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
+
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 ```
@@ -4184,7 +4017,7 @@ new_rdiv <- rdiv_1[, c(8)]
 new_sign <- rdiv_1[, c(9)]
 
 dd4 <- dd4 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd4$cor <- "positive"
 dd4$z1 <- "low"
 
@@ -4193,7 +4026,7 @@ new_rdiv <- rdiv_2[, c(8)]
 new_sign <- rdiv_2[, c(9)]
 
 dd5 <- dd5 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd5$cor <- "positive"
 dd5$z1 <- "medium"
 
@@ -4202,7 +4035,7 @@ new_rdiv <- rdiv_3[, c(8)]
 new_sign <- rdiv_3[, c(9)]
 
 dd6 <- dd6 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd6$cor <- "positive"
 dd6$z1 <- "high"
 ```
@@ -4213,7 +4046,7 @@ new_rdiv <- rdiv_1[, c(8)]
 new_sign <- rdiv_1[, c(9)]
 
 dd4z2 <- dd4z2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd4z2$cor <- "positive"
 dd4z2$z2 <- "high"
 
@@ -4222,7 +4055,7 @@ new_rdiv <- rdiv_2[, c(8)]
 new_sign <- rdiv_2[, c(9)]
 
 dd5z2 <- dd5z2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd5z2$cor <- "positive"
 dd5z2$z2 <- "medium"
 
@@ -4231,7 +4064,7 @@ new_rdiv <- rdiv_3[, c(8)]
 new_sign <- rdiv_3[, c(9)]
 
 dd6z2 <- dd6z2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd6z2$cor <- "positive"
 dd6z2$z2 <- "low"
 ```
@@ -4323,17 +4156,17 @@ dir_3 <- get_directionals(comm, new_data, refs)
  
 ```{r RDplot17z2, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -4342,10 +4175,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -4354,40 +4187,41 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
+
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
 ```
 
 
 ```{r}
-dd7 <- data.frame(rdiv_1[, c(8:9)]) 
+dd7 <- data.frame(rdiv_1[, c("rdiv", "sign")]) 
 dd7$cor <- "no_cor"
 dd7$z1 <- "low"
 
-dd8 <- data.frame(rdiv_2[, c(8:9)]) 
+dd8 <- data.frame(rdiv_2[, c("rdiv", "sign")]) 
 dd8$cor <- "positive"
 dd8$z1 <- "medium"
 
-dd9 <- data.frame(rdiv_3[, c(8:9)]) 
+dd9 <- data.frame(rdiv_3[, c("rdiv", "sign")]) 
 dd9$cor <- "positive"
 dd9$z1 <- "high"
 ```
 
 
 ```{r}
-dd7z2 <- data.frame(rdiv_1[, c(8:9)]) 
+dd7z2 <- data.frame(rdiv_1[, c("rdiv", "sign")]) 
 dd7z2$cor <- "no_cor"
 dd7z2$z2 <- "high"
 
-dd8z2 <- data.frame(rdiv_2[, c(8:9)]) 
+dd8z2 <- data.frame(rdiv_2[, c("rdiv", "sign")]) 
 dd8z2$cor <- "positive"
 dd8z2$z2 <- "medium"
 
-dd9z2 <- data.frame(rdiv_3[, c(8:9)]) 
+dd9z2 <- data.frame(rdiv_3[, c("rdiv", "sign")]) 
 dd9z2$cor <- "positive"
 dd9z2$z2 <- "low"
 ```
@@ -4482,17 +4316,17 @@ dir_3 <- get_directionals(comm, new_data, refs)
 
 ```{r RDplot18z2, fig.cap='Directional derivatives and response diversity for the three different communities. a, b, c. Species directional derivatives over time. d, e, f. Response diversity measured as similarity-based diversity metric. g, h, i. Response diversity measured as divergence (sign sensitive). Dashed lines indicate zero in panels a, b and c, and the median value of response diversity along the X-axis in panels d, e, f, g, h and i.', fig.align="center", fig.height=10, fig.width=16}
 # community 1  - calculation RD
-
 # from long to wide
 rdiv_1 <- dir_1 %>%
   spread( sp, dir_deriv)
 rdiv_1[is.na(rdiv_1)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_1$rdiv<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_1$sign<-apply(rdiv_1[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_1$rdiv<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_1$sign<-apply(dplyr:: select(rdiv_1, starts_with("s")), 1, resp_div, sign_sens = T)                  
 rdiv_1$Med<-median(rdiv_1$rdiv)
-rdiv_1$Med_sing<-median(rdiv_1$sign)
+rdiv_1$Med_sign<-median(rdiv_1$sign)
+
 
 # community 2  - calculation RD
 # from long to wide
@@ -4501,10 +4335,10 @@ rdiv_2 <- dir_2 %>%
 rdiv_2[is.na(rdiv_2)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_2$rdiv<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_2$sign<-apply(rdiv_2[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_2$rdiv<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_2$sign<-apply(dplyr:: select(rdiv_2, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_2$Med<-median(rdiv_2$rdiv)
-rdiv_2$Med_sing<-median(rdiv_2$sign)
+rdiv_2$Med_sign<-median(rdiv_2$sign)
 
 # community 3  - calculation RD
 # from long to wide
@@ -4513,68 +4347,68 @@ rdiv_3 <- dir_3 %>%
 rdiv_3[is.na(rdiv_3)] <- 0
 
 # actual calculation for only the same species used above
-rdiv_3$rdiv<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = F)
-rdiv_3$sign<-apply(rdiv_3[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_3$rdiv<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = F)
+rdiv_3$sign<-apply(dplyr:: select(rdiv_3, starts_with("s")), 1, resp_div, sign_sens = T) 
 rdiv_3$Med<-median(rdiv_3$rdiv)
-rdiv_3$Med_sing<-median(rdiv_3$sign)
+rdiv_3$Med_sign<-median(rdiv_3$sign)
+
 
 plot_RD(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3)
-
 ```
 
 
 ```{r}
-new_rdiv <- rdiv_1[, c(8)]
-new_sign <- rdiv_1[, c(9)]
+new_rdiv <- rdiv_1[, c("rdiv")]
+new_sign <- rdiv_1[, c("sign")]
 
 dd7 <- dd7 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd7$cor <- "no_cor"
 dd7$z1 <- "low"
 
 
-new_rdiv <- rdiv_2[, c(8)]
-new_sign <- rdiv_2[, c(9)]
+new_rdiv <- rdiv_2[, c("rdiv")]
+new_sign <- rdiv_2[, c("sign")]
 
 dd8 <- dd8 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd8$cor <- "no_cor"
 dd8$z1 <- "medium"
 
 
-new_rdiv <- rdiv_3[, c(8)]
-new_sign <- rdiv_3[, c(9)]
+new_rdiv <- rdiv_3[, c("rdiv")]
+new_sign <- rdiv_3[, c("sign")]
 
 dd9 <- dd9 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd9$cor <- "no_cor"
 dd9$z1 <- "high"
 ```
 
 ```{r}
-new_rdiv <- rdiv_1[, c(8)]
-new_sign <- rdiv_1[, c(9)]
+new_rdiv <- rdiv_1[, c("rdiv")]
+new_sign <- rdiv_1[, c("sign")]
 
 dd7z2 <- dd7z2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd7z2$cor <- "no_cor"
 dd7z2$z2 <- "high"
 
 
-new_rdiv <- rdiv_2[, c(8)]
-new_sign <- rdiv_2[, c(9)]
+new_rdiv <- rdiv_2[, c("rdiv")]
+new_sign <- rdiv_2[, c("sign")]
 
 dd8z2 <- dd8z2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd8z2$cor <- "no_cor"
 dd8z2$z2 <- "medium"
 
 
-new_rdiv <- rdiv_3[, c(8)]
-new_sign <- rdiv_3[, c(9)]
+new_rdiv <- rdiv_3[, c("rdiv")]
+new_sign <- rdiv_3[, c("sign")]
 
 dd9z2 <- dd9z2 %>% rows_insert(tibble(rdiv = new_rdiv,
-                        sign = new_sign))
+                        sign = new_sign), conflict = "ignore")
 dd9z2$cor <- "no_cor"
 dd9z2$z2 <- "low"
 ```

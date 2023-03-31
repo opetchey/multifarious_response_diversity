@@ -73,13 +73,13 @@ plot_RD <- function(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3) {
     theme_bw(base_size = 12)+
     labs(x = "time",y = "Divergence", tag = "g)") + 
     geom_line() +
-    geom_hline(yintercept = rdiv_1$Med_sing,lty=2) +
+    geom_hline(yintercept = rdiv_1$Med_sign,lty=2) +
     geom_line() + 
     geom_richtext(x = 7,
                   mapping = aes(y = dmax),
                   size=4.5,
                   label.color = NA,
-                  label = paste("RDiv^Median =",paste0(round(rdiv_1$Med_sing,digits = 2))))+
+                  label = paste("RDiv^Median =",paste0(round(rdiv_1$Med_sign,digits = 2))))+
     lims(y = c(dmin,dmax))
   
   Fig3_comm2 <- rdiv_2 %>% 
@@ -87,13 +87,13 @@ plot_RD <- function(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3) {
     theme_bw(base_size = 12)+
     labs(x = "time",y = "Divergence", tag = "h)") + 
     geom_line() +
-    geom_hline(yintercept = rdiv_2$Med_sing,lty=2) +
+    geom_hline(yintercept = rdiv_2$Med_sign,lty=2) +
     geom_line() + 
     geom_richtext(x = 7,
                   mapping = aes(y = dmax),
                   size=4.5,
                   label.color = NA,
-                  label = paste("RDiv^Median =",paste0(round(rdiv_2$Med_sing,digits = 2))))+
+                  label = paste("RDiv^Median =",paste0(round(rdiv_2$Med_sign,digits = 2))))+
     lims(y = c(dmin,dmax))
   
   Fig3_comm3 <- rdiv_3 %>% 
@@ -101,13 +101,13 @@ plot_RD <- function(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3) {
     theme_bw(base_size = 12)+
     labs(x = "time",y = "Divergence", tag = "i)") + 
     geom_line()+
-    geom_hline(yintercept = rdiv_3$Med_sing,lty=2) +
+    geom_hline(yintercept = rdiv_3$Med_sign,lty=2) +
     geom_line() + 
     geom_richtext(x = 7,
                   mapping = aes(y = dmax),
                   size=4.5,
                   label.color = NA,
-                  label = paste("RDiv^Median =",paste0(round(rdiv_3$Med_sing,digits = 2))))+
+                  label = paste("RDiv^Median =",paste0(round(rdiv_3$Med_sign,digits = 2))))+
     lims(y = c(dmin,dmax))
   
   
