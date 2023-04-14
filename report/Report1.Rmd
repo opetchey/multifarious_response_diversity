@@ -2455,7 +2455,7 @@ sm_E1 <- smooth_estimates(m_Colpidium, smooth = "te(E1,E2)", data = ds_E1) |>
 pd_E1 <- partial_derivatives(m_Colpidium, data = ds_E1, type = "central", focal = "E1")
 
 # draw te(x,z)
-p1 <- draw(m_Colpidium, rug = FALSE) &
+p1 <- draw(m_Colpidium, rug = FALSE, dist = 0.5) &
    geom_hline(yintercept = E2_p, size = 1)
 p1
 ```
@@ -2511,7 +2511,7 @@ pd_E2 <- partial_derivatives(m_Colpidium, data = ds_E2, type = "central", focal 
 
 
 # draw te(x,z)
-p4 <- draw(m_Colpidium, rug = FALSE) &
+p4 <- draw(m_Colpidium, rug = FALSE, dist = 0.5) &
   geom_vline(xintercept = E1_p, size = 1)
 p4
 ```
@@ -2550,7 +2550,7 @@ Plot the two partial derivatives and relative effects
 (ref:summary-empirical) Summary plot of Colpidium (a) response surface of Colpidium (b) Partial effect of nutrient concentration on the density of Colpidium when light intensity is held constant at 5. (c) Partial derivative with respect to nutrient concentration when light intensity is held constant at 5. (d) Partial effect of light intensity on the growth rate of Colpidium when nutrient concentration is held constant at 2.67. (e) Partial derivative with respect to light intensity when nutrient concentration is held constant at 2.67.
 
 ```{r summary-empirical, fig.cap='(ref:summary-empirical)', fig.align="center", fig.height=12, fig.width=18}
-p1 <-  draw(m_Colpidium, rug = FALSE) &
+p1 <-  draw(m_Colpidium, rug = FALSE, dist = 0.5) &
   geom_hline(yintercept = E2_p, size =1) &
   geom_vline(xintercept = E1_p, size = 1)
 
