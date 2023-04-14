@@ -36,6 +36,7 @@ library(broom)
 library(reshape2)
 library(ggtext)
 library(ggsci)
+library(ggpubr)
 source.files <- list.files(here("r"), full.names = TRUE)
 sapply(source.files, source, .GlobalEnv)
 ```
@@ -671,6 +672,8 @@ p_partials
 ## No direction of environmental change specified
 ### One point
 We start showing how directional derivatives can be calculated even when the direction of the environmental change is unknown. This may be the case when we want to calculate response diversity for future scenarios, and the future direction of environmental change is thus not known. Or we may have data for a species or a community at only one environmental location (E1 = x, E2 = y). It is therefore important to be able to measure directional derivatives when the direction of the environmental change is unknown, as this can provide useful information on response diversity nonetheless, for instance, by taking the mean of the slopes calculates in all directions.  
+Measuring response diversity when the direction of environmental change is unknown may represent a way to systematically measuring response diversity to all possible environmental changes. This is represents, in our view, an absolute measure of overall response diversity, since it captures the complete insurance capacity of a system under all possible environmental conditions. We thus put some emphasis on this approach here.
+
 
 Here, we calculate, for a specific point (E1 = 300, E2 = 20), directional derivatives in all directions. 
 
@@ -1010,7 +1013,7 @@ p4 +  geom_segment(data = dd1,
 Environmental variables may show different correlations between each other. The increase in one environmental variable may be directly correlated with the increase of another one (positive correlation), or vice versa, the increase in one driver may be correlated to a decrease in the other one (negative correlation). Yet, two environmental variable may change over time, or space, completely independently.    
 We may imagine that these different types of relationships between two environmental variables could determine specific trends in response diversity.
 
-To explore this hypothesis, we calculate now response diversity for two communities composed of 3 spp in 4 different cases:
+To explore this hypothesis, we calculate now response diversity for two communities (one with additive effect, and one including an interactive environmental effect) composed of 4 spp in 4 different cases:
 1. Unknown direction of the environmental change
 2. Direction of env change is given by the time series,and E1 and E2 change over time independently
 3. Direction of env change is given by the time series,and E1 and E2 change over time with positive correlation
@@ -1018,15 +1021,13 @@ To explore this hypothesis, we calculate now response diversity for two communit
 
 We want to see if any consistent trend appears in the two communities when E1 and E2 have different correlations. 
 
-[Only additives effects of the drivers on sp responses - we may change this later, so using an example with interactive effect]
-
 Steps: 
 
-(i) Simulate spp performance curves with the modified Eppley function.
+(i) Simulate spp performance curves with the modified Eppley function with and without interactive effect.
 ```{r, echo=FALSE, results='hide'}
-
-set.seed(2456)
-s <- 15 ## number of species
+# Without interaction
+set.seed(2465)
+s <- 4 ## number of species
 a1_mean <- 1e-9
 b1_mean <- 0.063
 z1_mean <- 285
@@ -1037,8 +1038,8 @@ z2_mean <- 20
 w2_mean <- 10
 zint_mean <- 0 ## no interaction
 sd_rate_mean <- 0.02
-z1_range <- 0
-z2_range <- 0
+z1_range <- 40
+z2_range <- 20
 par_table <- tibble(a1 = rnorm(s, a1_mean, 0),#a1_mean/100),
                     b1 = rnorm(s, b1_mean, 0),#b1_mean/100),
                     z1 = runif(s, min = z1_mean - z1_range/2, max = z1_mean + z1_range / 2),
@@ -1050,8 +1051,7 @@ par_table <- tibble(a1 = rnorm(s, a1_mean, 0),#a1_mean/100),
                     z_int21 = rnorm(s, zint_mean, zint_mean/10),
                     sd_rate = rnorm(s, sd_rate_mean, 0)
                     )
-## set z_int of the second species to non-zero value
-par_table$z_int21[2] <- -0.2
+
 
 ## The normal house keeping
 par_list <- Partable_2_parlist(par_table)
@@ -1065,9 +1065,59 @@ species_pars_no_inter <- species_pars_no_inter %>% unnest(expt)
 species_pars_no_inter %>%  group_by(species) %>%  nest() 
 
 
-(dd <- species_pars_no_inter %>% dplyr::select(species, E1, E2, rate) %>% 
-  dplyr::filter(species == c("s1", "s2", "s3", "s4")))
+(dd1 <- species_pars_no_inter %>% dplyr::select(species, E1, E2, rate))
 
+
+
+```
+
+```{r, echo=FALSE, results='hide'}
+# With interaction
+set.seed(245)
+s <- 4 ## number of species
+a1_mean <- 1e-9
+b1_mean <- 0.063
+z1_mean <- 285
+w1_mean <- 60
+a2_mean <- 1e-3
+b2_mean <- 0.02
+z2_mean <- 20
+w2_mean <- 10
+zint_mean <- 0.2 ## no interaction
+sd_rate_mean <- 0.02
+z1_range <- 40
+z2_range <- 20
+par_table <- tibble(a1 = rnorm(s, a1_mean, 0),#a1_mean/100),
+                    b1 = rnorm(s, b1_mean, 0),#b1_mean/100),
+                    z1 = runif(s, min = z1_mean - z1_range/2, max = z1_mean + z1_range / 2),
+                    w1 = rnorm(s, w1_mean, 0),#w1_mean/100),
+                    a2 = rnorm(s, a2_mean, 0),#a2_mean/100),
+                    b2 = rnorm(s, b2_mean, 0),#b2_mean/100),
+                    z2 = runif(s, min = z2_mean - z2_range/2, max = z2_mean + z2_range / 2),
+                    w2 = rnorm(s, w2_mean, 0),#w2_mean/100),
+                    z_int21 = rnorm(s, zint_mean, zint_mean/10),
+                    sd_rate = rnorm(s, sd_rate_mean, 0)
+                    )
+
+
+## The normal house keeping
+par_list <- Partable_2_parlist(par_table)
+species_pars_inter <- tibble(species = paste0("s", 1:s), pars = par_list) %>%
+  rowwise() %>%
+  mutate(expt = Make_expt(E1_series, E2_series, pars))
+
+
+
+species_pars_inter <- species_pars_inter %>% unnest(expt)
+species_pars_inter %>%  group_by(species) %>%  nest() 
+
+
+(dd2 <- species_pars_inter %>% dplyr::select(species, E1, E2, rate))
+
+dd2$species[dd2$species == "s1"] <- "s5"
+dd2$species[dd2$species == "s2"] <- "s6"
+dd2$species[dd2$species == "s3"] <- "s7"
+dd2$species[dd2$species == "s4"] <- "s8"
 
 ```
 
@@ -1077,9 +1127,9 @@ species_pars_no_inter %>%  group_by(species) %>%  nest()
 new_data <- tibble(E1 = 273.15 + seq(0, 50, 0.2),
                         E2 = seq(0, 50, 0.2))
 
-
+# Without interaction
 # GAMs
-nested_gams_no_inter <- species_pars_no_inter[,c(1,3,4,5)] %>% 
+nested_gams_no_inter <- species_pars_no_inter %>% 
   nest(cols =-species) %>% 
   mutate(
     gams = map(cols, ~ gam(rate ~ te(E1, E2, k = c(10, 10)),
@@ -1103,51 +1153,85 @@ nested_gams_no_inter %>%
   unnest(results) 
 
 
+
+
+
+# With interaction
+# GAMs
+nested_gams_inter <- species_pars_inter %>% 
+  nest(cols =-species) %>% 
+  mutate(
+    gams = map(cols, ~ gam(rate ~ te(E1, E2, k = c(10, 10)),
+                           data = .x,
+                           method = "REML")),
+    predicted = map(gams, ~ predict(.x, newdata = new_data))
+  )
+
+
+# Get gams coefficients
+nested_gams_inter %>% 
+  mutate(coefs = map(gams, tidy, conf.int = TRUE)) %>% 
+  unnest(coefs)
+
+
+# Get gams glance
+nested_gams_inter %>% 
+  mutate(results = map(gams, glance), 
+         R.square = map_dbl(gams, ~ summary(.)$r.sq))  %>% 
+  unnest(results) 
+
+
 ```
 
 
-<!-- (ref:spp-surf) Species' response surfaces. (a) is species 1, (b) is species 2, and (c) is species 3.  -->
-<!-- ```{r spp-surf, fig.cap='(ref:spp-surf)', fig.align="center", fig.height=3, fig.width=12} -->
 
-<!-- # Plot spp surfaces and selecting spp with similar magnitude of responses, so we will see them later in the RD plot -->
-<!-- sp1m <- nested_gams_no_inter$gams[[1]] -->
-<!-- sp1 <- draw(sp1m, rug = FALSE) & -->
-<!--       labs(tag = "(a)") -->
-<!-- sp2 <- draw(nested_gams_no_inter$gams[[2]], rug = FALSE) & -->
-<!--       labs(tag = "(b)") -->
-<!-- sp3 <- draw(nested_gams_no_inter$gams[[3]], rug = FALSE) & -->
-<!--       labs(tag = "(b)") -->
-<!-- sp4 <- draw(nested_gams_no_inter$gams[[4]], rug = FALSE) & -->
-<!--       labs(tag = "(d)") -->
+```{r, echo= FALSE, results='hide'}
 
-<!-- sp5 <- draw(nested_gams_no_inter$gams[[5]], rug = FALSE) & -->
-<!--       labs(tag = "(c)") -->
-<!-- sp6 <- draw(nested_gams_no_inter$gams[[6]], rug = FALSE) & -->
-<!--       labs(tag = "(c)") -->
-<!-- sp7 <- draw(nested_gams_no_inter$gams[[7]], rug = FALSE) & -->
-<!--       labs(tag = "(c)") -->
-<!-- sp8 <- draw(nested_gams_no_inter$gams[[8]], rug = FALSE) & -->
-<!--       labs(tag = "(c)") -->
-<!-- sp9 <- draw(nested_gams_no_inter$gams[[9]], rug = FALSE) & -->
-<!--       labs(tag = "(c)") -->
-<!-- sp11 <- draw(nested_gams_no_inter$gams[[11]], rug = FALSE) & -->
-<!--       labs(tag = "(c)") -->
-<!-- sp12 <- draw(nested_gams_no_inter$gams[[12]], rug = FALSE) & -->
-<!--       labs(tag = "(c)") -->
-<!-- sp13 <- draw(nested_gams_no_inter$gams[[13]], rug = FALSE) & -->
-<!--       labs(tag = "(c)") -->
-<!-- sp14 <- draw(nested_gams_no_inter$gams[[14]], rug = FALSE) & -->
-<!--       labs(tag = "(c)") -->
+# Plot spp surfaces and selecting spp with similar magnitude of responses, so we will see them later in the RD plot
 
-<!-- sp15 <- draw(nested_gams_no_inter$gams[[15]], rug = FALSE)  -->
-
-<!-- p_spp_surf <- wrap_plots(sp1, sp3, sp10) -->
-<!-- p_spp_surf -->
+sp1 <- draw(nested_gams_no_inter$gams[[1]], rug = FALSE) &
+      labs(tag = "(a)")
+sp2 <- draw(nested_gams_no_inter$gams[[2]], rug = FALSE) &
+      labs(tag = "(a)")
+sp3 <- draw(nested_gams_no_inter$gams[[3]], rug = FALSE) &
+      labs(tag = "(b)")
+sp4 <- draw(nested_gams_no_inter$gams[[4]], rug = FALSE) &
+      labs(tag = "(a)")
 
 
-<!-- p_spp_surf <- wrap_plots(sp2, sp5, sp13) -->
-<!-- p_spp_surf -->
-<!-- ``` -->
+sp5 <- draw(nested_gams_inter$gams[[1]], rug = FALSE) &
+      labs(tag = "(a)")
+sp6 <- draw(nested_gams_inter$gams[[2]], rug = FALSE) &
+      labs(tag = "(a)")
+sp7 <- draw(nested_gams_inter$gams[[3]], rug = FALSE) &
+      labs(tag = "(b)")
+sp8 <- draw(nested_gams_inter$gams[[4]], rug = FALSE) &
+      labs(tag = "(a)")
+# 
+# sp5 <- draw(nested_gams_no_inter$gams[[5]], rug = FALSE) &
+#       labs(tag = "(b)")
+# sp6 <- draw(nested_gams_no_inter$gams[[6]], rug = FALSE) &
+#       labs(tag = "(b)")
+# sp7 <- draw(nested_gams_no_inter$gams[[7]], rug = FALSE) &
+#       labs(tag = "(c)")
+# sp8 <- draw(nested_gams_no_inter$gams[[8]], rug = FALSE) &
+#       labs(tag = "(c)")
+# sp9 <- draw(nested_gams_no_inter$gams[[9]], rug = FALSE) &
+#       labs(tag = "(c)")
+# sp11 <- draw(nested_gams_no_inter$gams[[11]], rug = FALSE) &
+#       labs(tag = "(c)")
+# sp12 <- draw(nested_gams_no_inter$gams[[12]], rug = FALSE) &
+#       labs(tag = "(c)")
+# sp13 <- draw(nested_gams_no_inter$gams[[13]], rug = FALSE) &
+#       labs(tag = "(c)")
+# sp14 <- draw(nested_gams_no_inter$gams[[14]], rug = FALSE) &
+#       labs(tag = "(c)")
+# 
+# sp15 <- draw(nested_gams_no_inter$gams[[15]], rug = FALSE)
+
+
+```
+
 
 
 (iii) Data wrangling and partials derivatives calculations 
@@ -1158,9 +1242,9 @@ refs2 <- expand_grid(E1 = 273.15 + seq(0, 50, 1),
                      E2 = seq(0, 50, 1))
 
 #community 1 
-m_list_no <- (nested_gams_no_inter$gams[c(4, 6, 11)])
+m_list_no <- (nested_gams_no_inter$gams)
 
-my_spp_names_no <- (nested_gams_no_inter$species[c(4, 6, 11)])
+my_spp_names_no <- (nested_gams_no_inter$species)
 
 
 (pd_list_no <- modify_depth(m_list_no, 1, ~ get_partials(., refs2)))
@@ -1178,27 +1262,40 @@ my_spp_names_no <- (nested_gams_no_inter$species[c(4, 6, 11)])
 
 
 #community 2
-m_list_no2 <- (nested_gams_no_inter$gams[c(2, 5, 13)])
+m_list_yes <- (nested_gams_inter$gams)
 
-my_spp_names_no2 <- (nested_gams_no_inter$species[c(2, 5, 13)])
+my_spp_names_yes <- c("s5", "s6", "s7", "s8")
 
 
-(pd_list_no2 <- modify_depth(m_list_no2, 1, ~ get_partials(., refs2)))
-
+(pd_list_yes <- modify_depth(m_list_yes, 1, ~ get_partials(., refs2)))
+#try to see if faster 
+#pd_list_yes = map(m_list_yes, ~ get_partials(.x, refs2))
 
 # from list to tibble
-(pd_spp_no2 <- tibble(
-  E1_ref = map(pd_list_no2, "E1"),
-  E2_ref = map(pd_list_no2, "E2"),
-  pd_E1 = map(pd_list_no2, "pd_E1"),
-  pd_E2 = map(pd_list_no2, "pd_E2")) %>% 
-    dplyr::mutate(sp = my_spp_names_no2) %>% 
+(pd_spp_yes <- tibble(
+  E1_ref = map(pd_list_yes, "E1"),
+  E2_ref = map(pd_list_yes, "E2"),
+  pd_E1 = map(pd_list_yes, "pd_E1"),
+  pd_E2 = map(pd_list_yes, "pd_E2")) %>% 
+    dplyr::mutate(sp = my_spp_names_yes) %>% 
     relocate(sp, E1_ref, E2_ref, pd_E1, pd_E2) %>% 
     unnest(E1_ref, E2_ref, pd_E1, pd_E2))
 
 ```
 
-### Unknown direction of the environmental change 
+
+## Community 1 - without interactive effect
+```{r comm1Simulated, fig.cap='Response surface of the three species composing community 1. (a) Sp4. (b) Sp6. (c) Sp 11', fig.align="center", fig.height=6, fig.width=17}
+ggarrange(sp1, sp2, sp3, sp4, ncol=4, nrow=1, common.legend = TRUE, legend="right")
+```
+
+## Community 2 - interactive effect
+```{r comm2Simulated, fig.cap='Response surface of the three species composing community 1. (a) Sp2. (b) Sp5. (c) Sp 13', fig.align="center", fig.height=6, fig.width=17}
+ggarrange(sp5, sp6, sp7, sp8,  ncol=4, nrow=1, common.legend = TRUE, legend="right")
+```
+
+
+## Unknown direction of the environmental change 
 ```{r, echo=FALSE, results='hide'}
 
 # community 1 
@@ -1234,17 +1331,17 @@ pd_spp_no <- tibble(angle = rep(seq(0, 2*pi, length = num_arrows), nrow(pd_spp_n
 # community 2
 radius <- 1
 num_arrows <- 20
-pd_spp_no2 <- tibble(angle = rep(seq(0, 2*pi, length = num_arrows), nrow(pd_spp_no2))) %>%
-  mutate(E1_ref = rep(pd_spp_no2$E1_ref, each = num_arrows),
-         E2_ref = rep(pd_spp_no2$E2_ref, each = num_arrows)) %>%
-  full_join(pd_spp_no2) %>%
+pd_spp_yes <- tibble(angle = rep(seq(0, 2*pi, length = num_arrows), nrow(pd_spp_yes))) %>%
+  mutate(E1_ref = rep(pd_spp_yes$E1_ref, each = num_arrows),
+         E2_ref = rep(pd_spp_yes$E2_ref, each = num_arrows)) %>%
+  full_join(pd_spp_yes) %>%
   mutate(E1 = cos(angle) * radius,
          E2 = sin(angle) * radius,
          dir_deriv = E1 * pd_E1 + E2 * pd_E2,
          unit_vec_mag = sqrt(E1^2 + E2^2))
 
 # taking the mean dir derivative for each point
-(dd2_no2 <- pd_spp_no2 %>% 
+(dd2_yes <- pd_spp_yes %>% 
   dplyr::group_by(sp, E1_ref, E2_ref) %>% 
   nest() %>% 
   mutate(dir_d = map(data, "dir_deriv")) %>% 
@@ -1253,7 +1350,7 @@ pd_spp_no2 <- tibble(angle = rep(seq(0, 2*pi, length = num_arrows), nrow(pd_spp_
 
 
 
-(tmp_rd_multi_no2 <- dd2_no2 %>% dplyr::select(E1_ref, E2_ref, sp, mean_dd) %>% 
+(tmp_rd_multi_yes <- dd2_yes %>% dplyr::select(E1_ref, E2_ref, sp, mean_dd) %>% 
   group_by(E1_ref, E2_ref, sp) %>% nest() %>% 
   mutate(dir_d = map(data, "mean_dd")) %>% 
   unnest(dir_d) %>% 
@@ -1270,19 +1367,19 @@ pd_spp_no2 <- tibble(angle = rep(seq(0, 2*pi, length = num_arrows), nrow(pd_spp_
 (rd_multi_no <- tmp_rd_multi_no %>% pivot_wider(names_from = sp, values_from = dir_d))
 
 
-rd_multi_no$rdiv <- apply(rd_multi_no[,c(3:5)], 1, resp_div, sign_sens = F)
-rd_multi_no$sign <- apply(rd_multi_no[,c(3:5)], 1, resp_div, sign_sens = T)
+rd_multi_no$rdiv <- apply(rd_multi_no[,c(3:6)], 1, resp_div, sign_sens = F)
+rd_multi_no$sign <- apply(rd_multi_no[,c(3:6)], 1, resp_div, sign_sens = T)
 rd_multi_no$Med<-median(rd_multi_no$rdiv)
 rd_multi_no
 
 # community 2 
-(rd_multi_no2 <- tmp_rd_multi_no2 %>% pivot_wider(names_from = sp, values_from = dir_d))
+(rd_multi_yes <- tmp_rd_multi_yes %>% pivot_wider(names_from = sp, values_from = dir_d))
 
 
-rd_multi_no2$rdiv <- apply(rd_multi_no[,c(3:5)], 1, resp_div, sign_sens = F)
-rd_multi_no2$sign <- apply(rd_multi_no[,c(3:5)], 1, resp_div, sign_sens = T)
-rd_multi_no2$Med<-median(rd_multi_no$rdiv)
-rd_multi_no2
+rd_multi_yes$rdiv <- apply(rd_multi_yes[,c(3:6)], 1, resp_div, sign_sens = F)
+rd_multi_yes$sign <- apply(rd_multi_yes[,c(3:6)], 1, resp_div, sign_sens = T)
+rd_multi_yes$Med<-median(rd_multi_yes$rdiv)
+rd_multi_yes
 ```
 
 Table showing the calculated response diversity for one of the two communities when the direction of the environmental change is unknown.
@@ -1310,8 +1407,8 @@ set.seed(465)
 library(MASS)
 refs_ts <- mvrnorm(n = 15,        #  specifies the sample size
                  mu = c(mean(E1_series), mean(E2_series)), #specifies the mean values of each column
-                 Sigma = matrix(c( 0.0001, 0.000,
-                                  0.000,  0.0001), #  specifies the correlation matrix
+                 Sigma = matrix(c( 80, 0.0,
+                                  0.0, 80), #  specifies the correlation matrix
                                 nrow = 2))
 
 
@@ -1332,9 +1429,56 @@ p_E2 <- refs_ts %>%
 # Plot environmental change over time
 p_E1 + p_E2
 
-#detach("package:MASS", unload=TRUE)
+detach("package:MASS", unload=TRUE)
 ```
 
+
+### Response surfaces with change in environmental conditions
+```{r comm1nocor, fig.cap='Response surface of the three species composing community 1. (a) Sp4. (b) Sp6. (c) Sp 11. The numbers on the response surfaces show the environmental location in the time steps of the time series and the arrows connect the time steps.', fig.align="center", fig.height=6, fig.width=20}
+
+
+sp1_nocor <- sp1 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_ts, mapping = aes(label = time)) +
+  geom_path(data = refs_ts, aes(color = time), arrow = arrow())
+
+sp2_nocor <- sp2 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_ts, mapping = aes(label = time)) +
+  geom_path(data = refs_ts, aes(color = time), arrow = arrow())
+
+sp3_nocor <- sp3 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_ts, mapping = aes(label = time)) +
+  geom_path(data = refs_ts, aes(color = time), arrow = arrow())
+
+sp4_nocor <- sp4 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_ts, mapping = aes(label = time)) +
+  geom_path(data = refs_ts, aes(color = time), arrow = arrow())
+
+ggarrange(sp1_nocor, sp2_nocor, sp3_nocor,  sp4_nocor, ncol=4, nrow=1, common.legend = TRUE, legend="right")
+
+```
+
+```{r comm2nocor, fig.cap='Response surface of the three species composing community 2. (a) Sp2. (b) Sp5. (c) Sp 13', fig.align="center", fig.height=6, fig.width=20}
+
+
+sp5_nocor <- sp5 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_ts, mapping = aes(label = time)) +
+  geom_path(data = refs_ts, aes(color = time), arrow = arrow())
+
+sp6_nocor <- sp6 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_ts, mapping = aes(label = time)) +
+  geom_path(data = refs_ts, aes(color = time), arrow = arrow())
+
+sp7_nocor <- sp7 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_ts, mapping = aes(label = time)) +
+  geom_path(data = refs_ts, aes(color = time), arrow = arrow())
+
+sp8_nocor <- sp8 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_ts, mapping = aes(label = time)) +
+  geom_path(data = refs_ts, aes(color = time), arrow = arrow())
+
+ggarrange(sp5_nocor, sp6_nocor, sp7_nocor,  sp8_nocor, ncol=4, nrow=1, common.legend = TRUE, legend="right")
+
+```
 
 
 ```{r, echo=FALSE, results='hide'}
@@ -1369,22 +1513,22 @@ p_E1 + p_E2
 
 #community 2
 # get partial derivatives
-(pd_list_no2 <- modify_depth(m_list_no2, 1, ~ get_partials(., refs_ts)))
+(pd_list_yes <- modify_depth(m_list_yes, 1, ~ get_partials(., refs_ts)))
 # from list to tibble
-(pd_spp_no2 <- tibble(
-  E1_ref = map(pd_list_no2, "E1"),
-  E2_ref = map(pd_list_no2, "E2"),
-  pd_E1 = map(pd_list_no2, "pd_E1"),
-  pd_E2 = map(pd_list_no2, "pd_E2")) %>%
-    dplyr::mutate(sp = my_spp_names_no2) %>%
+(pd_spp_yes <- tibble(
+  E1_ref = map(pd_list_yes, "E1"),
+  E2_ref = map(pd_list_yes, "E2"),
+  pd_E1 = map(pd_list_yes, "pd_E1"),
+  pd_E2 = map(pd_list_yes, "pd_E2")) %>%
+    dplyr::mutate(sp = my_spp_names_yes) %>%
     relocate(sp, E1_ref, E2_ref, pd_E1, pd_E2) %>%
     unnest(E1_ref, E2_ref, pd_E1, pd_E2))
 # add time
-(pd_spp_no2 <-cbind(pd_spp_no2, refs_ts$time) %>% 
+(pd_spp_yes <-cbind(pd_spp_yes, refs_ts$time) %>% 
     dplyr::rename(time = "refs_ts$time"))
 
 # calculation next value for directional derivatives, and get directional derivatives
-(pd_spp_no2 <- pd_spp_no2 %>% transform( nxt_value_E1 = c(E1_ref[-1], NA)) %>%
+(pd_spp_yes <- pd_spp_yes %>% transform( nxt_value_E1 = c(E1_ref[-1], NA)) %>%
     transform(nxt_value_E2 = c(E2_ref[-1], NA)) %>%
     dplyr::mutate(del_E1 = nxt_value_E1 - E1_ref,
                   del_E2 = nxt_value_E2 - E2_ref,
@@ -1418,7 +1562,7 @@ rdiv_sim_nocor
 
 # community 2 
 # reduce the dataframe and keep only what we need
-red_spp2 <- pd_spp_no2 %>%  dplyr::select(sp, time, E1_ref, E2_ref, dir_deriv)
+red_spp2 <- pd_spp_yes %>%  dplyr::select(sp, time, E1_ref, E2_ref, dir_deriv)
 # from long to wide
 rdiv_sim_nocor2 <- red_spp2 %>%
   spread( sp, dir_deriv)
@@ -1442,53 +1586,83 @@ knitr::kable(head(rdiv_sim_nocor), col.names = gsub("[.]", " ", names(rdiv_sim_n
 
 Plot response diversity over time
 
-(ref:RDindependentplot) Directional derivatives and response diversity with known direction of env change. E1 and E2 change independently over time.
-a and b: Species directional derivatives over time. c and d: Response diversity measured as similarity-based diversity metric. e and : Response diversity measured as divergence (sign sensitive). 
-
-
-```{r RDindependentplot, fig.cap='(ref:RDindependentplot)', fig.align="center", fig.height=6, fig.width=12}
+```{r RDindependentplot, fig.cap='Directional derivatives and response diversity with known direction of env change. E1 and E2 change independently over time. a and b: Species directional derivatives over time. c and d: Response diversity measured as similarity-based diversity metric. e and : Response diversity measured as divergence (sign sensitive). ', fig.align="center", fig.height=6, fig.width=12}
 # community 1 
+rmax<-max(rdiv_sim_nocor$rdiv,rdiv_sim_nocor2$rdiv); rmin<-1
+  dmax<-max(rdiv_sim_nocor$sign,rdiv_sim_nocor2$sign); dmin<-0
+# community 1 
+
+  
 dd_plot <- ggplot(data = red_spp, mapping = aes(x = time, y = (dir_deriv), col = sp)) +
+   theme_bw(base_size = 12)+
   geom_line()+
-  theme_classic() +
-   labs(x = "time",y = "Directional derivative", tag = "a")
+   labs(x = "time",y = "Directional derivative", tag = "a")+
+  geom_hline(yintercept = 0, linetype= "dashed")
 
 rdiv_plot <- ggplot(data = rdiv_sim_nocor, mapping = aes(x = time, y = rdiv)) +
   geom_line()+
-  theme_classic() +
-   labs(x = "time",y = "Dissimilarity (derivatives)", tag = "c")
+   labs(x = "time",y = "Dissimilarity (derivatives)", tag = "c") +
+    theme_bw(base_size = 12)+
+    geom_hline(yintercept = mean(rdiv_sim_nocor$rdiv),lty=2) +
+    geom_richtext(x = 7,
+                  mapping = aes(y = rmax - 0.005),
+                  size=4.5,
+                  label.color = NA,
+                  label = paste("RDiv^Mean =",paste0(round(mean(rdiv_sim_nocor$rdiv),digits = 2))))+
+    lims(y = c(rmin,rmax))
 
 
 sing_plot <- ggplot(data = rdiv_sim_nocor, mapping = aes(x = time, y = sign)) +
   geom_line()+
-  theme_classic() +
-   labs(x = "time",y = "Divergence", tag = "e")
-random_ev_change <- dd_plot / rdiv_plot / sing_plot
-#random_ev_change
+   labs(x = "time",y = "Divergence", tag = "e") +
+  theme_bw(base_size = 12)+
+    geom_hline(yintercept = mean(rdiv_sim_nocor$sign),lty=2) +
+    geom_richtext(x = 7,
+                  mapping = aes(y = dmax - 0.1),
+                  size=4.5,
+                  label.color = NA,
+                  label = paste("RDiv^Mean =",paste0(round(mean(rdiv_sim_nocor$sign),digits = 2))))+
+    lims(y = c(dmin,dmax))
 
 # community 2 
-dd_plot2 <- ggplot(data = red_spp2, mapping = aes(x = time, y = (dir_deriv), col = sp)) +
+ 
+dd_plot2 <- ggplot(data = red_spp2, mapping = aes(x = time, y = dir_deriv, col = sp)) +
+   theme_bw(base_size = 12)+
   geom_line()+
-  theme_classic() +
-   labs(x = "time",y = "Directional derivative", tag = "b")
+   labs(x = "time",y = "Directional derivative", tag = "b")+
+  geom_hline(yintercept = 0, linetype= "dashed")
 
 rdiv_plot2 <- ggplot(data = rdiv_sim_nocor2, mapping = aes(x = time, y = rdiv)) +
   geom_line()+
-  theme_classic() +
-   labs(x = "time",y = "Dissimilarity (derivatives)", tag = "d")
+   labs(x = "time",y = "Dissimilarity (derivatives)", tag = "d") +
+    theme_bw(base_size = 12)+
+    geom_hline(yintercept = mean(rdiv_sim_nocor2$rdiv),lty=2) +
+    geom_richtext(x = 7,
+                  mapping = aes(y = rmax - 0.005),
+                  size=4.5,
+                  label.color = NA,
+                  label = paste("RDiv^Mean =",paste0(round(mean(rdiv_sim_nocor2$rdiv),digits = 2))))+
+    lims(y = c(rmin,rmax))
 
 
 sing_plot2 <- ggplot(data = rdiv_sim_nocor2, mapping = aes(x = time, y = sign)) +
   geom_line()+
-  theme_classic() +
-   labs(x = "time",y = "Divergence", tag = "f")
-random_ev_change2 <- dd_plot2 / rdiv_plot2 / sing_plot2
-#random_ev_change2
+   labs(x = "time",y = "Divergence", tag = "f") +
+  theme_bw(base_size = 12)+
+    geom_hline(yintercept = mean(rdiv_sim_nocor2$sign),lty=2) +
+    geom_richtext(x = 7,
+                  mapping = aes(y = dmax - 0.1),
+                  size=4.5,
+                  label.color = NA,
+                  label = paste("RDiv^Mean =",paste0(round(mean(rdiv_sim_nocor2$sign),digits = 2))))+
+    lims(y = c(dmin,dmax))
+
+
 
 (dd_plot + dd_plot2) / (rdiv_plot + rdiv_plot2) / (sing_plot + sing_plot2)
 ```
 
-### E1 and E2 change with negative correlation
+## E1 and E2 change with negative correlation
 
 This example mimics a situation where the two environmental variables change over time with negative correlation. This is common in field studies, where one environmental variable (e.g. CO2 concentration in oceans) increases, while another (e.g. pH) decreases [e.g. Shirayama & Thornton (2005)](https://agupubs.onlinelibrary.wiley.com/doi/full/10.1029/2004JC002618). 
 
@@ -1497,11 +1671,11 @@ Creating a time series with E1 and E2 changing over time with negative correlati
 (ref:RD-negative) Time series of E1 and E2 changing with negative correlation over time.
 
 ```{r RD-negative, fig.cap='(ref:RD-negative)', fig.align="center", fig.height=3, fig.width=8}
-
+library(MASS)
 refs_neg <- mvrnorm(n = 15,        #  specifies the sample size
                  mu = c(mean(E1_series), mean(E2_series)), #specifies the mean values of each column
-                 Sigma = matrix(c( 1, -1,
-                                  -1,  1), #  specifies the correlation matrix
+                 Sigma = matrix(c( 70, -59,
+                                  -59,  70), #  specifies the correlation matrix
                                 nrow = 2))
 
 refs_neg <- refs_neg %>%  as_tibble(refs_neg) %>% 
@@ -1520,9 +1694,54 @@ p_E2 <- refs_neg %>%
 
 # Plot environmental change over time
 p_E1 + p_E2
+detach("package:MASS", unload=TRUE)
 ```
 
+### Response surfaces with change in environmental conditions
+```{r comm1neg, fig.cap='Response surface of the three species composing community 1. (a) Sp4. (b) Sp6. (c) Sp 11. The numbers on the response surfaces show the environmental location in the time steps of the time series and the arrows connect the time steps.', fig.align="center", fig.height=6, fig.width=20}
 
+
+sp1_neg <- sp1 + geom_point(data = refs_neg, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_neg, mapping = aes(label = time)) +
+  geom_path(data = refs_neg, aes(color = time), arrow = arrow())
+
+sp2_neg <- sp2 + geom_point(data = refs_neg, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_neg, mapping = aes(label = time)) +
+  geom_path(data = refs_neg, aes(color = time), arrow = arrow())
+
+sp3_neg <- sp3 + geom_point(data = refs_neg, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_neg, mapping = aes(label = time)) +
+  geom_path(data = refs_neg, aes(color = time), arrow = arrow())
+
+sp4_neg <- sp4 + geom_point(data = refs_neg, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_neg, mapping = aes(label = time)) +
+  geom_path(data = refs_neg, aes(color = time), arrow = arrow())
+
+ggarrange(sp1_neg, sp2_neg, sp3_neg,  sp4_neg, ncol=4, nrow=1, common.legend = TRUE, legend="right")
+
+```
+
+```{r comm2neg, fig.cap='Response surface of the three species composing community 2. (a) Sp2. (b) Sp5. (c) Sp 13', fig.align="center", fig.height=6, fig.width=20}
+
+sp5_neg <- sp5 + geom_point(data = refs_neg, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_neg, mapping = aes(label = time)) +
+  geom_path(data = refs_neg, aes(color = time), arrow = arrow())
+
+sp6_neg <- sp6 + geom_point(data = refs_neg, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_neg, mapping = aes(label = time)) +
+  geom_path(data = refs_neg, aes(color = time), arrow = arrow())
+
+sp7_neg <- sp7 + geom_point(data = refs_neg, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_neg, mapping = aes(label = time)) +
+  geom_path(data = refs_neg, aes(color = time), arrow = arrow())
+
+sp8_neg <- sp8 + geom_point(data = refs_neg, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_neg, mapping = aes(label = time)) +
+  geom_path(data = refs_neg, aes(color = time), arrow = arrow())
+
+ggarrange(sp5_neg, sp6_neg, sp7_neg,  sp8_neg, ncol=4, nrow=1, common.legend = TRUE, legend="right")
+
+```
 
 ```{r, echo=FALSE, results='hide'}
 #Getting partial derivatives and direction of change
@@ -1555,22 +1774,22 @@ p_E1 + p_E2
 
 # community 2 
 # get partial derivatives
-(pd_list_no2 <- modify_depth(m_list_no2, 1, ~ get_partials(., refs_neg)))
+(pd_list_yes <- modify_depth(m_list_yes, 1, ~ get_partials(., refs_neg)))
 # from list to tibble
-(pd_spp_no2 <- tibble(
-  E1_ref = map(pd_list_no2, "E1"),
-  E2_ref = map(pd_list_no2, "E2"),
-  pd_E1 = map(pd_list_no2, "pd_E1"),
-  pd_E2 = map(pd_list_no2, "pd_E2")) %>%
-    dplyr::mutate(sp = my_spp_names_no2) %>%
+(pd_spp_yes <- tibble(
+  E1_ref = map(pd_list_yes, "E1"),
+  E2_ref = map(pd_list_yes, "E2"),
+  pd_E1 = map(pd_list_yes, "pd_E1"),
+  pd_E2 = map(pd_list_yes, "pd_E2")) %>%
+    dplyr::mutate(sp = my_spp_names_yes) %>%
     relocate(sp, E1_ref, E2_ref, pd_E1, pd_E2) %>%
     unnest(E1_ref, E2_ref, pd_E1, pd_E2))
 # add time
-(pd_spp_no2 <-cbind(pd_spp_no2, refs_neg$time) %>% 
+(pd_spp_yes <-cbind(pd_spp_yes, refs_neg$time) %>% 
     dplyr::rename(time = "refs_neg$time"))
 
 # calculation next value for directional derivatives, and get directional derivatives
-(pd_spp_no2 <- pd_spp_no2 %>% transform( nxt_value_E1 = c(E1_ref[-1], NA)) %>%
+(pd_spp_yes <- pd_spp_yes %>% transform( nxt_value_E1 = c(E1_ref[-1], NA)) %>%
     transform(nxt_value_E2 = c(E2_ref[-1], NA)) %>%
     dplyr::mutate(del_E1 = nxt_value_E1 - E1_ref,
                   del_E2 = nxt_value_E2 - E2_ref,
@@ -1598,14 +1817,14 @@ rdiv_sim_neg[is.na(rdiv_sim_neg)] <- 0
 
 
 # actual calculation for only the same species used above
-rdiv_sim_neg$rdiv<-apply(rdiv_sim_neg[,c(4:6)], 1, resp_div, sign_sens = F)
-rdiv_sim_neg$sign<-apply(rdiv_sim_neg[,c(4:6)], 1, resp_div, sign_sens = T)
+rdiv_sim_neg$rdiv<-apply(rdiv_sim_neg[,c(4:7)], 1, resp_div, sign_sens = F)
+rdiv_sim_neg$sign<-apply(rdiv_sim_neg[,c(4:7)], 1, resp_div, sign_sens = T)
 rdiv_sim_neg$Med<-median(rdiv_sim_neg$rdiv)
 rdiv_sim_neg
 
 # community 2 
 # reduce the dataframe and keep only what we need
-red_spp2 <- pd_spp_no2 %>%  dplyr::select(sp, time, E1_ref, E2_ref, dir_deriv)
+red_spp2 <- pd_spp_yes %>%  dplyr::select(sp, time, E1_ref, E2_ref, dir_deriv)
 
 # from long to wide
 rdiv_sim_neg2 <- red_spp2 %>%
@@ -1615,8 +1834,8 @@ rdiv_sim_neg2[is.na(rdiv_sim_neg2)] <- 0
 
 
 # actual calculation for only the same species used above
-rdiv_sim_neg2$rdiv<-apply(rdiv_sim_neg2[,c(4:6)], 1, resp_div, sign_sens = F)
-rdiv_sim_neg2$sign<-apply(rdiv_sim_neg2[,c(4:6)], 1, resp_div, sign_sens = T)
+rdiv_sim_neg2$rdiv<-apply(rdiv_sim_neg2[,c(4:7)], 1, resp_div, sign_sens = F)
+rdiv_sim_neg2$sign<-apply(rdiv_sim_neg2[,c(4:7)], 1, resp_div, sign_sens = T)
 rdiv_sim_neg2$Med<-median(rdiv_sim_neg2$rdiv)
 rdiv_sim_neg2
 ```
@@ -1629,59 +1848,87 @@ knitr::kable(head(rdiv_sim_neg), col.names = gsub("[.]", " ", names(rdiv_sim_neg
 
 Plot response diversity over time for the two communities
 
-(ref:RDnegativeplot) Directional derivatives and response diversity with known direction of env change. E1 and E2 change with negative correlation over time.
-a and b: Species directional derivatives over time. c and d: Response diversity measured as similarity-based diversity metric. e and : Response diversity measured as divergence (sign sensitive). 
 
-
-```{r RDnegativeplot, fig.cap='(ref:RDnegativeplot)', fig.align="center", fig.height=6, fig.width=12}
+```{r RDnegativeplot, fig.cap='Directional derivatives and response diversity with known direction of env change. E1 and E2 change with negative correlation over time. a and b: Species directional derivatives over time. c and d: Response diversity measured as similarity-based diversity metric. e and : Response diversity measured as divergence (sign sensitive). ', fig.align="center", fig.height=6, fig.width=12}
 
 # community 1 
+rmax<-max(rdiv_sim_neg$rdiv,rdiv_sim_neg2$rdiv); rmin<-1
+  dmax<-max(rdiv_sim_neg$sign,rdiv_sim_neg2$sign); dmin<-0
+# community 1 
 
+  
 dd_plot <- ggplot(data = red_spp, mapping = aes(x = time, y = (dir_deriv), col = sp)) +
+   theme_bw(base_size = 12)+
   geom_line()+
-  theme_classic() +
-   labs(x = "time",y = "Directional derivative", tag = "a")
+   labs(x = "time",y = "Directional derivative", tag = "a")+
+  geom_hline(yintercept = 0, linetype= "dashed")
 
 rdiv_plot <- ggplot(data = rdiv_sim_neg, mapping = aes(x = time, y = rdiv)) +
   geom_line()+
-  theme_classic() +
-   labs(x = "time",y = "Dissimilarity (derivatives)", tag = "c")
+   labs(x = "time",y = "Dissimilarity (derivatives)", tag = "c") +
+    theme_bw(base_size = 12)+
+    geom_hline(yintercept = mean(rdiv_sim_neg$rdiv),lty=2) +
+    geom_richtext(x = 7,
+                  mapping = aes(y = rmax - 0.005),
+                  size=4.5,
+                  label.color = NA,
+                  label = paste("RDiv^Mean =",paste0(round(mean(rdiv_sim_neg$rdiv),digits = 2))))+
+    lims(y = c(rmin,rmax))
 
 
 sing_plot <- ggplot(data = rdiv_sim_neg, mapping = aes(x = time, y = sign)) +
   geom_line()+
-  theme_classic() +
-   labs(x = "time",y = "Divergence", tag = "e")
-neg_ev_change <- dd_plot / rdiv_plot / sing_plot
-#neg_ev_change
+   labs(x = "time",y = "Divergence", tag = "e") +
+  theme_bw(base_size = 12)+
+    geom_hline(yintercept = mean(rdiv_sim_neg$sign),lty=2) +
+    geom_richtext(x = 7,
+                  mapping = aes(y = dmax - 0.1),
+                  size=4.5,
+                  label.color = NA,
+                  label = paste("RDiv^Mean =",paste0(round(mean(rdiv_sim_neg$sign),digits = 2))))+
+    lims(y = c(dmin,dmax))
 
-
-# community 2
-
+# community 2 
+ 
 dd_plot2 <- ggplot(data = red_spp2, mapping = aes(x = time, y = (dir_deriv), col = sp)) +
+   theme_bw(base_size = 12)+
   geom_line()+
-  theme_classic() +
-   labs(x = "time",y = "Directional derivative", tag = "b")
+   labs(x = "time",y = "Directional derivative", tag = "b")+
+  geom_hline(yintercept = 0, linetype= "dashed")
 
 rdiv_plot2 <- ggplot(data = rdiv_sim_neg2, mapping = aes(x = time, y = rdiv)) +
   geom_line()+
-  theme_classic() +
-   labs(x = "time",y = "Dissimilarity (derivatives)", tag = "d")
+   labs(x = "time",y = "Dissimilarity (derivatives)", tag = "d") +
+    theme_bw(base_size = 12)+
+    geom_hline(yintercept = mean(rdiv_sim_neg2$rdiv),lty=2) +
+    geom_richtext(x = 7,
+                  mapping = aes(y = rmax - 0.005),
+                  size=4.5,
+                  label.color = NA,
+                  label = paste("RDiv^Mean =",paste0(round(mean(rdiv_sim_neg2$rdiv),digits = 2))))+
+    lims(y = c(rmin,rmax))
 
 
 sing_plot2 <- ggplot(data = rdiv_sim_neg2, mapping = aes(x = time, y = sign)) +
   geom_line()+
-  theme_classic() +
-   labs(x = "time",y = "Divergence", tag = "f")
-neg_ev_change2 <- dd_plot2 / rdiv_plot2 / sing_plot2
-#neg_ev_change2
+   labs(x = "time",y = "Divergence", tag = "f") +
+  theme_bw(base_size = 12)+
+    geom_hline(yintercept = mean(rdiv_sim_neg2$sign),lty=2) +
+    geom_richtext(x = 7,
+                  mapping = aes(y = dmax - 0.1),
+                  size=4.5,
+                  label.color = NA,
+                  label = paste("RDiv^Mean =",paste0(round(mean(rdiv_sim_neg2$sign),digits = 2))))+
+    lims(y = c(dmin,dmax))
+
+
 
 (dd_plot + dd_plot2) / (rdiv_plot + rdiv_plot2) / (sing_plot + sing_plot2)
 
 ```
 
 
-### E1 and E2 change with positive correlation
+## E1 and E2 change with positive correlation
 
 Finally, two environmental variables can show positive correlation over time. A typical example is given by the positive correlation between air temperature and UV radiation [e.g. Häder at al. 2015](https://pubs.rsc.org/en/content/articlehtml/2015/pp/c4pp90035a). 
 
@@ -1690,11 +1937,11 @@ Let us create a time series with E1 and E2 changing over time with positive corr
 (ref:RD-positive) Time series of E1 and E2 changing with positive correlation over time.
 
 ```{r RD-positive, fig.cap='(ref:RD-positive)', fig.align="center", fig.height=3, fig.width=8}
-
+library(MASS)
 refs_pos <- mvrnorm(n = 15,        #  specifies the sample size
                  mu = c(mean(E1_series), mean(E2_series)), #specifies the mean values of each column
-                 Sigma = matrix(c( 1, 0.8,
-                                 0.8,  1), #  specifies the correlation matrix
+                 Sigma = matrix(c( 70, 59,
+                                 59,  70), #  specifies the correlation matrix
                                 nrow = 2))
 
 refs_pos <- refs_pos %>%  as_tibble(refs_pos) %>% 
@@ -1713,8 +1960,55 @@ p_E2 <- refs_pos %>%
 
 # Plot environmental change over time
 p_E1 + p_E2
+detach("package:MASS", unload=TRUE)
 ```
 
+### Response surfaces with change in environmental conditions
+```{r comm1pos, fig.cap='Response surface of the three species composing community 1. (a) Sp4. (b) Sp6. (c) Sp 11. The numbers on the response surfaces show the environmental location in the time steps of the time series and the arrows connect the time steps.', fig.align="center", fig.height=6, fig.width=20}
+
+sp1_pos <- sp1 + geom_point(data = refs_pos, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_pos, mapping = aes(label = time)) +
+  geom_path(data = refs_pos, aes(color = time), arrow = arrow())
+
+sp2_pos <- sp2 + geom_point(data = refs_pos, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_pos, mapping = aes(label = time)) +
+  geom_path(data = refs_pos, aes(color = time), arrow = arrow())
+
+sp3_pos <- sp3 + geom_point(data = refs_pos, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_pos, mapping = aes(label = time)) +
+  geom_path(data = refs_pos, aes(color = time), arrow = arrow())
+
+sp4_pos <- sp4 + geom_point(data = refs_pos, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_pos, mapping = aes(label = time)) +
+  geom_path(data = refs_pos, aes(color = time), arrow = arrow())
+
+ggarrange(sp1_pos, sp2_pos, sp3_pos,  sp4_pos, ncol=4, nrow=1, common.legend = TRUE, legend="right")
+
+
+```
+
+```{r comm2pos, fig.cap='Response surface of the three species composing community 2. (a) Sp2. (b) Sp5. (c) Sp 13', fig.align="center", fig.height=6, fig.width=20}
+
+sp5_pos <- sp5 + geom_point(data = refs_pos, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_pos, mapping = aes(label = time)) +
+  geom_path(data = refs_pos, aes(color = time), arrow = arrow())
+
+sp6_pos <- sp6 + geom_point(data = refs_pos, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_pos, mapping = aes(label = time)) +
+  geom_path(data = refs_pos, aes(color = time), arrow = arrow())
+
+sp7_pos <- sp7 + geom_point(data = refs_pos, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_pos, mapping = aes(label = time)) +
+  geom_path(data = refs_pos, aes(color = time), arrow = arrow())
+
+sp8_pos <- sp8 + geom_point(data = refs_pos, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_pos, mapping = aes(label = time)) +
+  geom_path(data = refs_pos, aes(color = time), arrow = arrow())
+
+ggarrange(sp5_pos, sp6_pos, sp7_pos,  sp8_pos, ncol=4, nrow=1, common.legend = TRUE, legend="right")
+
+
+```
 
 
 ```{r, echo=FALSE, results='hide'}
@@ -1748,22 +2042,22 @@ p_E1 + p_E2
 
 # community 2 
 # get partial derivatives
-(pd_list_no2 <- modify_depth(m_list_no2, 1, ~ get_partials(., refs_pos)))
+(pd_list_yes <- modify_depth(m_list_yes, 1, ~ get_partials(., refs_pos)))
 # from list to tibble
-(pd_spp_no2 <- tibble(
-  E1_ref = map(pd_list_no2, "E1"),
-  E2_ref = map(pd_list_no2, "E2"),
-  pd_E1 = map(pd_list_no2, "pd_E1"),
-  pd_E2 = map(pd_list_no2, "pd_E2")) %>%
-    dplyr::mutate(sp = my_spp_names_no2) %>%
+(pd_spp_yes <- tibble(
+  E1_ref = map(pd_list_yes, "E1"),
+  E2_ref = map(pd_list_yes, "E2"),
+  pd_E1 = map(pd_list_yes, "pd_E1"),
+  pd_E2 = map(pd_list_yes, "pd_E2")) %>%
+    dplyr::mutate(sp = my_spp_names_yes) %>%
     relocate(sp, E1_ref, E2_ref, pd_E1, pd_E2) %>%
     unnest(E1_ref, E2_ref, pd_E1, pd_E2))
 # add time
-(pd_spp_no2 <-cbind(pd_spp_no2, refs_pos$time) %>% 
+(pd_spp_yes <-cbind(pd_spp_yes, refs_pos$time) %>% 
     dplyr::rename(time = "refs_pos$time"))
 
 # calculation next value for directional derivatives, and get directional derivatives
-(pd_spp_no2 <- pd_spp_no2 %>% transform( nxt_value_E1 = c(E1_ref[-1], NA)) %>%
+(pd_spp_yes <- pd_spp_yes %>% transform( nxt_value_E1 = c(E1_ref[-1], NA)) %>%
     transform(nxt_value_E2 = c(E2_ref[-1], NA)) %>%
     dplyr::mutate(del_E1 = nxt_value_E1 - E1_ref,
                   del_E2 = nxt_value_E2 - E2_ref,
@@ -1792,14 +2086,14 @@ rdiv_sim_pos[is.na(rdiv_sim_pos)] <- 0
 
 
 # actual calculation for only the same species used above
-rdiv_sim_pos$rdiv<-apply(rdiv_sim_pos[,c(4:6)], 1, resp_div, sign_sens = F)
-rdiv_sim_pos$sign<-apply(rdiv_sim_pos[,c(4:6)], 1, resp_div, sign_sens = T)
+rdiv_sim_pos$rdiv<-apply(rdiv_sim_pos[,c(4:7)], 1, resp_div, sign_sens = F)
+rdiv_sim_pos$sign<-apply(rdiv_sim_pos[,c(4:7)], 1, resp_div, sign_sens = T)
 rdiv_sim_pos$Med<-median(rdiv_sim_pos$rdiv)
 rdiv_sim_pos
 
 # community 2
 # reduce the dataframe and keep only what we need
-red_spp2 <- pd_spp_no2 %>%  dplyr::select(sp, time, E1_ref, E2_ref, dir_deriv)
+red_spp2 <- pd_spp_yes %>%  dplyr::select(sp, time, E1_ref, E2_ref, dir_deriv)
 # from long to wide
 rdiv_sim_pos2 <- red_spp2 %>%
   spread( sp, dir_deriv)
@@ -1808,8 +2102,8 @@ rdiv_sim_pos2[is.na(rdiv_sim_pos2)] <- 0
 
 
 # actual calculation for only the same species used above
-rdiv_sim_pos2$rdiv<-apply(rdiv_sim_pos2[,c(4:6)], 1, resp_div, sign_sens = F)
-rdiv_sim_pos2$sign<-apply(rdiv_sim_pos2[,c(4:6)], 1, resp_div, sign_sens = T)
+rdiv_sim_pos2$rdiv<-apply(rdiv_sim_pos2[,c(4:7)], 1, resp_div, sign_sens = F)
+rdiv_sim_pos2$sign<-apply(rdiv_sim_pos2[,c(4:7)], 1, resp_div, sign_sens = T)
 rdiv_sim_pos2$Med<-median(rdiv_sim_pos2$rdiv)
 rdiv_sim_pos2
 ```
@@ -1824,28 +2118,43 @@ knitr::kable(head(rdiv_sim_pos), col.names = gsub("[.]", " ", names(rdiv_sim_pos
 
 Plot response diversity over time
 
-(ref:RDpositiveplot) Directional derivatives and response diversity with known direction of env change for community 1 and 2. E1 and E2 change with negative correlation over time.
-a and b: Species directional derivatives over time. c and d: Response diversity measured as similarity-based diversity metric. e and : Response diversity measured as divergence (sign sensitive). 
+```{r RDpositiveplot, fig.cap=' Directional derivatives and response diversity with known direction of env change for community 1 and 2. E1 and E2 change with negative correlation over time.a and b: Species directional derivatives over time. c and d: Response diversity measured as similarity-based diversity metric. e and : Response diversity measured as divergence (sign sensitive). ', fig.align="center", fig.height=12, fig.width=12}
 
-
-```{r RDpositiveplot, fig.cap='(ref:RDpositiveplot)', fig.align="center", fig.height=12, fig.width=12}
+rmax<-max(rdiv_sim_pos$rdiv,rdiv_sim_pos2$rdiv); rmin<-1
+  dmax<-max(rdiv_sim_pos$sign,rdiv_sim_pos2$sign); dmin<-0
 # community 1 
 
+  
 dd_plot <- ggplot(data = red_spp, mapping = aes(x = time, y = (dir_deriv), col = sp)) +
+   theme_bw(base_size = 12)+
   geom_line()+
-  theme_classic() +
-   labs(x = "time",y = "Directional derivative", tag = "a")
+   labs(x = "time",y = "Directional derivative", tag = "a")+
+  geom_hline(yintercept = 0, linetype= "dashed")
 
 rdiv_plot <- ggplot(data = rdiv_sim_pos, mapping = aes(x = time, y = rdiv)) +
   geom_line()+
-  theme_classic() +
-   labs(x = "time",y = "Dissimilarity (derivatives)", tag = "c") 
+   labs(x = "time",y = "Dissimilarity (derivatives)", tag = "c") +
+    theme_bw(base_size = 12)+
+    geom_hline(yintercept = mean(rdiv_sim_pos$rdiv),lty=2) +
+    geom_richtext(x = 7,
+                  mapping = aes(y = rmax),
+                  size=4.5,
+                  label.color = NA,
+                  label = paste("RDiv^Mean =",paste0(round(mean(rdiv_sim_pos$rdiv),digits = 2))))+
+    lims(y = c(rmin,rmax))
 
 
 sing_plot <- ggplot(data = rdiv_sim_pos, mapping = aes(x = time, y = sign)) +
   geom_line()+
-  theme_classic() +
-   labs(x = "time",y = "Divergence", tag = "e")
+   labs(x = "time",y = "Divergence", tag = "e") +
+  theme_bw(base_size = 12)+
+    geom_hline(yintercept = mean(rdiv_sim_pos$sign),lty=2) +
+    geom_richtext(x = 7,
+                  mapping = aes(y = dmax),
+                  size=4.5,
+                  label.color = NA,
+                  label = paste("RDiv^Mean =",paste0(round(mean(rdiv_sim_pos$sign),digits = 2))))+
+    lims(y = c(dmin,dmax))
 
 #pos_ev_change <- dd_plot / rdiv_plot / sing_plot
 #pos_ev_change
@@ -1853,20 +2162,36 @@ sing_plot <- ggplot(data = rdiv_sim_pos, mapping = aes(x = time, y = sign)) +
 # community 2 
 
 dd_plot2 <- ggplot(data = red_spp2, mapping = aes(x = time, y = (dir_deriv), col = sp)) +
+   theme_bw(base_size = 12)+
   geom_line()+
-  theme_classic() +
-   labs(x = "time",y = "Directional derivative", tag = "b")
+   labs(x = "time",y = "Directional derivative", tag = "b")+
+  geom_hline(yintercept = 0, linetype= "dashed")
 
 rdiv_plot2 <- ggplot(data = rdiv_sim_pos2, mapping = aes(x = time, y = rdiv)) +
   geom_line()+
-  theme_classic() +
-   labs(x = "time",y = "Dissimilarity (derivatives)", tag = "d")
+   labs(x = "time",y = "Dissimilarity (derivatives)", tag = "d")+
+  theme_bw(base_size = 12)+
+    geom_hline(yintercept = mean(rdiv_sim_pos2$rdiv),lty=2) +
+    geom_richtext(x = 7,
+                  mapping = aes(y = rmax),
+                  size=4.5,
+                  label.color = NA,
+                  label = paste("RDiv^Mean =",paste0(round(mean(rdiv_sim_pos2$rdiv),digits = 2))))+
+    lims(y = c(rmin,rmax))
 
 
 sing_plot2 <- ggplot(data = rdiv_sim_pos2, mapping = aes(x = time, y = sign)) +
   geom_line()+
-  theme_classic() +
-   labs(x = "time",y = "Divergence", tag = "f")
+   theme_bw(base_size = 12)+
+   labs(x = "time",y = "Divergence", tag = "f")+
+  theme_bw(base_size = 12)+
+    geom_hline(yintercept = mean(rdiv_sim_pos2$sign),lty=2) +
+    geom_richtext(x = 7,
+                  mapping = aes(y = dmax),
+                  size=4.5,
+                  label.color = NA,
+                  label = paste("RDiv^Mean =",paste0(round(mean(rdiv_sim_pos2$sign),digits = 2))))+
+    lims(y = c(dmin,dmax))
 
 #pos_ev_change2 <- dd_plot2 / rdiv_plot2 / sing_plot2
 #pos_ev_change2
@@ -1876,46 +2201,37 @@ sing_plot2 <- ggplot(data = rdiv_sim_pos2, mapping = aes(x = time, y = sign)) +
 
 ```
 
+
+
+
 Now, we visualize the relationship between different correlations between the two environmental variables and response diversity.
 
-(ref:plotcorrelations) Correlation types and response diversity.
-a and c: correlation types and response diversity measured as dissimilarity in the first derivatives (sign insensitive) for community 1 and 2 respectively. c and d. correlation types and response diversity measured as divergence in the first derivatives (sign sensitive) for community 1 and 2 respectively
 
-```{r plotcorrelations, fig.cap='(ref:plotcorrelations)', fig.align="center", fig.height=8, fig.width=12}
 
+```{r plotcorrelations, fig.cap='Correlation types and response diversity. a and c: correlation types and response diversity measured as dissimilarity in the first derivatives (sign insensitive) for community 1 and 2 respectively. c and d. correlation types and response diversity measured as divergence in the first derivatives (sign sensitive) for community 1 and 2 respectively', fig.align="center", fig.height=8, fig.width=12}
 # community 1 
-dd1 <- data.frame(rdiv_sim_neg[, c(7:8)]) 
+dd1 <- data.frame(rdiv_sim_neg[, c(8:9)]) 
 dd1$cor <- "negative"
 dd1$community <- 1
-
-dd2 <- data.frame(rdiv_sim_pos[, c(7:8)]) 
+dd2 <- data.frame(rdiv_sim_pos[, c(8:9)]) 
 dd2$cor <- "positive"
 dd2$community <- 1
-
-dd3 <- data.frame(rdiv_sim_nocor[, c(7:8)]) 
+dd3 <- data.frame(rdiv_sim_nocor[, c(8:9)]) 
 dd3$cor <- "nocor"
 dd3$community <- 1
-
 # community 2 
-dd4 <- data.frame(rdiv_sim_neg2[, c(7:8)]) 
+dd4 <- data.frame(rdiv_sim_neg2[, c(8:9)]) 
 dd4$cor <- "negative"
 dd4$community <- 2
-
-dd5 <- data.frame(rdiv_sim_pos2[, c(7:8)]) 
+dd5 <- data.frame(rdiv_sim_pos2[, c(8:9)]) 
 dd5$cor <- "positive"
 dd5$community <- 2
-
-dd6 <- data.frame(rdiv_sim_nocor2[, c(7:8)]) 
+dd6 <- data.frame(rdiv_sim_nocor2[, c(8:9)]) 
 dd6$cor <- "nocor"
 dd6$community <- 2
-
-
 # Community 3
-
 dd_plot1 <- rbind(dd1, dd2, dd3 )
-
 theme_set(theme_classic(base_size = 12))
-
 g1.1 <-
   ggplot(dd_plot1, aes(x = cor, y = rdiv, color = cor)) +
    # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
@@ -1926,11 +2242,9 @@ g1.1 <-
       axis.title = element_text(size = 16),
       panel.grid = element_blank()
     )
-
 rdiv1 <- g1.1 +
   geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
   stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(a)")
-
 g1.2 <-
   ggplot(dd_plot1, aes(x = cor, y = sign, color = cor)) +
     scale_color_uchicago() +
@@ -1940,18 +2254,11 @@ g1.2 <-
       axis.title = element_text(size = 16),
       panel.grid = element_blank()
     )
-
 sign1 <- g1.2 +
   geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
   stat_summary(fun = mean, geom = "point", size = 5)+ labs(tag = "(b)")
-
-
-
 # community 2 
 dd_plot2 <- rbind(dd4, dd5, dd6)
-
-
-
 g2.1 <-
   ggplot(dd_plot2, aes(x = cor, y = rdiv, color = cor)) +
     scale_color_uchicago() +
@@ -1961,11 +2268,9 @@ g2.1 <-
       axis.title = element_text(size = 16),
       panel.grid = element_blank()
     )
-
 rdiv2 <- g2.1 +
   geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
   stat_summary(fun = mean, geom = "point", size = 5)+ labs(tag = "(c)")
-
 g2.2 <-
   ggplot(dd_plot2, aes(x = cor, y = sign, color = cor)) +
     scale_color_uchicago() +
@@ -1975,16 +2280,13 @@ g2.2 <-
       axis.title = element_text(size = 16),
       panel.grid = element_blank()
     )
-
 sign2 <- g2.2 +
   geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
   stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(d)")
-
-
 (rdiv1 + sign1)/(rdiv2 + sign2)
-
 ```
-It is hard to derive any conclusion from this plot...
+We can rule out the hypothesis that different types of relationships between two environmental variables could determine specific trends in response diversity.
+
 
 
 
@@ -1993,10 +2295,8 @@ We use data coming from an experiment where individual ciliates species have bee
 
 ### Load data set and look at species responses
 
-(ref:ciliates) Species responses to the environmental drivers.
-a. Species responses to nutrient concentrations. b. Species responses to light intensity. 
 
-```{r ciliates, fig.cap='(ref:ciliates)', fig.align="center", fig.height=10, fig.width=20}
+```{r ciliates, fig.cap='Species responses to the environmental drivers. a. Species responses to nutrient concentrations. b. Species responses to light intensity', fig.align="center", fig.height=10, fig.width=20, results='hide'}
 dd <- read_csv(here("data/20221010_ciliates.csv"))
 
 
@@ -2005,7 +2305,7 @@ fig1 <- dd %>%
   ggplot( aes(x = PPM_conc, y = log(density), group = as.factor(light), col = as.factor(light))) +
   geom_point()+
   geom_smooth(se = FALSE) +
-  facet_wrap(~species, ncol = 4) +
+  facet_wrap(~species, ncol = 7) +
   theme_bw()+
   scale_color_viridis_d(end = 0.2,begin = 0.9, option = 'inferno') +
   labs(x = "nutrient concentration", y = "log(density)", tag = "(a)")
@@ -2015,13 +2315,13 @@ fig2 <- dd %>%
   ggplot( aes(x = light, y = log(density), group = as.factor(PPM_conc), col = as.factor(PPM_conc))) +
   geom_point()+
   geom_smooth(se = FALSE) +
-  facet_wrap(~species, ncol = 4)+ 
+  facet_wrap(~species, ncol = 7)+ 
   theme_bw()+
   scale_color_viridis_d(end = 0.2,begin = 0.9, option = 'inferno') +
   labs(x = "light intensity", y = "log(density)", tag = "(b)")
 
 
-fig1 + fig2
+fig1 / fig2
 ```
 
 ### Fittig GAMs on empirical data
@@ -2063,7 +2363,7 @@ nested_gams %>%
   unnest(results) 
 
 
-# Creating the datsaet with the 2 columns as described above
+# Creating the dataset with the 2 columns as described above
 predicted <- nested_gams %>% unnest(predicted)
 rates <- cbind(new_data, predicted[,c(1,4)])
 rates <- rates %>%
@@ -2079,31 +2379,32 @@ knitr::kable(head(rates), col.names = gsub("[.]", " ", names(rates)))
 
 ### Plotting surface for a sp
 
-
-(ref:surface-fig) Response surface fitted with GAM. High non-linearity. Need to understand how to fix axis' values!
-
-```{r surface-fig, fig.cap='(ref:surface-fig)', fig.align="center", fig.height=5, fig.width=12}
+```{r surface-fig, fig.cap='Response surface fitted with GAM. High non-linearity.', fig.align="center", fig.height=5, fig.width=12}
 # try plotting surface for Colpidium
 Colpidium <- filter(rates, species == "Colpidium")
 data <- data.frame(x=Colpidium$E1,y=Colpidium$E2,z=Colpidium$predicted)
 
 density_Colpidium <- as.matrix(acast(data, x~y, value.var="z"))
 
-
+myxticks = c(0.55, 1.0, 1.5, 2, 2.5, 3.0, 3.5, 4.0, 4.5, 5)
 axx <- list(
   title = 'PPM concentration',
-  nticks = 4
+  nticks = myxticks,
+  ticktext = myxticks
 )
 
+myyticks = c(0, 1, 2, 3, 4, 5, 6, 7, 8, 9)
 axy <- list(
   title = 'Light',
-  nticks = 4
+   nticks = myyticks,
+  ticktext = myyticks
 )
 
 axz <- list(
   title = 'Colpidium density',
-  nticks = 4
+  nticks = 10
 )
+
 
 
 x_Col <- as.numeric(rownames(density_Colpidium))
@@ -2115,6 +2416,8 @@ figCol <- plot_ly(z = ~density_Colpidium) %>%
   layout(title = 'Colpidium', plot_bgcolor = "#e5ecf6", scene = list(xaxis=axx,yaxis=axy,zaxis=axz))
 
 figCol 
+
+
 ```
 
 
@@ -2123,10 +2426,9 @@ figCol
 
 First, we calculate the partial derivative with respect to nutrient concentration keeping light intensity constant at 5. 
 
-(ref:partialderiv-empirical) Response surface of Colpidium. The two solid lines show at which level of nutrients and light each partial derivative is going to be calculated. Not sure we get the gray areas...
 
-```{r partialderiv-empirical, fig.cap='(ref:partialderiv-empirical)', fig.align="center", fig.height=4, fig.width=6}
-detach("package:MASS", unload=TRUE)
+```{r partialderiv-empirical, fig.cap='Response surface of Colpidium. The two solid lines show at which level of nutrients and light each partial derivative is going to be calculated.', fig.align="center", fig.height=4, fig.width=6}
+
 Colpidium <- filter(nested_gams, species == "Colpidium")
 
 E1 = as.numeric(unique(dd$PPM_conc))
@@ -2154,8 +2456,7 @@ pd_E1 <- partial_derivatives(m_Colpidium, data = ds_E1, type = "central", focal 
 
 # draw te(x,z)
 p1 <- draw(m_Colpidium, rug = FALSE) &
-  geom_hline(yintercept = E2_p, size = 1) &
-  geom_vline(xintercept = E1_p, size = 1)
+   geom_hline(yintercept = E2_p, size = 1)
 p1
 ```
 
@@ -2211,7 +2512,6 @@ pd_E2 <- partial_derivatives(m_Colpidium, data = ds_E2, type = "central", focal 
 
 # draw te(x,z)
 p4 <- draw(m_Colpidium, rug = FALSE) &
-  geom_hline(yintercept = E2_p, size = 1) &
   geom_vline(xintercept = E1_p, size = 1)
 p4
 ```
@@ -2250,6 +2550,10 @@ Plot the two partial derivatives and relative effects
 (ref:summary-empirical) Summary plot of Colpidium (a) response surface of Colpidium (b) Partial effect of nutrient concentration on the density of Colpidium when light intensity is held constant at 5. (c) Partial derivative with respect to nutrient concentration when light intensity is held constant at 5. (d) Partial effect of light intensity on the growth rate of Colpidium when nutrient concentration is held constant at 2.67. (e) Partial derivative with respect to light intensity when nutrient concentration is held constant at 2.67.
 
 ```{r summary-empirical, fig.cap='(ref:summary-empirical)', fig.align="center", fig.height=12, fig.width=18}
+p1 <-  draw(m_Colpidium, rug = FALSE) &
+  geom_hline(yintercept = E2_p, size =1) &
+  geom_vline(xintercept = E1_p, size = 1)
+
 p_partials <- wrap_plots(p1, p2, p3, p5, p6)
 p_partials
 ```
@@ -2287,9 +2591,7 @@ time <-  as.data.frame(seq.int(nrow(refs)))
 Time series of nutrient concentration and light intensity changing over time.
 
 
-(ref:RD-empirical) Time series of (a) nutrient concentration and (b) light intensity changing over time.
-
-```{r RD-empirical, fig.cap='(ref:RD-empirical)', fig.align="center", fig.height=3, fig.width=8}
+```{r RD-empirical, fig.cap='Time series of (a) nutrient concentration and (b) light intensity changing over time.', fig.align="center", fig.height=3, fig.width=8}
 
 # plotting env change over time
 
@@ -2307,7 +2609,7 @@ p_E1 + p_E2
 
 ```
 
-Table with calculated partial derivatives for each sp at different times (only first 6 rowa shown).
+Table with calculated partial derivatives for each sp at different times (only first 6 rows shown).
 ```{r results='asis', message=FALSE, warning=FALSE}
 knitr::kable(head(pd_spp), col.names = gsub("[.]", " ", names(pd_spp)))
 
@@ -2336,7 +2638,7 @@ knitr::kable(head(dd_spp), col.names = gsub("[.]", " ", names(dd_spp)))
 
 ```
 
-Then we can calculate response diversity for an ipotetical community contaning all the species tested i this experiment.
+Then we can calculate response diversity for an hypothetical community containing all the species tested i this experiment.
 
 ```{r, echo=FALSE, results='hide'}
 # reduce the dataframe and keep only what we need, and filter spp (remove Loxocephallus as it has extreme values)
@@ -2368,11 +2670,7 @@ knitr::kable(head(rdiv_sim), col.names = gsub("[.]", " ", names(rdiv_sim)))
 
 Plot response diversity over time
 
-(ref:RDempiricalplot) Directional derivatives and response diversity with known direction of env change. 
-a. Species directional derivatives over time. b. Response diversity measured as similarity-based diversity metric. c. Response diversity measured as divergence (sign sensitive). 
-
-
-```{r RDempiricalplot, fig.cap='(ref:RDempiricalplot)', fig.align="center", fig.height=12, fig.width=10}
+```{r RDempiricalplot, fig.cap='Directional derivatives and response diversity with known direction of env change. a. Species directional derivatives over time. b. Response diversity measured as similarity-based diversity metric. c. Response diversity measured as divergence (sign sensitive). ', fig.align="center", fig.height=12, fig.width=10}
 
 p_dd <- ggplot(data = red_spp, mapping = aes(x = time, y = dir_deriv, col = sp)) +
   geom_line() +
@@ -2407,7 +2705,7 @@ p_dd / p_rd / p_sign
 
 
 ## Different community compositions
-Now we calculate response diversity for different community compositions and we comapre them. 
+Now we calculate response diversity for three different community compositions we assembled randomly and we compare them. 
 ```{r, echo=FALSE, results='hide'}
 
 # reduce the dataframe and keep only what we need, and filter spp (remove Loxocephallus as it has extreme values)
@@ -2459,7 +2757,6 @@ rdiv_comm3
 ```
 
 Plotting
-
 
 
 ```{r, echo=FALSE, results='hide'}
@@ -2542,11 +2839,10 @@ Fig3_comm3 <- rdiv_comm3 %>%
 
 
 
-(ref:RD-compositions) Directional derivatives and response diversity with known direction of env change for three different communities. 
-a. Species directional derivatives over time. b. Response diversity measured as similarity-based diversity metric. c. Response diversity measured as divergence (sign sensitive). 
 
 
-```{r RD-compositions, fig.cap='(ref:RD-compositions)', fig.align="center", fig.height=15, fig.width=22}
+```{r RD-compositions, fig.cap='Directional derivatives and response diversity with known direction of env change for three different communities. a. Species directional derivatives over time. b. Response diversity measured as similarity-based diversity metric. c. Response diversity measured as divergence (sign sensitive).', fig.align="center", fig.height=15, fig.width=22}
+
 (Fig_1_comm1 + Fig_1_comm2 + Fig_1_comm3)/ (Fig2_comm1 + Fig2_comm2 + Fig2_comm3)/ (Fig3_comm1 + Fig3_comm2 + Fig3_comm3)
 ```
 

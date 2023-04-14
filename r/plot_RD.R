@@ -30,7 +30,7 @@ plot_RD <- function(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3) {
   
   Fig2_comm1 <- rdiv_1 %>% 
     ggplot(mapping = aes(x = time,y = rdiv)) +
-    theme_classic(base_size = 12) + 
+    theme_bw(base_size = 12) + 
     labs(x = NULL,y = "dissimilarity (derivatives)",tag = "d)") + 
     geom_hline(yintercept = rdiv_1$Med,lty=2) +
     geom_line() + 
@@ -43,7 +43,7 @@ plot_RD <- function(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3) {
   
   Fig2_comm2 <- rdiv_2 %>% 
     ggplot(mapping = aes(x = time,y = rdiv)) +
-    theme_classic(base_size = 12) + 
+    theme_bw(base_size = 12) + 
     labs(x = NULL,y = "dissimilarity (derivatives)",tag = "e)") + 
     geom_hline(yintercept = rdiv_2$Med,lty=2) +
     geom_line() + 
@@ -56,7 +56,7 @@ plot_RD <- function(dir_1, dir_2, dir_3, rdiv_1, rdiv_2, rdiv_3) {
   
   Fig2_comm3 <- rdiv_3 %>% 
     ggplot(mapping = aes(x = time,y = rdiv)) +
-    theme_classic(base_size = 12) + 
+    theme_bw(base_size = 12) + 
     labs(x = NULL,y = "dissimilarity (derivatives)",tag = "f)") + 
     geom_hline(yintercept = rdiv_3$Med,lty=2) +
     geom_line() + 
