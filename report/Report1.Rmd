@@ -1192,21 +1192,21 @@ nested_gams_inter %>%
 sp1 <- draw(nested_gams_no_inter$gams[[1]], rug = FALSE) &
       labs(tag = "(a)")
 sp2 <- draw(nested_gams_no_inter$gams[[2]], rug = FALSE) &
-      labs(tag = "(a)")
-sp3 <- draw(nested_gams_no_inter$gams[[3]], rug = FALSE) &
       labs(tag = "(b)")
+sp3 <- draw(nested_gams_no_inter$gams[[3]], rug = FALSE) &
+      labs(tag = "(c)")
 sp4 <- draw(nested_gams_no_inter$gams[[4]], rug = FALSE) &
-      labs(tag = "(a)")
+      labs(tag = "(d)")
 
 
 sp5 <- draw(nested_gams_inter$gams[[1]], rug = FALSE) &
       labs(tag = "(a)")
 sp6 <- draw(nested_gams_inter$gams[[2]], rug = FALSE) &
-      labs(tag = "(a)")
-sp7 <- draw(nested_gams_inter$gams[[3]], rug = FALSE) &
       labs(tag = "(b)")
+sp7 <- draw(nested_gams_inter$gams[[3]], rug = FALSE) &
+      labs(tag = "(c)")
 sp8 <- draw(nested_gams_inter$gams[[4]], rug = FALSE) &
-      labs(tag = "(a)")
+      labs(tag = "(d)")
 # 
 # sp5 <- draw(nested_gams_no_inter$gams[[5]], rug = FALSE) &
 #       labs(tag = "(b)")
@@ -1238,8 +1238,8 @@ sp8 <- draw(nested_gams_inter$gams[[4]], rug = FALSE) &
 ```{r, echo=FALSE, results='hide'}
 
 # enviromental conditions 
-refs2 <- expand_grid(E1 = 273.15 + seq(0, 50, 1),
-                     E2 = seq(0, 50, 1))
+refs2 <- crossing(E1 = 273.15 + seq(0, 50, 10),
+                     E2 = seq(0, 50, 10))
 
 #community 1 
 m_list_no <- (nested_gams_no_inter$gams)
@@ -1281,6 +1281,7 @@ my_spp_names_yes <- c("s5", "s6", "s7", "s8")
     relocate(sp, E1_ref, E2_ref, pd_E1, pd_E2) %>% 
     unnest(E1_ref, E2_ref, pd_E1, pd_E2))
 
+
 ```
 
 
@@ -1295,12 +1296,13 @@ ggarrange(sp5, sp6, sp7, sp8,  ncol=4, nrow=1, common.legend = TRUE, legend="rig
 ```
 
 
+
 ## Unknown direction of the environmental change 
 ```{r, echo=FALSE, results='hide'}
-
+# Change this. What we want now is calculating response diversity in each of the 100 directions, and then take the mean of all responses diversity across the surface
 # community 1 
 radius <- 1
-num_arrows <- 20
+num_arrows <- 100
 pd_spp_no <- tibble(angle = rep(seq(0, 2*pi, length = num_arrows), nrow(pd_spp_no))) %>%
   mutate(E1_ref = rep(pd_spp_no$E1_ref, each = num_arrows),
          E2_ref = rep(pd_spp_no$E2_ref, each = num_arrows)) %>%
@@ -1310,27 +1312,74 @@ pd_spp_no <- tibble(angle = rep(seq(0, 2*pi, length = num_arrows), nrow(pd_spp_n
          dir_deriv = E1 * pd_E1 + E2 * pd_E2,
          unit_vec_mag = sqrt(E1^2 + E2^2))
 
-# taking the mean dir derivative for each point
-(dd2_no <- pd_spp_no %>% 
-  dplyr::group_by(sp, E1_ref, E2_ref) %>% 
-  nest() %>% 
-  mutate(dir_d = map(data, "dir_deriv")) %>% 
-  unnest(dir_d) %>%   mutate(mean_dd = mean(dir_d)) %>% 
-  dplyr::group_by(sp, E1_ref, E2_ref, mean_dd))
+
+
+# filter useless stuff
+pd_spp_no <- pd_spp_no %>% 
+  dplyr::select(angle, sp, E1_ref, E2_ref, dir_deriv)
+
+
+# Convert df into a list based on angle (so direction of env change)
+lst_dd <- pd_spp_no %>% group_by(angle) %>% 
+              group_map(~.x)
+
+# add column with point id to identify points on the surface
+point_len <- 4
+lst_dd <- map(lst_dd, ~ .x %>% 
+                mutate(point = rep(seq(1, 1 + nrow(.x) %/% point_len), each = point_len, length.out = nrow(.x))))
+
+
+lst_dd.2 <- lst_dd %>% map(~ .x %>% 
+                           dplyr::group_by(sp) %>% 
+                           summarise_at(vars(-point), list(mean = mean)) %>% 
+                           select(-c(E1_ref_mean, E2_ref_mean)))
+  
 
 
 
-(tmp_rd_multi_no <- dd2_no %>% dplyr::select(E1_ref, E2_ref, sp, mean_dd) %>% 
-  group_by(E1_ref, E2_ref, sp) %>% nest() %>% 
-  mutate(dir_d = map(data, "mean_dd")) %>% 
-  unnest(dir_d) %>% 
-  dplyr::select(-data) %>% 
-  group_by(E1_ref, E2_ref, sp, dir_d) %>% nest() %>% 
-  dplyr::select(-data))
+
+final_lst <- lst_dd.2 %>%  map( ~ .x %>% 
+                   spread(key = sp, value = dir_deriv_mean))
+
+
+### Response diversity calculation
+# dissimilarity
+rdiv_1 <- lapply(final_lst, function(x) cbind(x,"rdiv"= apply(x, 1, resp_div, sign_sens = F)))
+
+
+# divergence
+rdiv_1 <- lapply(rdiv_1, function(x) cbind(x,"sign"= apply(x, 1, resp_div, sign_sens = T)))
+
+
+# from list to tibble
+rdiv_1 <- tibble(
+  rdiv = map(rdiv_1, "rdiv"),
+  sing = map(rdiv_1, "sign")) %>% 
+    mutate(points = row_number()) %>% 
+    unnest(rdiv, sing)
+
+
+# # taking the mean dir derivative for each point
+# (dd2_no <- pd_spp_no %>% 
+#   dplyr::group_by(sp, E1_ref, E2_ref) %>% 
+#   nest() %>% 
+#   mutate(dir_d = map(data, "dir_deriv")) %>% 
+#   unnest(dir_d) %>%   mutate(mean_dd = mean(dir_d)) %>% 
+#   dplyr::group_by(sp, E1_ref, E2_ref, mean_dd))
+
+
+
+# (tmp_rd_multi_no <- dd2_no %>% dplyr::select(E1_ref, E2_ref, sp, mean_dd) %>% 
+#   group_by(E1_ref, E2_ref, sp) %>% nest() %>% 
+#   mutate(dir_d = map(data, "mean_dd")) %>% 
+#   unnest(dir_d) %>% 
+#   dplyr::select(-data) %>% 
+#   group_by(E1_ref, E2_ref, sp, dir_d) %>% nest() %>% 
+#   dplyr::select(-data))
 
 # community 2
 radius <- 1
-num_arrows <- 20
+num_arrows <- 100
 pd_spp_yes <- tibble(angle = rep(seq(0, 2*pi, length = num_arrows), nrow(pd_spp_yes))) %>%
   mutate(E1_ref = rep(pd_spp_yes$E1_ref, each = num_arrows),
          E2_ref = rep(pd_spp_yes$E2_ref, each = num_arrows)) %>%
@@ -1340,58 +1389,105 @@ pd_spp_yes <- tibble(angle = rep(seq(0, 2*pi, length = num_arrows), nrow(pd_spp_
          dir_deriv = E1 * pd_E1 + E2 * pd_E2,
          unit_vec_mag = sqrt(E1^2 + E2^2))
 
-# taking the mean dir derivative for each point
-(dd2_yes <- pd_spp_yes %>% 
-  dplyr::group_by(sp, E1_ref, E2_ref) %>% 
-  nest() %>% 
-  mutate(dir_d = map(data, "dir_deriv")) %>% 
-  unnest(dir_d) %>%   mutate(mean_dd = mean(dir_d)) %>% 
-  dplyr::group_by(sp, E1_ref, E2_ref, mean_dd))
+
+# filter useless stuff
+pd_spp_yes <- pd_spp_yes %>% 
+  dplyr::select(angle, sp, E1_ref, E2_ref, dir_deriv)
+
+
+# Convert df into a list based on angle (so direction of env change)
+
+lst_dd <- pd_spp_yes %>% group_by(angle) %>% 
+              group_map(~.x)
+
+# add column with point id to identify points on the surface
+point_len <- 4
+lst_dd <- map(lst_dd, ~ .x %>% 
+                mutate(point = rep(seq(1, 1 + nrow(.x) %/% point_len), each = point_len, length.out = nrow(.x))))
+
+
+lst_dd.2 <- lst_dd %>% map(~ .x %>% 
+                           dplyr::group_by(sp) %>% 
+                           summarise_at(vars(-point), list(mean = mean)) %>% 
+                           select(-c(E1_ref_mean, E2_ref_mean)))
+  
 
 
 
-(tmp_rd_multi_yes <- dd2_yes %>% dplyr::select(E1_ref, E2_ref, sp, mean_dd) %>% 
-  group_by(E1_ref, E2_ref, sp) %>% nest() %>% 
-  mutate(dir_d = map(data, "mean_dd")) %>% 
-  unnest(dir_d) %>% 
-  dplyr::select(-data) %>% 
-  group_by(E1_ref, E2_ref, sp, dir_d) %>% nest() %>% 
-  dplyr::select(-data))
+
+final_lst <- lst_dd.2 %>%  map( ~ .x %>% 
+                   spread(key = sp, value = dir_deriv_mean))
+
+
+### Response diversity calculation
+# dissimilarity
+rdiv_2 <- lapply(final_lst, function(x) cbind(x,"rdiv"= apply(x, 1, resp_div, sign_sens = F)))
+
+
+# divergence
+rdiv_2 <- lapply(rdiv_2, function(x) cbind(x,"sign"= apply(x, 1, resp_div, sign_sens = T)))
+
+
+# from list to tibble
+rdiv_2 <- tibble(
+  rdiv = map(rdiv_2, "rdiv"),
+  sing = map(rdiv_2, "sign")) %>% 
+    mutate(points = row_number()) %>% 
+    unnest(rdiv, sing)
+
 ```
 
 
 
-```{r, echo=FALSE, results='hide'}
-#Actual RD calculation
-# community 1 
-(rd_multi_no <- tmp_rd_multi_no %>% pivot_wider(names_from = sp, values_from = dir_d))
-
-
-rd_multi_no$rdiv <- apply(rd_multi_no[,c(3:6)], 1, resp_div, sign_sens = F)
-rd_multi_no$sign <- apply(rd_multi_no[,c(3:6)], 1, resp_div, sign_sens = T)
-rd_multi_no$Med<-median(rd_multi_no$rdiv)
-rd_multi_no
-
-# community 2 
-(rd_multi_yes <- tmp_rd_multi_yes %>% pivot_wider(names_from = sp, values_from = dir_d))
-
-
-rd_multi_yes$rdiv <- apply(rd_multi_yes[,c(3:6)], 1, resp_div, sign_sens = F)
-rd_multi_yes$sign <- apply(rd_multi_yes[,c(3:6)], 1, resp_div, sign_sens = T)
-rd_multi_yes$Med<-median(rd_multi_yes$rdiv)
-rd_multi_yes
-```
 
 Table showing the calculated response diversity for one of the two communities when the direction of the environmental change is unknown.
-In this case, directional derivatives for each point where calculated in all directions and then the mean was used to calculate response diversity (only first 6 rows shown).
+In this case, we calculated response diversity for a community in all possible directions across the surface, which represents in our opinion the most sensible way to measure the absolute response diversity of a specific community (only first 6 rows shown). 
 ```{r results='asis', message=FALSE, warning=FALSE}
 
-knitr::kable(head(rd_multi_no), col.names = gsub("[.]", " ", names(rd_multi_no)))
+knitr::kable(head(rdiv_1), col.names = gsub("[.]", " ", names(rdiv_1)))
 
 ```
 
 
-[Plotting response diversity - think about how to plot RD when we do not know the direction of env change. Surface?]
+[Plotting response diversity - think about how to plot RD when we do not know the direction of env change.
+The plot below isn't very clear. Doing the same in 3D would be best]
+
+```{r}
+p <-pd_spp_yes %>%  ggplot(aes(x = E1_ref, y = E2_ref)) + theme_bw()
+
+radius <- 4.5
+num_arrows <- 20
+dd1 <- tibble(angle = rep(seq(0, 2*pi, length = num_arrows), nrow(rdiv_2))) %>% 
+  cbind(rdiv_2) %>%  mutate(E1 = cos(angle) * radius,
+         E2 = sin(angle) * radius)
+rv1 <- p +  geom_segment(data = dd1,
+               aes(x = 300, y = 20,
+                   xend = 300 + E1, yend = 20 + E2,
+                   col = rdiv), alpha = 0.7,
+               size=1) +  scale_colour_gradient2(low = muted("blue"),
+                         mid = "white",
+                         high = muted("red"),
+                         midpoint = mean(dd1$rdiv))
+
+
+
+p2 <-pd_spp_no %>%  ggplot(aes(x = E1_ref, y = E2_ref)) + theme_bw()
+
+radius <- 4.5
+num_arrows <- 20
+dd2 <- tibble(angle = rep(seq(0, 2*pi, length = num_arrows), nrow(rdiv_1))) %>% 
+  cbind(rdiv_1) %>%  mutate(E1 = cos(angle) * radius,
+         E2 = sin(angle) * radius)
+rv2 <- p2 +  geom_segment(data = dd2,
+               aes(x = 300, y = 20,
+                   xend = 300 + E1, yend = 20 + E2,
+                   col = rdiv), alpha = 0.7,
+               size=1) +  scale_colour_gradient2(low = muted("blue"),
+                         mid = "white",
+                         high = muted("red"),
+                         midpoint = mean(dd2$rdiv))
+rv1 + rv2
+```
 
 ### E1 and E2 change independently over time
 This example mimics a situation where the two environmental variables change over time completely independently. This is a common situation in field studies, where multiple drivers of environmental change are not correlated one another.
