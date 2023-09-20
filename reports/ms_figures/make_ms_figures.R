@@ -1,0 +1,1216 @@
+
+rm(list = ls())
+source.files <- list.files(here("r"), full.names = TRUE)
+sapply(source.files, source, .GlobalEnv)
+load("/Users/francesco/Documents/GitHub/multifarious_response_diversity/Data/my_work_space.RData")
+
+############ Figure 1 ################
+#### Fig 1 normal distribution with two tangent lines ### 
+
+# Set the mean and standard deviation
+mu <- 50
+sigma <- 25
+
+# Create a data frame with x and y values for the normal distribution
+df <- data.frame(x = seq(0, 100, length.out = 100))
+df$y <- dnorm(df$x, mean = mu, sd = sigma)
+
+# Plot the normal distribution using ggplot
+p <- ggplot(df, aes(x, y)) +
+  geom_line() 
+
+# Add the first tangent line
+x1 <- 25
+y1 <- dnorm(x1, mean = mu, sd = sigma)
+slope1 <- (dnorm(x1 + 0.01, mean = mu, sd = sigma) - dnorm(x1 - 0.01, mean = mu, sd = sigma)) / 0.02
+intercept1 <- y1 - slope1 * x1
+p <- p + geom_abline(intercept = intercept1, slope = slope1, col = "red")
+
+# Add the second tangent line
+x2 <- 75
+y2 <- dnorm(x2, mean = mu, sd = sigma)
+slope2 <- (dnorm(x2 + 0.01, mean = mu, sd = sigma) - dnorm(x2 - 0.01, mean = mu, sd = sigma)) / 0.02
+intercept2 <- y2 - slope2 * x2
+p <- p + geom_abline(intercept = intercept2, slope = slope2, col = "blue") +
+  theme_classic(base_size = 14)  + theme(axis.title=element_text(size=15),
+                          axis.text=element_text(size=12))+
+  labs(x = "Environmental driver", y = "Growth rate", tag = "(a)")
+
+# Display panel (a)
+print(p)
+
+# Creating panel (b)
+m <- gam(y ~ s(x), data = df, method = "REML")
+
+new_data <- data.frame(x = seq(0, 100, length.out = 1000))
+
+# get first derivatives
+d1_m<-derivatives(m, data = new_data)
+
+d_plot <- ggplot(data = d1_m, mapping = aes(x = data, y = derivative)) +
+  theme_classic(base_size = 14) + 
+  labs(x = "Environmental driver",y = "Derivative",tag = "(b)") + 
+  geom_hline(yintercept = 0,
+             lty=2) +
+  geom_line()
+
+Fig1 <- p/d_plot
+Fig1
+
+# Save the plot
+ggsave(Fig1, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig1.jpg", width=8, height=8)
+ggsave(Fig1, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig1.pdf", width=8, height=8)
+
+
+
+############ Figure 2 ################
+# Fig 2 - annotations added in power point
+
+
+
+get_partials <- function(m, refs) {
+  refs$pd_x <- NA
+  refs$pd_z <- NA
+  for(i in 1:nrow(refs)) {
+    refs$pd_x[i] <- partial_derivatives(m,
+                                        data = refs[i,],
+                                        type = "central",
+                                        focal = "x")$partial_deriv
+    refs$pd_z[i] <- partial_derivatives(m,
+                                        data = refs[i,],
+                                        type = "central",
+                                        focal = "z")$partial_deriv
+  }
+  refs
+}
+
+# Species 1 
+df <- data_sim("eg2", n = 2000, dist = "normal", scale = 0.5, seed = 55)
+# fit the GAM (note: for execution time reasons, k is set articifially low)
+m <- gam(y ~  te(x, z, k = c(5, 5)), data = df, method = "REML")
+# draw te(x,z)
+p1 <- draw(m, rug = FALSE,
+           n_contour = 30,
+           contour_col = "lightgrey")
+
+
+refs <- data.frame(x = c(0.21, 0.9),
+                 z = c(0.325, 0.9))
+
+refs <- get_partials(m, refs) %>%
+  dplyr::rename(x_ref = x, z_ref = z)
+
+
+
+radius <- 0.1
+num_arrows <- 4
+dd1 <- tibble(angle = rep(seq(0, 2*pi, length = num_arrows), nrow(refs))) %>%
+  mutate(x_ref = rep(refs$x_ref, each = num_arrows),
+         z_ref = rep(refs$z_ref, each = num_arrows)) %>%
+  full_join(refs) %>%
+  mutate(x = cos(angle) * radius,
+         z = sin(angle) * radius,
+         dir_deriv = x * pd_x + z * pd_z,
+         unit_vec_mag = sqrt(x^2 + z^2))
+
+col <- ifelse(dd1$x_ref==0.66, "A", 
+              ifelse(dd1$z_ref==0.262, "A", 
+                     "B"  )) # all other values map to NA
+
+dd1$letter <- col
+
+Fig2 <- p1 +
+  geom_segment(data = dd1,
+               aes(x = x_ref, y = z_ref,
+                   xend = x_ref + x, yend = z_ref + z,
+                   col = dir_deriv), alpha = 0.7,
+               size=3) +
+  scale_colour_gradient2(low = muted("blue"),
+                         mid = "white",
+                         high = muted("red"),
+                         midpoint = 0) +
+  geom_point(data = dd1,
+             aes(x = x_ref, y = z_ref,
+                 size = 2))+
+  xlab("Temperature (k)") + ylab("Salinity (ppt)") + 
+  labs(title = "", caption = "") + theme_classic(base_size = 20) +
+  guides(size = "none") 
+
+Fig2
+
+ggsave(Fig2, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig2.jpg", width=8, height=8)
+ggsave(Fig2, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig2.pdf", width=8, height=8)
+
+
+############ Figure 3 ################
+# Fig 3 is generated in the document "Appendix1_principles and demos" at line 668
+
+
+
+
+############ Figure 4 ################
+# Fig 4 
+rm(list = ls())
+source.files <- list.files(here("r"), full.names = TRUE)
+sapply(source.files, source, .GlobalEnv)
+load("/Users/francesco/Documents/GitHub/multifarious_response_diversity/Data/my_work_space.RData")
+
+## Fig 4 - first part of the code also used for fig 5
+
+E1_series <- 273.15 + seq(0, 50, 1)
+E2_series <- seq(0, 50, 1)
+# Simulate spp performance curves with the modified Eppley function with and without interactive effect.
+
+# Without interaction
+set.seed(2465)
+s <- 4 ## number of species
+a1_mean <- 1e-9
+b1_mean <- 0.063
+z1_mean <- 285
+w1_mean <- 60
+a2_mean <- 1e-3
+b2_mean <- 0.02
+z2_mean <- 20
+w2_mean <- 10
+zint_mean <- 0 ## no interaction
+sd_rate_mean <- 0.02
+z1_range <- 40
+z2_range <- 20
+par_table <- tibble(a1 = rnorm(s, a1_mean, 0),#a1_mean/100),
+                    b1 = rnorm(s, b1_mean, 0),#b1_mean/100),
+                    z1 = runif(s, min = z1_mean - z1_range/2, max = z1_mean + z1_range / 2),
+                    w1 = rnorm(s, w1_mean, 0),#w1_mean/100),
+                    a2 = rnorm(s, a2_mean, 0),#a2_mean/100),
+                    b2 = rnorm(s, b2_mean, 0),#b2_mean/100),
+                    z2 = runif(s, min = z2_mean - z2_range/2, max = z2_mean + z2_range / 2),
+                    w2 = rnorm(s, w2_mean, 0),#w2_mean/100),
+                    z_int21 = rnorm(s, zint_mean, zint_mean/10),
+                    sd_rate = rnorm(s, sd_rate_mean, 0)
+)
+
+
+## The normal house keeping
+par_list <- Partable_2_parlist(par_table)
+species_pars_no_inter <- tibble(species = paste0("s", 1:s), pars = par_list) %>%
+  rowwise() %>%
+  mutate(expt = Make_expt(E1_series, E2_series, pars))
+
+
+
+species_pars_no_inter <- species_pars_no_inter %>% unnest(expt)
+species_pars_no_inter %>%  group_by(species) %>%  nest() 
+
+
+(dd1 <- species_pars_no_inter %>% dplyr::select(species, E1, E2, rate))
+
+#Fit response surface for each sp (done with GAMs)
+
+# Create new env data
+new_data <- tibble(E1 = 273.15 + seq(0, 50, 0.2),
+                   E2 = seq(0, 50, 0.2))
+
+# Without interaction
+# GAMs
+nested_gams_no_inter <- species_pars_no_inter %>% 
+  nest(cols =-species) %>% 
+  mutate(
+    gams = map(cols, ~ gam(rate ~ te(E1, E2, k = c(10, 10)),
+                           data = .x,
+                           method = "REML")),
+    predicted = map(gams, ~ predict(.x, newdata = new_data))
+  )
+
+
+
+# Get gams coefficients
+nested_gams_no_inter %>% 
+  mutate(coefs = map(gams, tidy, conf.int = TRUE)) %>% 
+  unnest(coefs)
+
+
+# Get gams glance
+nested_gams_no_inter %>% 
+  mutate(results = map(gams, glance), 
+         R.square = map_dbl(gams, ~ summary(.)$r.sq))  %>% 
+  unnest(results) 
+
+
+sp1 <- draw(nested_gams_no_inter$gams[[1]], rug = FALSE) &
+  labs(tag = "(a)",  caption = "")
+sp2 <- draw(nested_gams_no_inter$gams[[2]], rug = FALSE) &
+  labs(tag = "(b)",  caption = "")
+sp3 <- draw(nested_gams_no_inter$gams[[3]], rug = FALSE) &
+  labs(tag = "(c)",  caption = "")
+sp4 <- draw(nested_gams_no_inter$gams[[4]], rug = FALSE) &
+  labs(tag = "(d)",  caption = "")
+
+#Data wrangling and partials derivatives calculations
+
+# creating new environmental conditions 
+refs2 <- crossing(E1 = 273.15 + seq(0, 50, 10),
+                  E2 = seq(0, 50, 10))
+
+#community 1 
+m_list_no <- (nested_gams_no_inter$gams)
+
+my_spp_names_no <- (nested_gams_no_inter$species)
+
+
+(pd_list_no <- modify_depth(m_list_no, 1, ~ get_partials(., refs2)))
+
+
+
+
+# create a dataframe with E1 and E2 changing over time
+set.seed(64)
+
+library(MASS)
+refs_ts <- mvrnorm(n = 10,        #  specifies the sample size
+                   mu = c(mean(E1_series), mean(E2_series)), #specifies the mean values of each column
+                   Sigma = matrix(c( 105, 0.0,
+                                     0.0, 105), #  specifies the correlation matrix
+                                  nrow = 2))
+
+
+refs_ts <- refs_ts %>%  as_tibble(refs_ts) %>% 
+  dplyr::rename(E1 = "V1", E2 = "V2")
+
+refs_ts <- refs_ts%>% 
+  dplyr::mutate(time = seq.int(nrow(refs_ts)))
+
+p_E1 <- refs_ts %>% 
+  ggplot(aes(x = time, y = E1)) + geom_line(col = "blue", size = 1.5) +
+  geom_point(size = 3)+
+  labs(y = "Temperature", x = "Time", tag = "(a)") + theme_bw(base_size = 15) +
+  scale_x_continuous(breaks=seq(0, 10, 1))
+
+p_E2 <- refs_ts %>% 
+  ggplot(aes(x = time, y = E2)) + geom_line(col = "red", size = 1.5) +
+  geom_point(size = 3)+
+  labs(y = "Salinity", x = "Time",tag = "(b)") + theme_bw(base_size = 15)+
+  scale_x_continuous(breaks=seq(0, 10, 1))
+
+# Plot environmental change over time
+p_E1 + p_E2
+indipendent_fluctuations <- p_E1 + p_E2
+detach("package:MASS", unload=TRUE)
+
+
+### Response surfaces with change in environmental conditions
+
+sp1_nocor <- sp1 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_ts, mapping = aes(label = time)) +
+  geom_path(data = refs_ts, aes(color = time), arrow = arrow()) + guides(color="none" , fill=guide_legend(title="Growth \n Rate"))
+
+sp1_nocor <- sp1 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_ts, mapping = aes(label = time)) +
+  geom_path(data = refs_ts, aes(color = time), arrow = arrow())+ guides(color="none")
+
+sp2_nocor <- sp2 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_ts, mapping = aes(label = time)) +
+  geom_path(data = refs_ts, aes(color = time), arrow = arrow())+ guides(color="none")
+
+sp3_nocor <- sp3 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_ts, mapping = aes(label = time)) +
+  geom_path(data = refs_ts, aes(color = time), arrow = arrow())+ guides(color="none")
+
+sp4_nocor <- sp4 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_label(data = refs_ts, mapping = aes(label = time)) +
+  geom_path(data = refs_ts, aes(color = time), arrow = arrow())+ guides(color="none")
+
+ggarrange(sp1_nocor, sp2_nocor, sp3_nocor,  sp4_nocor, ncol=4, nrow=1, common.legend = TRUE, legend="right")
+
+# get partial derivatives
+(pd_list_no <- modify_depth(m_list_no, 1, ~ get_partials(., refs_ts)))
+# from list to tibble
+(pd_spp_no <- tibble(
+  E1_ref = map(pd_list_no, "E1"),
+  E2_ref = map(pd_list_no, "E2"),
+  pd_E1 = map(pd_list_no, "pd_E1"),
+  pd_E2 = map(pd_list_no, "pd_E2")) %>%
+    dplyr::mutate(sp = my_spp_names_no) %>%
+    relocate(sp, E1_ref, E2_ref, pd_E1, pd_E2) %>%
+    unnest(E1_ref, E2_ref, pd_E1, pd_E2))
+# add time
+(pd_spp_no <-cbind(pd_spp_no, refs_ts$time) %>% 
+    dplyr::rename(time = "refs_ts$time"))
+
+# calculation next value for directional derivatives, and get directional derivatives
+(pd_spp_no <- pd_spp_no %>% transform( nxt_value_E1 = c(E1_ref[-1], NA)) %>%
+    transform(nxt_value_E2 = c(E2_ref[-1], NA)) %>%
+    dplyr::mutate(del_E1 = nxt_value_E1 - E1_ref,
+                  del_E2 = nxt_value_E2 - E2_ref,
+                  unit_vec_mag =  sqrt(del_E1^2 + del_E2^2),
+                  uv_E1 = del_E1 / unit_vec_mag,
+                  uv_E2 = del_E2 / unit_vec_mag,
+                  dir_deriv = pd_E1 * uv_E1 +  pd_E2 * uv_E2) %>% 
+    filter(time != max(time)))
+
+
+
+# community 1 
+# reduce the dataframe and keep only what we need
+red_spp <- pd_spp_no %>%  dplyr::select(sp, time, E1_ref, E2_ref, dir_deriv)
+
+
+dir_plot <- red_spp %>% dplyr::filter(sp == "s1") %>% 
+  ggplot(., mapping = aes(x = time, y = (dir_deriv))) +
+  theme_bw(base_size = 12)+
+  geom_line()+
+  geom_point(size = 3)+
+  labs(x = "time",y = "Directional derivative", tag = "(d)") +
+  geom_hline(yintercept = 0, linetype= "dashed") + theme_classic(base_size = 15) +
+  scale_x_continuous(breaks=seq(0, 10, 1))
+sp_plot <- sp1_nocor + labs(title = "", tag = "(c)")+ theme_classic(base_size = 15) + ylab("Salinity (ppt)") + xlab("Temperature (k)") +
+  guides(fill=guide_legend(title="Growth \n Rate"))
+
+
+Fig4 <- (p_E1 + p_E2 + sp_plot) / dir_plot
+Fig4
+ggsave(Fig4, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig4.jpg", width=15, height=9)
+ggsave(Fig4, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig4.pdf", width=15, height=9)
+
+
+
+
+
+############ Figure 5 ################
+#Fig 5
+
+# community 1 
+# reduce the dataframe and keep only what we need
+red_spp <- pd_spp_no %>%  dplyr::select(sp, time, E1_ref, E2_ref, dir_deriv)
+# from long to wide
+rdiv_sim_nocor <- red_spp %>%
+  spread( sp, dir_deriv)
+
+rdiv_sim_nocor[is.na(rdiv_sim_nocor)] <- 0
+
+
+# actual calculation for only the same species used above
+rdiv_sim_nocor$rdiv<-apply(rdiv_sim_nocor[,c(4:7)], 1, resp_div, sign_sens = F)
+rdiv_sim_nocor$sign<-apply(rdiv_sim_nocor[,c(4:7)], 1, resp_div, sign_sens = T)
+rdiv_sim_nocor$Med<-median(rdiv_sim_nocor$rdiv)
+rdiv_sim_nocor
+
+
+
+# community 1 
+rmax<-max(rdiv_sim_nocor$rdiv); rmin<-1
+dmax<-max(rdiv_sim_nocor$sign); dmin<-0
+# community 1 
+
+
+dd_plot <- ggplot(data = red_spp, mapping = aes(x = time, y = (dir_deriv), col = sp)) +
+  theme_bw(base_size = 12)+
+  geom_line()+
+  labs(x = "time",y = "Directional derivative", tag = "a")+
+  geom_hline(yintercept = 0, linetype= "dashed")+
+  scale_x_continuous(breaks=seq(0, 15, 1))
+
+rdiv_plot <- ggplot(data = rdiv_sim_nocor, mapping = aes(x = time, y = rdiv)) +
+  geom_line()+
+  labs(x = "time",y = "Dissimilarity (derivatives)", tag = "c") +
+  theme_bw(base_size = 12)+
+  geom_richtext(x = 2,
+                mapping = aes(y = rmax - 0.005),
+                size=4.5,
+                label.color = NA,
+                label = paste("Mean =",paste0(round(mean(rdiv_sim_nocor$rdiv),digits = 2))))+
+  scale_x_continuous(breaks=seq(0, 15, 1))
+  
+
+
+
+sing_plot <- ggplot(data = rdiv_sim_nocor, mapping = aes(x = time, y = sign)) +
+  geom_line()+
+  labs(x = "time",y = "Divergence", tag = "e") +
+  theme_bw(base_size = 12)+
+  geom_richtext(x = 2,
+                mapping = aes(y = dmax - 0.1),
+                size=4.5,
+                label.color = NA,
+                label = paste("Mean =",paste0(round(mean(rdiv_sim_nocor$sign),digits = 2))))+
+  lims(y = c(dmin,dmax))+
+  scale_x_continuous(breaks=seq(0, 15, 1))
+
+sp1_nocor <- sp1_nocor + theme_classic(base_size = 15) + labs(title = "Sp 1") + xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_legend(title="Growth \n Rate"))
+sp2_nocor<- sp2_nocor + theme_classic(base_size = 15) + labs(title = "Sp 2")+ xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_legend(title="Growth \n Rate"))
+sp3_nocor <- sp3_nocor + theme_classic(base_size = 15) + labs(title = "Sp 3")+ xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_legend(title="Growth \n Rate"))
+sp4_nocor <- sp4_nocor + theme_classic(base_size = 15) + labs(title = "Sp 4")+ xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_legend(title="Growth \n Rate"))
+
+dd_plot <- dd_plot + labs(tag = "(e)")+ theme_classic(base_size = 15)
+rdiv_plot <- rdiv_plot + labs(title = "", tag = "(f)")+ theme_classic(base_size = 15) + ylab("Dissimilarity")
+sing_plot <- sing_plot + labs(tag = "(g)")+ theme_classic(base_size = 15)
+
+try <- ggarrange(sp1_nocor, sp2_nocor, sp3_nocor,  sp4_nocor, ncol=2, nrow=2, common.legend = TRUE, legend="right")
+try / dd_plot / rdiv_plot / sing_plot
+fig5 <- ggarrange(try, dd_plot, rdiv_plot, sing_plot, heights = c(2, 0.7, 0.7, 0.7),
+                  ncol = 1, nrow = 4) 
+fig5
+
+ggsave(fig5, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig5.jpg", width=8, height=12)
+ggsave(fig5, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig5.pdf", width=8, height=12)
+
+############ Figure 6 ################
+# Fig 6 is generated in the document called "Report1_for_pub.Rmd", line 689
+
+
+
+
+
+############ Figure 7 ################
+### Figure 7 - Creating the basis for the figure. Additional text and lines have been added in power point
+
+get_partials <- function(m, refs) {
+  refs$pd_x <- NA
+  refs$pd_z <- NA
+  for(i in 1:nrow(refs)) {
+    refs$pd_x[i] <- partial_derivatives(m,
+                                        data = refs[i,],
+                                        type = "central",
+                                        focal = "x")$partial_deriv
+    refs$pd_z[i] <- partial_derivatives(m,
+                                        data = refs[i,],
+                                        type = "central",
+                                        focal = "z")$partial_deriv
+  }
+  refs
+}
+
+# Species 1 
+df <- data_sim("eg2", n = 2000, dist = "normal", scale = 0.5, seed = 55)
+# fit the GAM (note: for execution time reasons, k is set articifially low)
+m <- gam(y ~ ti(x) + ti(z) + te(x, z, k = c(5, 5)), data = df, method = "REML")
+# draw te(x,z)
+p1 <- draw(m, rug = FALSE,
+           n_contour = 30,
+           contour_col = "lightgrey")
+refs <- crossing(x = seq(0.1, 0.9, 0.35),
+                 z = seq(0.1, 0.9, 0.35))
+refs <- get_partials(m, refs) %>%
+  dplyr::rename(x_ref = x, z_ref = z)
+radius <- 0.1
+num_arrows <- 4
+dd1 <- tibble(angle = rep(seq(0, 2*pi, length = num_arrows), nrow(refs))) %>%
+  mutate(x_ref = rep(refs$x_ref, each = num_arrows),
+         z_ref = rep(refs$z_ref, each = num_arrows)) %>%
+  full_join(refs) %>%
+  mutate(x = cos(angle) * radius,
+         z = sin(angle) * radius,
+         dir_deriv = x * pd_x + z * pd_z,
+         unit_vec_mag = sqrt(x^2 + z^2))
+sp1 <- p1 +
+  geom_segment(data = dd1,
+               aes(x = x_ref, y = z_ref,
+                   xend = x_ref + x, yend = z_ref + z,
+                   col = dir_deriv), alpha = 0.7,
+               size=3) +
+  scale_colour_gradient2(low = muted("blue"),
+                         mid = "white",
+                         high = muted("red"),
+                         midpoint = 0) +
+  geom_point(data = dd1,
+             aes(x = x_ref, y = z_ref,
+                 size = 2))+
+  xlab("Temperature (k)") + ylab("Salinity (ppt)") + 
+  labs(title = "Sp 1", tag = "(a)", caption = "") + theme_classic(base_size = 20) +
+  guides(size = "none") 
+
+# Species 2
+df <- data_sim("eg2", n = 2000, dist = "normal", scale = 0.5, seed = 55)
+# fit the GAM (note: for execution time reasons, k is set articifially low)
+m <- gam(y ~  te(x, z, k = c(5, 5)), data = df, method = "REML")
+# draw te(x,z)
+p1 <- draw(m, rug = FALSE,
+           n_contour = 30,
+           contour_col = "lightgrey")
+refs <- crossing(x = seq(0.1, 0.9, 0.35),
+                 z = seq(0.1, 0.9, 0.35))
+refs <- get_partials(m, refs) %>%
+  dplyr::rename(x_ref = x, z_ref = z)
+radius <- 0.1
+num_arrows <- 4
+dd1 <- tibble(angle = rep(seq(0, 2*pi, length = num_arrows), nrow(refs))) %>%
+  mutate(x_ref = rep(refs$x_ref, each = num_arrows),
+         z_ref = rep(refs$z_ref, each = num_arrows)) %>%
+  full_join(refs) %>%
+  mutate(x = cos(angle) * radius,
+         z = sin(angle) * radius,
+         dir_deriv = x * pd_x + z * pd_z,
+         unit_vec_mag = sqrt(x^2 + z^2))
+sp2 <- p1 + 
+  geom_segment(data = dd1,
+               aes(x = x_ref, y = z_ref,
+                   xend = x_ref + x, yend = z_ref + z,
+                   col = dir_deriv), alpha = 0.7,
+               size=3) +
+  scale_colour_gradient2(low = muted("blue"),
+                         mid = "white",
+                         high = muted("red"),
+                         midpoint = 0) +
+  geom_point(data = dd1,
+             aes(x = x_ref, y = z_ref,
+                 size = 2))+
+  xlab("Temperature (k)") + ylab("Salinity (ppt)") + 
+  labs(title = "Sp 2", tag = "(b)", caption = "") + theme_classic(base_size = 20) +
+  guides(size = "none")
+
+Fig_7 <- ggarrange(sp1, sp2, heights = c(2,2), 
+          ncol = 2) 
+Fig_7
+
+
+ggsave(Fig_7, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.7.jpg", width=10, height=8)
+ggsave(Fig_7, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.7.pdf", width=10, height=9)
+
+### Preparing Figure 8 - Temperature dominant env variable on species growth rate
+## define the series of values of the environmental variables. (We also provie the code to visualise the spp responses when we insert an interaction)
+E1_series <- 273.15 + seq(0, 50, 1)
+E2_series <- seq(0, 50, 1)
+
+
+## Set parameter values - without interaction
+pars <- list(a1 = 1e-9,
+             b1 = 0.063,
+             z1 = 285,
+             w1 = 60,
+             a2 = 1e-3,
+             b2 = 0.02,
+             z2 = 20,
+             w2 = 10,
+             z_int21 = 0,
+             wint = 0,
+             sd_rate = 0)
+## Make a surface / experiment 
+expt <- Make_expt(E1_series, E2_series, pars)
+
+
+## Visualise the performance surface of a species
+pc_figs <- Plot_performance_curves(expt[[1]])
+fig1 <- pc_figs[[1]]+ theme_bw() + pc_figs[[2]] + theme_bw()
+fig1 
+
+
+
+## Set parameter values - with interaction
+pars <- list(a1 = 1e-9,
+             b1 = 0.063,
+             z1 = 285,
+             w1 = 60,
+             a2 = 1e-3,
+             b2 = 0.02,
+             z2 = 20,
+             w2 = 10,
+             z_int21 = 0.2,
+             wint = 0,
+             sd_rate = 0)
+## Make a surface / experiment 
+expt <- Make_expt(E1_series, E2_series, pars)
+
+
+## Visualise the performance surface of a species
+pc_figs <- Plot_performance_curves(expt[[1]])
+fig2 <- pc_figs[[1]]+ theme_bw() + pc_figs[[2]] + theme_bw()
+
+fig1 + theme_bw()
+pp1 <- fig1[[1]] + labs(x = "Temperature", y = "Growth Rate",  tag = "(a)") +
+  theme_bw(base_size = 15) +
+  guides(color=guide_legend(title="Salinity")) +
+  fig1[[2]] + plot_annotation(tag_levels = 'a',
+                              tag_prefix = '(',
+                              tag_suffix = ')') +
+  theme_bw(base_size = 15) +
+  labs(x = "Salinity", y = "Growth Rate", tag = "(b)")+
+  guides(color=guide_legend(title="Temperature"))
+
+
+pp2 <- fig2[[1]] +  labs(x = "Temperature", y = "Growth Rate", tag = "(c)") +
+  theme_bw(base_size = 15) +
+  guides(color=guide_legend(title="Salinity")) +
+  fig2[[2]] +
+  theme_bw(base_size = 15) +
+  labs(x = "Salinity", y = "Growth Rate", tag = "(d)")+
+  guides(color=guide_legend(title="Temperature"))
+
+simulation_curves_Tdom <- pp1/pp2
+simulation_curves_Tdom
+
+
+
+
+
+### Preparing Figure 8 - same effect of temperature and salinity on species growth rate
+## define the series of values of the environmental variables
+E1_series <- seq(0, 50, 1)
+E2_series <- seq(0, 50, 1)
+
+
+## Set parameter values - without interaction
+pars <- list(a1 = 1e-3,
+             b1 = 0.02,
+             z1 = 20,
+             w1 = 10,
+             a2 = 1e-3,
+             b2 = 0.02,
+             z2 = 20,
+             w2 = 10,
+             z_int21 = 0,
+             wint = 0,
+             sd_rate = 0)
+## Make a surface / experiment 
+expt <- Make_expt(E1_series, E2_series, pars)
+expt[[1]]$E1 <- expt[[1]]$E1 + 273.15
+
+## Visualise the performance surface of a species
+pc_figs <- Plot_performance_curves(expt[[1]])
+fig1 <- pc_figs[[1]]+ theme_bw() + pc_figs[[2]] + theme_bw()
+fig1 
+
+
+
+## Set parameter values - with interaction
+pars <- list(a1 = 1e-3,
+             b1 = 0.02,
+             z1 = 20,
+             w1 = 10,
+             a2 = 1e-3,
+             b2 = 0.02,
+             z2 = 20,
+             w2 = 10,
+             z_int21 = 0.2,
+             wint = 0,
+             sd_rate = 0)
+## Make a surface / experiment 
+expt <- Make_expt(E1_series, E2_series, pars)
+expt[[1]]$E1 <- expt[[1]]$E1 + 273.15
+
+## Visualise the performance surface of a species
+pc_figs <- Plot_performance_curves(expt[[1]])
+fig2 <- pc_figs[[1]]+ theme_bw() + pc_figs[[2]] + theme_bw()
+
+fig1 + theme_bw()
+pp2 <- fig1[[1]] + labs(x = "Temperature", y = "Growth Rate",  tag = "(c)") +
+  theme_bw(base_size = 15) +
+  guides(color=guide_legend(title="Salinity")) +
+  fig1[[2]] + plot_annotation(tag_levels = 'c',
+                              tag_prefix = '(',
+                              tag_suffix = ')') +
+  theme_bw(base_size = 15) +
+  labs(x = "Salinity", y = "Growth Rate", tag = "(d)")+
+  guides(color=guide_legend(title="Temperature"))
+
+
+
+simulation_curves <- pp1/pp2
+simulation_curves
+
+ggsave(simulation_curves, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.8.jpg", width=10, height=8)
+ggsave(simulation_curves, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.8.pdf", width=10, height=9)
+
+
+
+
+
+
+############ Figure 9 ################
+### Preparing Figure 9
+# create data frame
+library(truncnorm)
+
+set.seed(46354)
+df_low_z1 <- data.frame(E1 = c(rtruncnorm(n=1000, a=250, b=350, mean=270, sd=15), rtruncnorm(n=1000, a=250, b=350, mean=275, sd=15), rtruncnorm(n=1000, a=250, b=350, mean=272, sd=15),
+                               rtruncnorm(n=1000, a=50, b=350, mean=280, sd=15)),
+                        species = rep(c("Sp 1", "Sp 2", "Sp 3", "Sp 4"), each = 1000))
+
+# plot normal distributions
+low_z1_div <- ggplot(df_low_z1, aes(x = E1, fill = species)) +
+  geom_density(alpha = 0.5) +
+  scale_fill_viridis_d() +
+  theme_classic() +
+  labs(y = "Growth rate") + ggtitle("Low T optimum diversity") +labs(x = "Temperature", tag = "(a)") +
+  theme(
+    plot.title = element_text(hjust = 0.5)) +
+  theme_classic(base_size = 15) +
+  theme(
+    plot.title = element_text(hjust = 0.5))
+
+
+
+# create data frame
+set.seed(46354)
+df_medium_z1 <-data.frame(E1 = c(rtruncnorm(n=1000, a=200, b=285, mean=235, sd=15), rtruncnorm(n=1000, a=210, b=320, mean=265, sd=15), rtruncnorm(n=1000, a=250, b=350, mean=285, sd=15),
+                                 rtruncnorm(n=1000, a=250, b=350, mean=288, sd=15)),
+                          species = rep(c("Sp 1", "Sp 2", "Sp 3", "Sp 4"), each = 1000))
+
+# plot normal distributions
+medium_z1_div <- ggplot(df_medium_z1, aes(x = E1, fill = species)) +
+  geom_density(alpha = 0.5) +
+  scale_fill_viridis_d() +
+  theme_classic() +
+  labs(y = "Growth rate") + ggtitle("Medium T optimum diversity") +labs(x = "Temperature", tag = "(b)") +
+  theme(
+    plot.title = element_text(hjust = 0.5))+
+  theme_classic(base_size = 15) +
+  theme(
+    plot.title = element_text(hjust = 0.5))
+
+medium_z1_div
+
+# create data frame
+set.seed(46354)
+df_high_z1 <- data.frame(E1 = c(rtruncnorm(n=1000, a=200, b=350, mean=230, sd=15), rtruncnorm(n=1000, a=220, b=300, mean=250, sd=15), rtruncnorm(n=1000, a=250, b=350, mean=285, sd=15),
+                                rtruncnorm(n=1000, a=250, b=350, mean=320, sd=15)),
+                         species = rep(c("Sp 1", "Sp 2", "Sp 3", "Sp 4"), each = 1000))
+# plot normal distributions
+high_z1_div <- ggplot(df_high_z1, aes(x = E1, fill = species)) +
+  geom_density(alpha = 0.5) +
+  scale_fill_viridis_d() +
+  theme_classic() +
+  labs(y = "Growth rate") + ggtitle("High T optimum diversity") +labs(x = "Temperature", tag = "(c)") +
+  theme(
+    plot.title = element_text(hjust = 0.5))+
+  theme_classic(base_size = 15) +
+  theme(
+    plot.title = element_text(hjust = 0.5))
+high_z1_div
+
+comb <- low_z1_div/ medium_z1_div / high_z1_div & theme(legend.position = "bottom")
+fig_optimum <- comb + plot_layout(guides = "collect", heights = c(0.5, 0.5, 0.5))
+
+# Position of the optimum
+scenario1 <- optima_scenario1 %>%  ggplot(aes(x = E1, y = E2, col = as.factor(community))) +
+  geom_point(size = 8) +
+  scale_colour_viridis_d()+
+  labs(x = "Optimum Temperature", y = "Optimum Salinity", tag = '(d)', col = ("community"), title = "Only variation in Temperature \n optimum diversity") +
+  theme_classic(base_size = 15) + 
+  ylim(0, 50) 
+
+
+scenario2 <- optima_scenatio2 %>%  ggplot(aes(x = E1, y = E2, col = as.factor(community))) +
+  geom_point(size = 8) +
+  scale_colour_viridis_d()+
+  labs(x = "Optimum Temperature", y = "Optimum Salinity", tag = '(e)',  col = ("community"), title = "Variation in Temperature and Salinity \n optimum diversity - Positive correlation") +
+  theme_classic(base_size = 15) + 
+  ylim(0, 50) 
+
+scenario3 <- optima_scenario3 %>%  ggplot(aes(x = E1, y = E2, col = as.factor(community))) +
+  geom_point(size = 8) +
+  scale_colour_viridis_d()+
+  labs(x = "Optimum Temperature", y = "Optimum Salinity", tag = '(f)',  col = ("community"), title = "Variation in Temperature and Salinity \n optimum diversity - Negative correlation") +
+  theme_classic(15)+ 
+  ylim(0, 50) 
+
+optimum_scenarios <- scenario1 / scenario2 / scenario3 & theme(legend.position = "bottom")
+optimum_scenarios <- optimum_scenarios + plot_layout(guides = "collect")
+optimum_scenarios
+
+fig_Optimum_complete <- ggarrange(fig_optimum, optimum_scenarios, heights = c(2,2), 
+                                  ncol = 2)  
+fig_Optimum_complete
+
+ggsave(fig_Optimum_complete, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.9.jpg", width=10, height=9)
+ggsave(fig_Optimum_complete, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.9.pdf", width=10, height=9)
+
+
+############ Figure 10 ################
+### Preparing Figure 10
+# Starting with time series of temperature changing over time with different mean values (low, medium, high)
+## define the series of values of the environmental variables
+E1_series <- 210.15 + seq(0, 120, 1)
+E1min = 180
+E1max = 350
+
+
+
+# Scenario 1 - low mean vakues of E1 and E2
+theme_set(theme_bw(base_size = 12))
+# create random distribution
+set.seed(65354)
+refs1 <- as.data.frame(rnorm(50, quantile(E1_series, .01 ), 10))
+refs1$time <- seq.int(nrow(refs1))
+refs1 <- refs1 %>% dplyr::rename(E1 = "rnorm(50, quantile(E1_series, 0.01), 10)")
+# plot env change over time
+p_E1 <- refs1 %>% 
+  ggplot(aes(x = time, y = E1)) + geom_line() +
+  geom_hline(yintercept = mean(refs1$E1),lty=2)+ 
+  labs(tag = "(a)", y = "Temperature") +
+  lims(y = c(E1min, E1max))
+
+p_E1
+
+
+### scenario 2 - intermediate mean values E1
+theme_set(theme_bw(base_size = 12))
+# create random distribution
+set.seed(65354)
+refs2 <- as.data.frame(rnorm(50, quantile(E1_series, 0.50), 10))
+refs2$time <- seq.int(nrow(refs1))
+refs2 <- refs2 %>% dplyr::rename(E1 = "rnorm(50, quantile(E1_series, 0.5), 10)")
+# plot env change over time
+p2_E1 <- refs2 %>% 
+  ggplot(aes(x = time, y = E1)) + geom_line() +
+  geom_hline(yintercept = mean(refs2$E1),lty=2)+ 
+  labs(tag = "(b)", y = "Temperature") +
+  lims(y = c(E1min, E1max))
+
+p2_E1
+
+
+### scenario 3 - high mean values E1
+theme_set(theme_bw(base_size = 12))
+# create random distribution
+set.seed(65354)
+refs3 <- as.data.frame(rnorm(50, quantile(E1_series, .99 ), 10))
+refs3$time <- seq.int(nrow(refs1))
+refs3 <- refs3 %>% dplyr::rename(E1 = "rnorm(50, quantile(E1_series, 0.99), 10)")
+# plot env change over time
+p3_E1 <- refs3 %>% 
+  ggplot(aes(x = time, y = E1)) + geom_line() +
+  geom_hline(yintercept = mean(refs3$E1),lty=2)+ 
+  labs(tag = "(c)", y = "Temperature") +
+  lims(y = c(E1min, E1max))
+
+p3_E1
+
+
+env <- (p_E1 + p2_E1 + p3_E1)
+
+
+
+# Now conceptual figure on diversity of spp responses
+# create data frame
+library(truncnorm)
+
+set.seed(46354)
+df_low_z1 <- data.frame(E1 = c(rtruncnorm(n=1000, a=250, b=350, mean=270, sd=15), rtruncnorm(n=1000, a=250, b=350, mean=275, sd=15), rtruncnorm(n=1000, a=250, b=350, mean=272, sd=15),
+                               rtruncnorm(n=1000, a=50, b=350, mean=280, sd=15)),
+                        species = rep(c("Sp 1", "Sp 2", "Sp 3", "Sp 4"), each = 1000))
+
+# plot normal distributions
+low_z1_div <- ggplot(df_low_z1, aes(x = E1, fill = species)) +
+  geom_density(alpha = 0.5) +
+  scale_fill_viridis_d() +
+  theme_classic() +
+  labs(y = "Growth rate") + ggtitle("Low T optimum diversity") +labs(x = "Temperature", tag = "(d)") +
+  theme(
+    plot.title = element_text(hjust = 0.5)) +
+  theme_classic(base_size = 15) +
+  annotate('rect', xmin=250, xmax=305, ymin=0.0, ymax=0.035, alpha=.2, fill='red')+
+  annotate('text', x=280, y=0.032, label='Intermediate mean Temperature')+
+  annotate('rect', xmin=200, xmax=250, ymin=0.0, ymax=0.035, alpha=.2, fill='green')+
+  annotate('text', x=220, y=0.032, label='Low mean Temperature')+
+  annotate('rect', xmin=305, xmax=350, ymin=0.0, ymax=0.035, alpha=.2, fill='blue')+
+  annotate('text', x=330, y=0.032, label='High mean Temperature')+
+  theme(
+    plot.title = element_text(hjust = 0.5))
+
+
+
+
+# create data frame
+set.seed(46354)
+df_high_z1 <- data.frame(E1 = c(rtruncnorm(n=1000, a=200, b=350, mean=230, sd=15), rtruncnorm(n=1000, a=220, b=300, mean=250, sd=15), rtruncnorm(n=1000, a=250, b=350, mean=285, sd=15),
+                                rtruncnorm(n=1000, a=250, b=350, mean=320, sd=15)),
+                         species = rep(c("Sp 1", "Sp 2", "Sp 3", "Sp 4"), each = 1000))
+# plot normal distributions
+high_z1_div <- ggplot(df_high_z1, aes(x = E1, fill = species)) +
+  geom_density(alpha = 0.5) +
+  scale_fill_viridis_d() +
+  theme_classic() +
+  labs(y = "Growth rate") + ggtitle("High T optimum diversity") +labs(x = "Temperature", tag = "(e)") +
+  theme(
+    plot.title = element_text(hjust = 0.5))+
+  theme_classic(base_size = 15) +
+  annotate('rect', xmin=250, xmax=305, ymin=0.0, ymax=0.035, alpha=.2, fill='red')+
+  annotate('text', x=280, y=0.032, label='Intermediate mean Temperature')+
+  annotate('rect', xmin=200, xmax=250, ymin=0.0, ymax=0.035, alpha=.2, fill='green')+
+  annotate('text', x=220, y=0.032, label='Low mean Temperature')+
+  annotate('rect', xmin=305, xmax=350, ymin=0.0, ymax=0.035, alpha=.2, fill='blue')+
+  annotate('text', x=330, y=0.032, label='High mean Temperature') +
+  theme(
+    plot.title = element_text(hjust = 0.5))
+
+
+comb <- low_z1_div / high_z1_div & theme(legend.position = "bottom")
+fig_optimum <- comb + plot_layout(guides = "collect", heights = c(0.5, 0.5))
+
+fig_optimum_color <- comb + plot_layout(guides = "collect")
+
+mean_value_env_change <- ggarrange(env, fig_optimum_color, ncol = 1, nrow = 2, heights = c(0.3, 0.7))
+
+mean_value_env_change
+ggsave(mean_value_env_change, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig10.jpg", width=10, height=9)
+ggsave(mean_value_env_change, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig10.pdf", width=10, height=9)
+
+
+
+
+
+############ Figure 11 ################
+# Figure 11 - potential response diversity
+# Potential response diversity - final overview
+col2 <- ifelse(Absolute_RD$scenario==1, "None",
+               ifelse(Absolute_RD$scenario==2, "Positive",
+                      ifelse(Absolute_RD$scenario==3, "Negative",
+                                    NA  ))) # all other values map to NA
+
+Absolute_RD$correlation <- col2
+Absolute_RD$correlation <- factor(Absolute_RD$correlation, levels = c("None", "Positive", "Negative"))
+Absolute_plot_tot <-  ggplot(Absolute_RD, aes(x = correlation, y = value, color = community)) +
+  scale_color_uchicago(labels=c('High', 'Medium', 'Low')) + 
+  labs(x = "Correlation in diversity of responses", y = "Response Diversity") + facet_wrap("RDiv",  scales = "free_y") +
+   facet_wrap("RDiv",  scales = "free_y") +
+  geom_jitter( size = 6, alpha = 0.80, width = 0.20) +
+  theme_bw(base_size = 12)  + ggtitle("Factor I:\nTemperature dominant environmental variable") +
+  guides(color=guide_legend(title="Factor II:\nDiversity in responses to temperature"))
+
+
+col2 <- ifelse(Absolute_RD_same$scenario==1, "None",
+               ifelse(Absolute_RD_same$scenario==2, "Positive",
+                      ifelse(Absolute_RD_same$scenario==3, "Negative",
+                             NA  ))) # all other values map to NA
+
+Absolute_RD_same$correlation <- col2
+Absolute_RD_same$correlation <- factor(Absolute_RD_same$correlation, levels = c("None", "Positive", "Negative"))
+
+Absolute_plot_tot_same <-  ggplot(Absolute_RD_same, aes(x = correlation, y = value, color = community)) +
+  scale_color_uchicago(labels=c('High', 'Medium', 'Low')) + 
+  labs(x = "Correlation in diversity of responses", y = "Response Diversity") + facet_wrap("RDiv",  scales = "free_y") +
+  facet_wrap("RDiv",  scales = "free_y") +
+  geom_jitter( size = 6, alpha = 0.80, width = 0.20) +
+  theme_bw(base_size = 12) +
+  guides(color=guide_legend(title="Factor II:\nDiversity in responses to temperature"))
+
+Absolute_RD_ms <-( Absolute_plot_tot + labs(tag = "(a)"))  /( Absolute_plot_tot_same + labs(tags = "(b)")) & theme(legend.position = "right")
+Absolute_RD_ms <- Absolute_RD_ms + plot_layout(guides = "collect") + ggtitle("Factor I:\nEqual effect of temperature and salinity")
+
+Absolute_RD_ms
+ggsave(Absolute_RD_ms, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.11.jpg", width=10, height=10)
+ggsave(Absolute_RD_ms, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig11.pdf", width=10, height=10)
+
+
+
+
+
+
+
+############ Figure 12 ################
+# Figure 12
+theme_set(theme_classic(base_size = 15))
+diss1 <-  ggplot(dd_dissimilarity_scenario1, aes(x = z1, y = rdiv, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "Temperature optimum diversity", y = "Dissimilarity (derivatives)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(a)")+ 
+  scale_x_discrete(limits = level_order)  + ggtitle("Factor II:\nOnly variation in Temperature\n optimum diversity")
+
+
+diss2 <-  ggplot(dd_dissimilarity_scenario2, aes(x = z1, y = rdiv, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "Temperature optimum diversity", y = "Dissimilarity (derivatives)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(b)")+ 
+  scale_x_discrete(limits = level_order) + ggtitle("Factor II:\nVariation in Temperature and Salinity\noptimum diversity - positive correlation")
+
+diss3 <-  ggplot(dd_dissimilarity_scenario3, aes(x = z1, y = rdiv, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "Temperature optimum diversity", y = "Dissimilarity (derivatives)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(c)")+ 
+  scale_x_discrete(limits = level_order) + ggtitle("Factor II:\nVariation in Temperature and Salinity\noptimum diversity - negative correlation")
+
+
+diss4 <-  ggplot(dd_dissimilarity_scenario1_SAME, aes(x = z1, y = rdiv, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "Temperature optimum diversity", y = "Dissimilarity (derivatives)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(d)")+ 
+  scale_x_discrete(limits = level_order)  + ggtitle("Factor II:\nOnly variation in Temperature\n optimum diversity")
+
+
+diss5 <-  ggplot(dd_dissimilarity_scenario2_SAME, aes(x = z1, y = rdiv, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "Temperature optimum diversity", y = "Dissimilarity (derivatives)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(e)")+ 
+  scale_x_discrete(limits = level_order) + ggtitle("Factor II:\nVariation in Temperature and Salinity\noptimum diversity - positive correlation")
+
+diss6 <-  ggplot(dd_dissimilarity_scenario3_SAME, aes(x = z1, y = rdiv, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "Temperature optimum diversity", y = "Dissimilarity (derivatives)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(f)")+ 
+  scale_x_discrete(limits = level_order) + ggtitle("Factor II:\nVariation in Temperature and Salinity\noptimum diversity - negative correlation")
+
+
+
+top_plot      <- wrap_elements((diss1 + diss2 + diss3 & theme(legend.position = "bottom") & 
+                                  labs(col = "Factor III: Temperature mean value")) + plot_layout(guides = "collect")+
+                                 plot_annotation(title = "Factor I: Temperature dominant environmental variable",
+                                                 theme = theme(plot.title = element_text(hjust = 0.5))))
+  
+
+bottom_plot   <- wrap_elements((diss4 + diss5 + diss6 & theme(legend.position = "bottom") & 
+                                  labs(col = "Factor III: Temperature mean value")) + plot_layout(guides = "collect")+ 
+                                 plot_annotation(title = "Factor I: Equal effect of Temperature and Salinity",
+                                                 theme = theme(plot.title = element_text(hjust = 0.5))))
+
+combined_final <- (top_plot / bottom_plot) 
+
+combined_final <-combined_final + plot_layout(guides = "collect") # doesn't actually collect the legend... if you happen to know how to meke it work, please get in touch
+combined_final 
+
+
+ggsave(combined_final, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.12.jpg", width=18, height=14)
+ggsave(combined_final, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.12.pdf", width=18, height=14)
+
+
+
+
+
+############ Figure 13 ################
+# Figure 13
+theme_set(theme_classic(base_size = 15))
+div1 <-  ggplot(dd_divergence_scenario1, aes(x = z1, y = sign, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "Temperature optimum diversity", y = "Divergence (sign sensitive)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(a)")+ 
+  scale_x_discrete(limits = level_order)  + ggtitle("Factor II:\nOnly variation in Temperature\n optimum diversity")
+
+
+div2 <-  ggplot(dd_divergence_scenario2, aes(x = z1, y = sign, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "Temperature optimum diversity", y = "Divergence (sign sensitive)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(b)")+ 
+  scale_x_discrete(limits = level_order) + ggtitle("Factor II:\nVariation in Temperature and Salinity\noptimum diversity - positive correlation")
+
+div3 <-  ggplot(dd_divergence_scenario3, aes(x = z1, y = sign, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "Temperature optimum diversity", y = "Divergence (sign sensitive)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(c)")+ 
+  scale_x_discrete(limits = level_order) + ggtitle("Factor II:\nVariation in Temperature and Salinity\noptimum diversity - negative correlation")
+
+
+div4 <-  ggplot(dd_divergence_scenario1_SAME, aes(x = z1, y = sign, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "Temperature optimum diversity", y = "Divergence (sign sensitive)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(d)")+ 
+  scale_x_discrete(limits = level_order)   + ggtitle("Factor II:\nOnly variation in Temperature\n optimum diversity")
+
+
+div5 <-  ggplot(dd_divergence_scenario2_SAME, aes(x = z1, y = sign, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "Temperature optimum diversity", y = "Divergence (sign sensitive)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(e)")+ 
+  scale_x_discrete(limits = level_order) + ggtitle("Factor II:\nVariation in Temperature and Salinity\noptimum diversity - positive correlation")
+
+
+div6 <-  ggplot(dd_divergence_scenario3_SAME, aes(x = z1, y = sign, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "Temperature optimum diversity", y = "Divergence (sign sensitive)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(f)")+ 
+  scale_x_discrete(limits = level_order) + ggtitle("Factor II:\nVariation in Temperature and Salinity\noptimum diversity - negative correlation")
+
+
+
+
+
+top_plot      <- wrap_elements((div1 + div2 + div3 & theme(legend.position = "bottom") & 
+                                  labs(col = "Factor III: Temperature mean value")) + plot_layout(guides = "collect")+
+                                 plot_annotation(title = "Factor I: Temperature dominant environmental variable",
+                                                 theme = theme(plot.title = element_text(hjust = 0.5))))
+
+
+bottom_plot   <- wrap_elements((div4 + div5 + div6 & theme(legend.position = "bottom") & 
+                                  labs(col = "Factor III: Temperature mean value")) + plot_layout(guides = "collect")+ 
+                                 plot_annotation(title = "Factor I: Equal effect of Temperature and Salinity",
+                                                 theme = theme(plot.title = element_text(hjust = 0.5))))
+
+combined_final <- (top_plot / bottom_plot) 
+
+combined_final <-combined_final + plot_layout(guides = "collect") # doesn't actually collect the legend... if you happen to know how to meke it work, please get in touch
+combined_final 
+
+ggsave(combined_final, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.13.jpg", width=18, height=14)
+ggsave(combined_final, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.13.pdf", width=18, height=14)
+
+
