@@ -694,7 +694,7 @@ dd3.3$E1_mean <- "high"
 
 Increasing variance in z1 - positive correlation between env variables (E1 and E2) 
 
-Same steps as before (3 communities with increasing diversity in z1 while z2 is fixed), but the correlation between E1 and E1 is negative.
+Same steps as before (3 communities with increasing diversity in z1 while z2 is fixed), but the correlation between E1 and E1 is positive
 
 ```{r }
 E1max<-350; E1min<-250
@@ -1935,7 +1935,7 @@ dd3.3$E1_mean <- "high"
 
 Increasing variance in z1 and z2 - positive correlation between env variables (E1 and E2) 
 
-Same steps as before (3 communities with increasing diversity in z1 while z2 is fixed), but the correlation between E1 and E1 is negative.
+Same steps as before (3 communities with increasing diversity in z1 while z2 is fixed), but the correlation between E1 and E1 is positive
 
 ```{r}
 E1max<-350; E1min<-250
@@ -2547,7 +2547,7 @@ Increasing variance in z1 and z2 - negative correlation between env variables (E
 
 We now create 3 communities. Community 1 is characterized by low diversity in z1 and high diversity in z2, community 2 has medium diversity in z1 and z2, and community 3 has high diversity in z1 and low in z2.
 
-E1 and E2 have high fluctuations and *negative* correlation.
+E1 and E2 have  *negative* correlation.
 
 ```{r}
 # Specify the correlation E1 and E2 
@@ -3159,7 +3159,7 @@ dd3.3$E1_mean <- "high"
 
 Increasing variance in z1 and z2 - positive correlation between env variables (E1 and E2) 
 
-Same steps as before (3 communities with increasing diversity ib z1 while z2 is fixed), but the correlation between E1 and E1 is negative.
+Same steps as before (3 communities with increasing diversity in z1 while z2 is fixed), but the correlation between E1 and E1 is positive
 
 ```{r }
 E1max<-350; E1min<-250
@@ -3783,6 +3783,8 @@ new_data <- tibble(E1 =  seq(0, 50, 0.2),
                    E2 = seq(0, 50, 0.2))
 ```
 
+
+## fluctuation in environmental change - negative correlation
 ```{r }
 # Specify the correlation E1 and E2 
 #negative in this example and high variation in E1 and E2 
@@ -4388,7 +4390,7 @@ dd3.3$E1_mean <- "high"
 
 Increasing variance in z1 - positive correlation between env variables (E1 and E2) 
 
-Same steps as before (3 communities with increasing diversity ib z1 while z2 is fixed), but the correlation between E1 and E1 is negative.
+Same steps as before (3 communities with increasing diversity ib z1 while z2 is fixed), but the correlation between E1 and E1 is positive
 
 ```{r }
 E1max<- 70; E1min<- -25
@@ -5599,7 +5601,7 @@ dd3.3$E1_mean <- "high"
 
 Increasing variance in z1 and z2 - positive correlation between env variables (E1 and E2) 
 
-Same steps as before (3 communities with increasing diversity in z1 while z2 is fixed), but the correlation between E1 and E1 is negative.
+Same steps as before (3 communities with increasing diversity in z1 while z2 is fixed), but the correlation between E1 and E1 is positive
 
 ```{r}
 E1max<- 70; E1min<- -25
@@ -6819,7 +6821,7 @@ dd3.3$E1_mean <- "high"
 
 Increasing variance in z1 and z2 - positive correlation between env variables (E1 and E2) 
 
-Same steps as before (3 communities with increasing diversity ib z1 while z2 is fixed), but the correlation between E1 and E1 is negative.
+Same steps as before (3 communities with increasing diversity ib z1 while z2 is fixed), but the correlation between E1 and E1 is positive
 
 ```{r }
 E1max<- 70; E1min<- -25
