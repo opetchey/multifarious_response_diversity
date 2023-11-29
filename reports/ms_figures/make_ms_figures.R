@@ -1,8 +1,22 @@
+# Manuscript figure
 
-rm(list = ls())
+# rm(list = ls())
+
+# packages
+pkgs <- c("here", "dplyr", "ggplot2", "mgcv", "gratia", "scales")
+vapply(pkgs, library, logical(1L), logical.return = TRUE, character.only = TRUE)
+
 source.files <- list.files(here("r"), full.names = TRUE)
 sapply(source.files, source, .GlobalEnv)
-load("/Users/francesco/Documents/GitHub/multifarious_response_diversity/Data/my_work_space.RData")
+
+load(here("Data/my_work_space.RData"))
+# the above loads all these old gratia functions - you should use the dev
+# version of gratia and install the binary from my r-universe
+# Now I delete all the old functions that are stored in the sourced image
+rm(list = ls(getNamespace("gratia"), all.names = TRUE))
+# this will throw warnings if you have a newer versio of gratia installed than
+# is represented by the dump of R functions into the `./r` folder. This is
+# harmless.
 
 ############ Figure 1 ################
 #### Fig 1 normal distribution with two tangent lines ### 
@@ -45,7 +59,7 @@ m <- gam(y ~ s(x), data = df, method = "REML")
 new_data <- data.frame(x = seq(0, 100, length.out = 1000))
 
 # get first derivatives
-d1_m<-derivatives(m, data = new_data)
+d1_m <- gratia::derivatives(m, data = new_data)
 
 d_plot <- ggplot(data = d1_m, mapping = aes(x = data, y = derivative)) +
   theme_classic(base_size = 14) + 
@@ -58,9 +72,14 @@ Fig1 <- p/d_plot
 Fig1
 
 # Save the plot
-ggsave(Fig1, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig1.jpg", width=8, height=8)
-ggsave(Fig1, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig1.pdf", width=8, height=8)
-
+# ggsave(Fig1, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig1.jpg", width=8, height=8)
+# ggsave(Fig1, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig1.pdf", width=8, height=8)
+# Note you don't want JPEGs for images like this - that format is for pictures.
+# You want PNG.
+# Note I also modified the folder so these are dumped into the ms_figures folder
+ggsave(Fig1, file = here("ms_figures/Fig1.jpg"), width = 8, height = 8)
+ggsave(Fig1, file = here("ms_figures/Fig1.png"), width = 8, height = 8)
+ggsave(Fig1, file = here("ms_figures/Fig1.pdf"), width = 8, height = 8)
 
 
 ############ Figure 2 ################
@@ -93,7 +112,6 @@ p1 <- draw(m, rug = FALSE,
            n_contour = 30,
            contour_col = "lightgrey")
 
-
 refs <- data.frame(x = c(0.21, 0.9),
                  z = c(0.325, 0.9))
 
@@ -119,21 +137,28 @@ col <- ifelse(dd1$x_ref==0.66, "A",
 
 dd1$letter <- col
 
+# need to replace p1 with smooth_estimates data and steal code from the `draw()`
+# method to get the nice colours
+gs_p1_df <- smooth_estimates(m)
+p1 <- gs_p1_df |>
+  ggplot() +
+  scale_fill_distiller(palette = "RdBu", type = "div")
 Fig2 <- p1 +
   geom_segment(data = dd1,
                aes(x = x_ref, y = z_ref,
                    xend = x_ref + x, yend = z_ref + z,
                    col = dir_deriv), alpha = 0.7,
-               size=3) +
+               linewidth=3) +
   scale_colour_gradient2(low = muted("blue"),
                          mid = "white",
                          high = muted("red"),
-                         midpoint = 0) +
+                         midpoint = 0, name = "Directional\nderivative") +
   geom_point(data = dd1,
              aes(x = x_ref, y = z_ref,
                  size = 2))+
   xlab("Temperature (k)") + ylab("Salinity (ppt)") + 
-  labs(title = "", caption = "") + theme_classic(base_size = 20) +
+  labs(title = "", caption = "") +
+  theme_classic(base_size = 20) +
   guides(size = "none") 
 
 Fig2
