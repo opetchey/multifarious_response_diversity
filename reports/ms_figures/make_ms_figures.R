@@ -298,6 +298,23 @@ p_E2 <- refs_ts %>%
 # Plot environmental change over time
 p_E1 + p_E2
 indipendent_fluctuations <- p_E1 + p_E2
+
+
+
+
+# Calculate cubic spline for E1
+spline_E1 <- spline(refs_ts$time, refs_ts$E1, n = 100, method = "natural")
+spline_data_E1 <- data.frame(time = spline_E1$x, E1_spline = spline_E1$y)
+
+# Calculate cubic spline for E2
+spline_E2 <- spline(refs_ts$time, refs_ts$E2, n = 100, method = "natural")
+spline_data_E2 <- data.frame(time = spline_E2$x, E2_spline = spline_E2$y)
+
+# Create plots with interpolated lines
+p_E1_with_spline <- p_E1 + geom_line(data = spline_data_E1, aes(x = time, y = E1_spline), color = "#1f77b4", size = 1)
+p_E2_with_spline <- p_E2 + geom_line(data = spline_data_E2, aes(x = time, y = E2_spline), color = "#ff7f0e", size = 1)
+
+
 detach("package:MASS", unload=TRUE)
 
 
@@ -365,12 +382,26 @@ dir_plot <- red_spp %>% dplyr::filter(sp == "s1") %>%
   geom_point(size = 3)+
   labs(x = "time",y = "Directional derivative", tag = "(d)") +
   geom_hline(yintercept = 0, linetype= "dashed") + theme_classic(base_size = 15) +
-  scale_x_continuous(breaks=seq(0, 10, 1))
+  scale_x_continuous(breaks=seq(0, 10, 1), labels = function(x) paste0("t", x, " -> t", x + 1))
+
+
+# Calculate cubic spline for dir_deriv
+spline_dir_deriv <- spline(red_spp$time, red_spp$dir_deriv, n = 100, method = "natural")
+spline_data_dir_deriv <- data.frame(time = spline_dir_deriv$x, dir_deriv_spline = spline_dir_deriv$y)
+
+# Add interpolated line to dir_plot
+dir_plot_with_spline <- dir_plot + 
+  geom_line(data = spline_data_dir_deriv, aes(x = time, y = dir_deriv_spline), color = "#009E73", size = 1)
+
+# View the plot with the interpolated line
+dir_plot_with_spline
+
+# Sp response surface
 sp_plot <- sp1_nocor + labs(title = "", tag = "(c)")+ theme_classic(base_size = 15) + ylab("Salinity (ppt)") + xlab("Temperature (k)") +
   guides(fill=guide_legend(title="Growth \n Rate"))
 
 
-Fig4 <- (p_E1 + p_E2 + sp_plot) / dir_plot
+Fig4 <- (p_E1_with_spline + p_E2_with_spline + sp_plot) / dir_plot_with_spline
 Fig4
 ggsave(Fig4, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig4.jpg", width=15, height=9)
 ggsave(Fig4, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig4.pdf", width=15, height=9)
