@@ -137,7 +137,7 @@ Fig2 <- p1 +
   xlab("Temperature (k)") + ylab("Salinity (ppt)") + 
   labs(title = "", caption = "", fill = "Growth \n Rate", color = "Directional \n Derivative") + 
   theme_classic(base_size = 20) +
-  guides(fill=guide_legend(title="Growth \n Rate"), size = "none")
+  guides(fill=guide_colourbar(title="Growth \n Rate"), size = "none")
 
 Fig2
 
@@ -314,7 +314,8 @@ interpolated_df_E1 <- data.frame(time = xout, E1 = spline_E1)
 # Adding the spline and points to the plot
 p_E1_spline <- p_E1 +
   geom_line(data = interpolated_df_E1, aes(x = time, y = E1), color = "#1f77b4", size = 1) +
-  geom_point(data = interpolated_df_E1, aes(x = time, y = E1), color = "#1f77b4", size = 3)
+  geom_point(data = interpolated_df_E1, aes(x = time, y = E1), color = "#1f77b4", size = 3)+
+  geom_point(size = 4)+ geom_line( size = 1.5)
 
 # Viewing the plot
 p_E1_spline
@@ -330,7 +331,8 @@ interpolated_df_E2 <- data.frame(time = xout, E2 = spline_E2)
 # Adding the spline and points to the plot
 p_E2_spline <- p_E2 +
   geom_line(data = interpolated_df_E2, aes(x = time, y = E2), color = "#ff7f0e", size = 1) +
-  geom_point(data = interpolated_df_E2, aes(x = time, y = E2), color = "#ff7f0e", size = 3)
+  geom_point(data = interpolated_df_E2, aes(x = time, y = E2), color = "#ff7f0e", size = 3)+
+  geom_point(size = 4)+ geom_line( size = 1.5)
 
 # Viewing the plot
 p_E2_spline
@@ -477,9 +479,8 @@ dir_plot
 sp_plot <- sp1 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), size = 3) +
   geom_path(data = refs_ts, size = 1.5) +
   geom_point(data = interpolated_df, mapping = aes(x = E1, y = E2), size = 1) +
-  geom_path(data = interpolated_df,  size = 0.5, alpha = 0.5) + guides(color="none" , fill=guide_legend(title="Growth \n Rate")) +
-  geom_label(data = refs_ts, mapping = aes(label = time), size = 10) + labs(title = "", tag = "(c)")+ theme_classic(base_size = 20) + ylab("Salinity (ppt)") + xlab("Temperature (k)") +
-  guides(fill=guide_legend(title="Growth \n Rate")) + 
+  geom_path(data = interpolated_df,  size = 0.5, alpha = 0.5) + guides(color="none" , fill=guide_colourbar(title="Growth \n Rate")) +
+  geom_label(data = refs_ts, mapping = aes(label = time), size = 10) + labs(title = "", tag = "(c)")+ theme_classic(base_size = 20) + ylab("Salinity (ppt)") + xlab("Temperature (k)")  + 
   geom_path(data = interpolated_df, size = 0.5, alpha = 0.5) 
 
 
@@ -559,10 +560,10 @@ sing_plot <- ggplot(data = rdiv_sim_nocor, mapping = aes(x = time, y = sign)) +
   lims(y = c(dmin,dmax))+
   scale_x_continuous(breaks=seq(0, 15, 1))
 
-sp1_nocor <- sp1_nocor + theme_classic(base_size = 15) + labs(title = "Species 1") + xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_legend(title="Growth \n Rate"))
-sp2_nocor<- sp2_nocor + theme_classic(base_size = 15) + labs(title = "Species 2")+ xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_legend(title="Growth \n Rate"))
-sp3_nocor <- sp3_nocor + theme_classic(base_size = 15) + labs(title = "Species 3")+ xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_legend(title="Growth \n Rate"))
-sp4_nocor <- sp4_nocor + theme_classic(base_size = 15) + labs(title = "Species 4")+ xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_legend(title="Growth \n Rate"))
+sp1_nocor <- sp1_nocor + theme_classic(base_size = 15) + labs(title = "Species 1") + xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_colourbar(title="Growth \n Rate"))
+sp2_nocor<- sp2_nocor + theme_classic(base_size = 15) + labs(title = "Species 2")+ xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_colourbar(title="Growth \n Rate"))
+sp3_nocor <- sp3_nocor + theme_classic(base_size = 15) + labs(title = "Species 3")+ xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_colourbar(title="Growth \n Rate"))
+sp4_nocor <- sp4_nocor + theme_classic(base_size = 15) + labs(title = "Species 4")+ xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_colourbar(title="Growth \n Rate"))
 
 dd_plot <- dd_plot + labs(tag = "(e)")+ theme_classic(base_size = 15) + theme(legend.position = "top")
 rdiv_plot <- rdiv_plot + labs(title = "", tag = "(f)")+ theme_classic(base_size = 15) + ylab("Dissimilarity")
@@ -580,7 +581,7 @@ ggsave(fig5, file="/Users/francesco/Documents/GitHub/multifarious_response_diver
 ggsave(fig5, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig5.pdf", width=8, height=12)
 
 ############ Figure 6 ################
-# Fig 6 is generated in the document called "Report1_for_pub.Rmd", line 689
+# Fig 6 is generated in the document called "Appendix1_principle and demos.Rmd", line 707
 
 
 
