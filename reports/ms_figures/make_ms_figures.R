@@ -716,7 +716,7 @@ expt <- Make_expt(E1_series, E2_series, pars)
 
 ## Visualise the performance surface of a species
 pc_figs <- Plot_performance_curves(expt[[1]])
-fig1 <- pc_figs[[1]]+ theme_bw() + pc_figs[[2]] + theme_bw()
+fig1 <- pc_figs[[1]]+ theme_classic() + pc_figs[[2]] + theme_classic()
 fig1 
 
 
@@ -739,14 +739,14 @@ expt <- Make_expt(E1_series, E2_series, pars)
 
 ## Visualise the performance surface of a species
 pc_figs <- Plot_performance_curves(expt[[1]])
-fig2 <- pc_figs[[1]]+ theme_bw() + pc_figs[[2]] + theme_bw()
+fig2 <- pc_figs[[1]]+ theme_classic() + pc_figs[[2]] + theme_classic()
 
-fig1 + theme_bw()
+fig1 + theme_classic()
 pp1 <- fig1[[1]] + labs(x = "Temperature", y = "Growth Rate",  tag = "(a)") +
-  theme_bw(base_size = 15) +
+  theme_classic(base_size = 15) +
   guides(color=guide_legend(title="Salinity")) +
   fig1[[2]] +
-  theme_bw(base_size = 15) +
+  theme_classic(base_size = 15) +
   labs(x = "Salinity", y = "Growth Rate", tag = "")+
   guides(color=guide_legend(title="Temperature"))
 
@@ -755,10 +755,10 @@ pp1 <- pp1 +  ggtitle("Temperature dominant environmental variable")+
 
 
 pp2 <- fig2[[1]] +  labs(x = "Temperature", y = "Growth Rate", tag = "(b)") +
-  theme_bw(base_size = 15) +
+  theme_classic(base_size = 15) +
   guides(color=guide_legend(title="Salinity")) +
   fig2[[2]] +
-  theme_bw(base_size = 15) +
+  theme_classic(base_size = 15) +
   labs(x = "Salinity", y = "Growth Rate", tag = "")+
   guides(color=guide_legend(title="Temperature"))
 
@@ -796,7 +796,7 @@ expt[[1]]$E1 <- expt[[1]]$E1 + 273.15
 
 ## Visualise the performance surface of a species
 pc_figs <- Plot_performance_curves(expt[[1]])
-fig1 <- pc_figs[[1]]+ theme_bw() + pc_figs[[2]] + theme_bw()
+fig1 <- pc_figs[[1]]+ theme_classic() + pc_figs[[2]] 
 fig1 
 
 
@@ -819,14 +819,14 @@ expt[[1]]$E1 <- expt[[1]]$E1 + 273.15
 
 ## Visualise the performance surface of a species
 pc_figs <- Plot_performance_curves(expt[[1]])
-fig2 <- pc_figs[[1]]+ theme_bw() + pc_figs[[2]] + theme_bw()
+fig2 <- pc_figs[[1]]+ theme_classic() + pc_figs[[2]] + theme_classic()
 
-fig1 + theme_bw() 
+fig1 + theme_classic() 
 pp2 <- fig1[[1]] + labs(x = "Temperature", y = "Growth Rate",  tag = "(b)") +
-  theme_bw(base_size = 15) +
+  theme_classic(base_size = 15) +
   guides(color=guide_legend(title="Salinity")) +
   fig1[[2]]  +
-  theme_bw(base_size = 15) +
+  theme_classic(base_size = 15) +
   labs(x = "Salinity", y = "Growth Rate", tag = "")+
   guides(color=guide_legend(title="Temperature"))
 
@@ -839,10 +839,6 @@ simulation_curves
 
 ggsave(simulation_curves, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.8.jpg", width=10, height=8)
 ggsave(simulation_curves, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.8.pdf", width=10, height=9)
-
-
-
-
 
 
 ############ Figure 9 ################
