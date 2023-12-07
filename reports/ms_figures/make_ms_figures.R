@@ -206,6 +206,8 @@ rm(list = ls(getNamespace("gratia"), all.names = TRUE))
 
 ## Fig 4 - first part of the code also used for fig 5
 
+library(pracma)
+
 E1_series <- 273.15 + seq(0, 50, 1)
 E2_series <- seq(0, 50, 1)
 # Simulate spp performance curves with the modified Eppley function with and without interactive effect.
@@ -330,28 +332,69 @@ refs_ts <- refs_ts%>%
 p_E1 <- refs_ts %>% 
   ggplot(aes(x = time, y = E1)) + geom_line( size = 1.5) +
   geom_point(size = 3)+
-  theme_classic(base_size = 15) +
+  theme_classic(base_size = 20) +
   labs(y = "Temperature", x = "Time", tag = "(a)") + 
   scale_x_continuous(breaks=seq(0, 10, 1))
 
 p_E2 <- refs_ts %>% 
   ggplot(aes(x = time, y = E2)) + geom_line( size = 1.5) +
   geom_point(size = 3)+
-  theme_classic(base_size = 15) +
+  theme_classic(base_size = 20) +
   labs(y = "Salinity", x = "Time",tag = "(b)") + 
   scale_x_continuous(breaks=seq(0, 10, 1))
 
 # Plot environmental change over time
 p_E1 + p_E2
 indipendent_fluctuations <- p_E1 + p_E2
+
+
+
+# Generating spline for E1
+xout <- seq(min(refs_ts$time), max(refs_ts$time), length.out = 100)
+spline_E1 <- pracma::interp1(x = refs_ts$time, y = refs_ts$E1, xi = xout, method = "cubic")
+
+# Creating a data frame for interpolated values
+interpolated_df_E1 <- data.frame(time = xout, E1 = spline_E1)
+
+# Adding the spline and points to the plot
+p_E1_spline <- p_E1 +
+  geom_line(data = interpolated_df_E1, aes(x = time, y = E1), color = "#1f77b4", size = 1) +
+  geom_point(data = interpolated_df_E1, aes(x = time, y = E1), color = "#1f77b4", size = 3)+
+  geom_point(size = 4)+ geom_line( size = 1.5)
+
+# Viewing the plot
+p_E1_spline
+
+
+# Generating spline for E2
+xout <- seq(min(refs_ts$time), max(refs_ts$time), length.out = 100)
+spline_E2 <- pracma::interp1(x = refs_ts$time, y = refs_ts$E2, xi = xout, method = "cubic")
+
+# Creating a data frame for interpolated values
+interpolated_df_E2 <- data.frame(time = xout, E2 = spline_E2)
+
+# Adding the spline and points to the plot
+p_E2_spline <- p_E2 +
+  geom_line(data = interpolated_df_E2, aes(x = time, y = E2), color = "#ff7f0e", size = 1) +
+  geom_point(data = interpolated_df_E2, aes(x = time, y = E2), color = "#ff7f0e", size = 3)+
+  geom_point(size = 4)+ geom_line( size = 1.5)
+
+# Viewing the plot
+p_E2_spline
+
+
+# creating interpolated df of env condition
+interpolated_df <- cbind(interpolated_df_E1, interpolated_df_E2[,2]) %>% rename(E2 = "interpolated_df_E2[, 2]")
+
 detach("package:MASS", unload=TRUE)
 
 
 ### Response surfaces with change in environmental conditions
 
 sp1_nocor <- sp1 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_path(data = refs_ts, aes(color = "#0072B2"), size = 1.5) +
   geom_label(data = refs_ts, mapping = aes(label = time)) +
-  geom_path(data = refs_ts, aes(color = time), arrow = arrow()) + guides(color="none" , fill=guide_legend(title="Growth \n Rate"))
+  guides(color="none" , fill=guide_legend(title="Growth \n Rate"))
 
 sp1_nocor <- sp1 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), size = 3) +
   geom_label(data = refs_ts, mapping = aes(label = time)) +
@@ -371,7 +414,7 @@ sp4_nocor <- sp4 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), siz
 
 ggarrange(sp1_nocor, sp2_nocor, sp3_nocor,  sp4_nocor, ncol=4, nrow=1, common.legend = TRUE, legend="right")
 
-# get partial derivatives
+# get partial derivatives - measured values
 (pd_list_no <- modify_depth(m_list_no, 1, ~ get_partials(., refs_ts)))
 # from list to tibble
 (pd_spp_no <- tibble(
@@ -406,19 +449,91 @@ red_spp <- pd_spp_no %>%  dplyr::select(sp, time, E1_ref, E2_ref, dir_deriv)
 
 dir_plot <- red_spp %>% dplyr::filter(sp == "s1") %>% 
   ggplot(., mapping = aes(x = time, y = (dir_deriv))) +
-  theme_bw(base_size = 12)+
+  theme_bw(base_size = 20)+
   geom_line()+
   geom_point(size = 3)+
   labs(x = "time",y = "Directional derivative", tag = "(d)") +
   geom_hline(yintercept = 0, linetype= "dashed") + theme_classic(base_size = 15) +
   scale_x_continuous(breaks=seq(0, 10, 1))
-sp_plot <- sp1_nocor + labs(title = "", tag = "(c)")+ theme_classic(base_size = 15) + ylab("Salinity (ppt)") + xlab("Temperature (k)") +
-  guides(fill=guide_legend(title="Growth \n Rate"))
 
 
-Fig4 <- (p_E1 + p_E2 + sp_plot) / dir_plot
+
+
+
+#### Using interpolated data
+# get partial derivatives - measured values
+(pd_list_interpolated <- modify_depth(m_list_no, 1, ~ get_partials(., interpolated_df)))
+# from list to tibble
+(pd_spp_interpolated <- tibble(
+  E1_ref = map(pd_list_interpolated, "E1"),
+  E2_ref = map(pd_list_interpolated, "E2"),
+  pd_E1 = map(pd_list_interpolated, "pd_E1"),
+  pd_E2 = map(pd_list_interpolated, "pd_E2")) %>%
+    dplyr::mutate(sp = my_spp_names_no) %>%
+    relocate(sp, E1_ref, E2_ref, pd_E1, pd_E2) %>%
+    unnest(E1_ref, E2_ref, pd_E1, pd_E2))
+# add time
+(pd_spp_interpolated <-cbind(pd_spp_interpolated, interpolated_df$time) %>% 
+    dplyr::rename(time = "interpolated_df$time"))
+
+# calculation next value for directional derivatives, and get directional derivatives
+(pd_spp_interpolated <- pd_spp_interpolated %>% transform( nxt_value_E1 = c(E1_ref[-1], NA)) %>%
+    transform(nxt_value_E2 = c(E2_ref[-1], NA)) %>%
+    dplyr::mutate(del_E1 = nxt_value_E1 - E1_ref,
+                  del_E2 = nxt_value_E2 - E2_ref,
+                  unit_vec_mag =  sqrt(del_E1^2 + del_E2^2),
+                  uv_E1 = del_E1 / unit_vec_mag,
+                  uv_E2 = del_E2 / unit_vec_mag,
+                  dir_deriv = pd_E1 * uv_E1 +  pd_E2 * uv_E2) %>% 
+    filter(time != max(time)))
+
+
+
+# community 1 
+# reduce the dataframe and keep only what we need
+red_interpolated <- pd_spp_interpolated %>%  dplyr::select(sp, time, E1_ref, E2_ref, dir_deriv)
+
+
+dir_plot_interpolated <- red_interpolated %>%
+  dplyr::filter(sp == "s1") %>%
+  ggplot(aes(x = time, y = dir_deriv)) +
+  theme_bw(base_size = 20) +
+  geom_line(color = "#009E73", position = position_nudge(x = 0.5), size = 1) +
+  geom_point(color = "#009E73", position = position_nudge(x = 0.5), size = 3) +
+  labs(x = "time", y = "Directional derivative", tag = "(d)") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  theme_classic(base_size = 20) +
+  scale_x_continuous(breaks = seq(0.5, 10.5, 1), labels = seq(0, 10, 1), expand = c(0, 0.5))
+
+
+red_spp_s1 <- red_spp %>% dplyr::filter(sp == "s1") 
+
+
+# Adding data from pd_spp_interpolated
+dir_plot <- dir_plot_interpolated +
+  geom_line(data = red_spp_s1, aes(x = time + 0.5, y = dir_deriv), color = "black", size = 1) +
+  geom_point(data = red_spp_s1, aes(x = time + 0.5, y = dir_deriv), color = "black", size = 3) +
+  scale_x_continuous(breaks = seq(0, 10, 1), expand = c(0, 0.5))
+
+
+# View combined plot
+dir_plot
+
+# Sp response surface
+
+sp_plot <- sp1 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), size = 3) +
+  geom_path(data = refs_ts, size = 1.5) +
+  geom_point(data = interpolated_df, mapping = aes(x = E1, y = E2), size = 1) +
+  geom_path(data = interpolated_df,  size = 0.5, alpha = 0.5) + guides(color="none" , fill=guide_colourbar(title="Growth \n Rate")) +
+  geom_label(data = refs_ts, mapping = aes(label = time), size = 10) + labs(title = "", tag = "(c)")+ theme_classic(base_size = 20) + ylab("Salinity (ppt)") + xlab("Temperature (k)")  + 
+  geom_path(data = interpolated_df, size = 0.5, alpha = 0.5) 
+
+
+
+
+Fig4 <- (p_E1_spline + p_E2_spline + sp_plot) / dir_plot
 Fig4
-ggsave(Fig4, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig4.jpg", width=15, height=9)
+ggsave(Fig4, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig4.jpg", width=22, height=15)
 ggsave(Fig4, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig4.pdf", width=15, height=9)
 
 
@@ -490,10 +605,10 @@ sing_plot <- ggplot(data = rdiv_sim_nocor, mapping = aes(x = time, y = sign)) +
   lims(y = c(dmin,dmax))+
   scale_x_continuous(breaks=seq(0, 15, 1))
 
-sp1_nocor <- sp1_nocor + theme_classic(base_size = 15) + labs(title = "Species 1") + xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_legend(title="Growth \n Rate"))
-sp2_nocor<- sp2_nocor + theme_classic(base_size = 15) + labs(title = "Species 2")+ xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_legend(title="Growth \n Rate"))
-sp3_nocor <- sp3_nocor + theme_classic(base_size = 15) + labs(title = "Species 3")+ xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_legend(title="Growth \n Rate"))
-sp4_nocor <- sp4_nocor + theme_classic(base_size = 15) + labs(title = "Species 4")+ xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_legend(title="Growth \n Rate"))
+sp1_nocor <- sp1_nocor + theme_classic(base_size = 15) + labs(title = "Species 1") + xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_colourbar(title="Growth \n Rate"))
+sp2_nocor<- sp2_nocor + theme_classic(base_size = 15) + labs(title = "Species 2")+ xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_colourbar(title="Growth \n Rate"))
+sp3_nocor <- sp3_nocor + theme_classic(base_size = 15) + labs(title = "Species 3")+ xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_colourbar(title="Growth \n Rate"))
+sp4_nocor <- sp4_nocor + theme_classic(base_size = 15) + labs(title = "Species 4")+ xlab("Temperature (k)") + ylab("Salinity (ppt)") + guides(fill=guide_colourbar(title="Growth \n Rate"))
 
 dd_plot <- dd_plot + labs(tag = "(e)")+ theme_classic(base_size = 15) + theme(legend.position = "top")
 rdiv_plot <- rdiv_plot + labs(title = "", tag = "(f)")+ theme_classic(base_size = 15) + ylab("Dissimilarity")
@@ -511,7 +626,7 @@ ggsave(fig5, file="/Users/francesco/Documents/GitHub/multifarious_response_diver
 ggsave(fig5, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig5.pdf", width=8, height=12)
 
 ############ Figure 6 ################
-# Fig 6 is generated in the document called "Report1_for_pub.Rmd", line 689
+# Fig 6 is generated in the document called "Appendix1_principle and demos.Rmd", line 707
 
 
 

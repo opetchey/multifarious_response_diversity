@@ -668,23 +668,28 @@ Plot the two partial derivatives and relative effects
 
 (ref:summary-species1) Summary plot sp1. (a) response surface of sp 1. (b) Partial effect of E1 on the growth rate of sp 1 when E2 is held constant at E2 = 20. (c) Partial derivative with respect to E1 when E2 is constant at 20. (d) Partial effect of E2 on the growth rate of sp 1 when E1 is held constant at E1 = 300. (e) Partial derivative with respect to E2 when E1 is constant at 300.
 
-```{r summary-species1, fig.cap='(ref:summary-species1)', fig.align="center", fig.height=12, fig.width=18}
+```{r summary-species1, fig.cap='(ref:summary-species1)', fig.align="center", fig.height=12, fig.width=20}
 
-p1 <- draw(m1, rug = FALSE) &
-  geom_hline(yintercept = E1E2_locs$E2, size = 2, col = "#1f77b4") &
-  geom_vline(xintercept = 300, size = 2, col = "#ff7f0e") &
-   labs(tag = "(a)") & xlab("Temperature (k)") & ylab("Salinity (ppt)") & 
-   labs(title = "", fill = "Growth", caption = "") & theme_classic(base_size = 20) &
-  theme(legend.position = "top")
-p1 <- p1 + guides(fill = guide_legend(title = "Growth Rate", keywidth = 1, keyheight = 1, direction = "horizontal"))
 
+p1 <- draw(m1, rug = FALSE) +
+  geom_hline(yintercept = E1E2_locs$E2, size = 2, col = "#1f77b4") +
+  geom_vline(xintercept = 300, size = 2, col = "#ff7f0e") +
+  labs(tag = "(a)", x = "Temperature (k)", y = "Salinity (ppt)",
+       title = "", fill = "Growth", caption = "") +
+  theme_classic(base_size = 20) +
+  theme(legend.position = "top",
+        legend.text = element_text(size = 15),  # Adjust font size
+        legend.key.width  = unit(2, "cm")) +   # Adjust key height
+  guides(fill = guide_colourbar(title = "Growth Rate",
+                                keywidth = 1.5, keyheight = 1,  # Modify key size
+                                direction = "horizontal"))
 
 
 
 second <- (p2 +p3) / (p5 + p6)
 
 
-ggarrange(p1, second, widths = c(2,2))
+ggarrange(p1, second, widths = c(1.5,2))
 ```
 
 # Directional derivatives 
@@ -717,7 +722,7 @@ p4 <- draw(m1, rug = FALSE) &
   geom_hline(yintercept = 20, size = 1) &
   labs(tag = "(d)") & xlab("Temperature (k)") & ylab("Salinity (ppt)") & 
    labs(title = "", fill = "Growth", caption = "") & theme_classic(base_size = 15) 
-p4 <- p4+ labs(tag = "(a)") + guides(fill=guide_legend(title="Growth \n Rate"))
+p4 <- p4+ labs(tag = "(a)") + guides(fill=guide_colourbar(title="Growth \n Rate"))
 
 
 fig6 <- p4 + labs(color = "Directional \n  Derivative") +
