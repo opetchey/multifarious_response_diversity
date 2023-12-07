@@ -140,35 +140,48 @@ dd1$letter <- col
 
 # need to replace p1 with smooth_estimates data and steal code from the `draw()`
 # method to get the nice colours
-gs_p1_df <- smooth_estimates(m)
-p1 <- gs_p1_df |>
-  ggplot() +
-  scale_fill_distiller(palette = "RdBu", type = "div")
-Fig2 <- p1 +
+gs_p1 <- smooth_estimates(m) |>
+  ggplot(aes(x = x, y = z)) +
+  geom_raster(aes(fill = .estimate)) +
+  geom_contour(mapping = aes(z = .estimate),
+    colour = "lightgrey", bins = 30, na.rm = TRUE) +
+  scale_fill_distiller(palette = "RdBu", type = "div") +
+  expand_limits(fill = c(-1, 1) * max(abs(gs_p1_df[[".estimate"]]),
+    na.rm = TRUE))
+
+Fig2 <- gs_p1 +
   geom_segment(data = dd1,
-               aes(x = x_ref, y = z_ref,
-                   xend = x_ref + x, yend = z_ref + z,
-                   col = dir_deriv), alpha = 0.7,
-               linewidth=3) +
+    aes(x = x_ref, y = z_ref,
+      xend = x_ref + x, yend = z_ref + z,
+      col = dir_deriv), alpha = 0.9,
+    linewidth = 3) +
   scale_colour_gradient2(low = muted("blue"),
-                         mid = "white",
-                         high = muted("red"),
-                         midpoint = 0, name = "Directional\nderivative") +
+    mid = "white",
+    high = muted("red"),
+    midpoint = 0) +
   geom_point(data = dd1,
-             aes(x = x_ref, y = z_ref,
-                 size = 2))+
+    aes(x = x_ref, y = z_ref,
+      size = 2)) +
   annotate("text", x = 0.10, y = 0.60, label = "A", size = 6) +
   annotate("text", x = 0.60, y = 0.70, label = "B", size = 6) +
-  xlab("Temperature (k)") + ylab("Salinity (ppt)") + 
-  labs(title = "", caption = "", fill = "Growth \n Rate", color = "Directional \n Derivative") + 
+  labs(x = "Temperature (k)", y = "Salinity (ppt)",
+    color = "Directional\nDerivative") +
   theme_classic(base_size = 20) +
-  guides(fill=guide_legend(title="Growth \n Rate"), size = "none")
+  # here is the issue - you need guide_colourbar() not guide_legend()
+  guides(fill = guide_colourbar(title="Growth\nRate"), size = "none")
 
 Fig2
 
-ggsave(Fig2, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig2.jpg", width=10, height=8)
-ggsave(Fig2, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig2.pdf", width=10, height=8)
+ggsave(Fig2, file = here("ms_figures/Fig2.jpg"), width = 10, height = 8)
+ggsave(Fig2, file = here("ms_figures/Fig2.png"), width = 10, height = 8)
+ggsave(Fig3, file = here("ms_figures/Fig2.pdf"), width = 10, height = 8)
 
+# notice though that the directional deriative lines are not the same length!
+# this is because the aspect ratio of the plot is not 1
+# this versions fix that
+ggsave(Fig2 + coord_equal(), file = here("ms_figures/Fig2-eq.jpg"), width = 10, height = 8)
+ggsave(Fig2 + coord_equal(), file = here("ms_figures/Fig2-eq.png"), width = 10, height = 8)
+ggsave(Fig3 + coord_equal(), file = here("ms_figures/Fig2-eq.pdf"), width = 10, height = 8)
 
 ############ Figure 3 ################
 # Fig 3 is generated in the document "Appendix1_principles and demos" at line 668
@@ -178,10 +191,18 @@ ggsave(Fig2, file="/Users/francesco/Documents/GitHub/multifarious_response_diver
 
 ############ Figure 4 ################
 # Fig 4 
-rm(list = ls())
 source.files <- list.files(here("r"), full.names = TRUE)
 sapply(source.files, source, .GlobalEnv)
-load("/Users/francesco/Documents/GitHub/multifarious_response_diversity/Data/my_work_space.RData")
+
+load(here("Data/my_work_space.RData"))
+# the above loads all these old gratia functions - you should use the dev
+# version of gratia and install the binary from my r-universe
+# Now I delete all the old functions that are stored in the sourced image
+rm(list = ls(getNamespace("gratia"), all.names = TRUE))
+# this will throw warnings if you have a newer versio of gratia installed than
+# is represented by the dump of R functions into the `./r` folder. This is
+# harmless.
+
 
 ## Fig 4 - first part of the code also used for fig 5
 
