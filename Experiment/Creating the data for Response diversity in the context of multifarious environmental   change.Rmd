@@ -22,7 +22,7 @@ knitr::opts_chunk$set(echo = FALSE,
 ```
 
 ```{r results='hide'}
-# rm(list = ls())
+rm(list = ls())
 library(plotly)
 library(tidyverse)
 library(here)
@@ -7427,7 +7427,7 @@ dd_divergence_scenario3_SAME <- dd_plot2
 ```
 
 ```{r}
-# setwd("/Users/francesco/Documents/GitHub/multifarious_response_diversity/Data/")
-save.image(file = here("Data/my_work_space.RData"))
+setwd("/Users/francesco/Documents/GitHub/multifarious_response_diversity/Data/")
+save.image(file = "my_work_space.RData")
 ```
 
