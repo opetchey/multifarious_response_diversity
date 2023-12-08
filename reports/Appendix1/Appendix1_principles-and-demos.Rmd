@@ -689,7 +689,11 @@ p1 <- draw(m1, rug = FALSE) +
 second <- (p2 +p3) / (p5 + p6)
 
 
-ggarrange(p1, second, widths = c(1.5,2))
+fig3 <- ggarrange(p1, second, widths = c(1.5,2))
+
+ggsave(fig3, file = here("ms_figures/fig3.jpg"), width = 20, height = 12)
+ggsave(fig3, file = here("ms_figures/fig3.png"), width = 20, height = 12)
+ggsave(fig3, file = here("ms_figures/fig3.pdf"), width = 20, height = 12)
 ```
 
 # Directional derivatives 
@@ -722,8 +726,9 @@ p4 <- draw(m1, rug = FALSE) &
   geom_hline(yintercept = 20, size = 1) &
   labs(tag = "(d)") & xlab("Temperature (k)") & ylab("Salinity (ppt)") & 
    labs(title = "", fill = "Growth", caption = "") & theme_classic(base_size = 15) 
-p4 <- p4+ labs(tag = "(a)") + guides(fill=guide_colourbar(title="Growth \n Rate"))
-
+p4 <- p4+ labs(tag = "(a)") + guides(fill=guide_colourbar(title="Growth \n Rate")) +
+  theme(legend.key.width = unit(0.28, "cm"),  # Adjust width of the legend key
+        legend.key.height = unit(0.28, "cm"))
 
 fig6 <- p4 + labs(color = "Directional \n  Derivative") +
   geom_segment(data = dd1,
@@ -735,8 +740,10 @@ fig6 <- p4 + labs(color = "Directional \n  Derivative") +
                          high = muted("red"),
                          midpoint = 0)
 fig6 
+ggsave(fig6 + coord_equal(), file = here("ms_figures/fig6.jpg"), width = 6, height = 4)
+ggsave(fig6 + coord_equal(), file = here("ms_figures/fig6.png"), width = 6, height = 4)
+ggsave(fig6 + coord_equal(), file = here("ms_figures/fig6.pdf"), width = 6, height = 4)
 
-ggsave(fig6, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig6.jpg", width=6, height=4)
 
 ```
 
@@ -1789,12 +1796,6 @@ positive_fluctuations <- p_E1+ labs(tag = "(e)") + p_E2 + labs(tag = "(f)")
 detach("package:MASS", unload=TRUE)
 ```
 
-```{r}
-#figure for manuscript
-correlation_direction_env_change <- indipendent_fluctuations/negative_fluctuations/positive_fluctuations
-ggsave(correlation_direction_env_change, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/correlation_direction_env_change.pdf", width=6, height=8)
- 
-```
 
 
 ### Response surfaces with change in environmental conditions
@@ -2681,6 +2682,7 @@ Fig3_comm3 <- rdiv_comm3 %>%
 ```
 
 ```{r}
-pagedown::chrome_print("file:///Users/francesco/Documents/GitHub/multifarious_response_diversity/reports/Appendix1/Appendix1_principles-and-demos.html", output = "Appendix1_principle-and-demos.pdf")
+# Create pdf report
+pagedown::chrome_print(here("reports/Appendix1/Appendix1_principles-and-demos.html"), output = "Appendix1_principle-and-demos.pdf")
 ```
 

@@ -3,7 +3,7 @@
 # rm(list = ls())
 
 # packages
-pkgs <- c("here", "dplyr", "ggplot2", "mgcv", "gratia", "scales")
+pkgs <- c("here", "dplyr", "ggplot2", "mgcv", "gratia", "scales", "tidyverse", "purrr")
 vapply(pkgs, library, logical(1L), logical.return = TRUE, character.only = TRUE)
 
 source.files <- list.files(here("r"), full.names = TRUE)
@@ -140,16 +140,17 @@ dd1$letter <- col
 
 # need to replace p1 with smooth_estimates data and steal code from the `draw()`
 # method to get the nice colours
-gs_p1 <- smooth_estimates(m) |>
-  ggplot(aes(x = x, y = z)) +
-  geom_raster(aes(fill = .estimate)) +
-  geom_contour(mapping = aes(z = .estimate),
-    colour = "lightgrey", bins = 30, na.rm = TRUE) +
-  scale_fill_distiller(palette = "RdBu", type = "div") +
-  expand_limits(fill = c(-1, 1) * max(abs(gs_p1_df[[".estimate"]]),
-    na.rm = TRUE))
 
-Fig2 <- gs_p1 +
+# gs_p1 <- smooth_estimates(m) |>
+#   ggplot(aes(x = x, y = z)) +
+#   geom_raster(aes(fill = .estimate)) +
+#   geom_contour(mapping = aes(z = .estimate),
+#     colour = "lightgrey", bins = 30, na.rm = TRUE) +
+#   scale_fill_distiller(palette = "RdBu", type = "div") +
+#   expand_limits(fill = c(-1, 1) * max(abs(gs_p1_df[[".estimate"]]),
+#     na.rm = TRUE))
+
+Fig2 <- p1 +
   geom_segment(data = dd1,
     aes(x = x_ref, y = z_ref,
       xend = x_ref + x, yend = z_ref + z,
@@ -172,16 +173,13 @@ Fig2 <- gs_p1 +
 
 Fig2
 
-ggsave(Fig2, file = here("ms_figures/Fig2.jpg"), width = 10, height = 8)
-ggsave(Fig2, file = here("ms_figures/Fig2.png"), width = 10, height = 8)
-ggsave(Fig3, file = here("ms_figures/Fig2.pdf"), width = 10, height = 8)
 
 # notice though that the directional deriative lines are not the same length!
 # this is because the aspect ratio of the plot is not 1
 # this versions fix that
 ggsave(Fig2 + coord_equal(), file = here("ms_figures/Fig2-eq.jpg"), width = 10, height = 8)
 ggsave(Fig2 + coord_equal(), file = here("ms_figures/Fig2-eq.png"), width = 10, height = 8)
-ggsave(Fig3 + coord_equal(), file = here("ms_figures/Fig2-eq.pdf"), width = 10, height = 8)
+ggsave(Fig2 + coord_equal(), file = here("ms_figures/Fig2-eq.pdf"), width = 10, height = 8)
 
 ############ Figure 3 ################
 # Fig 3 is generated in the document "Appendix1_principles and demos" at line 668
@@ -533,11 +531,11 @@ sp_plot <- sp1 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), size 
 
 Fig4 <- (p_E1_spline + p_E2_spline + sp_plot) / dir_plot
 Fig4
-ggsave(Fig4, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig4.jpg", width=22, height=15)
-ggsave(Fig4, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig4.pdf", width=15, height=9)
 
 
-
+ggsave(Fig4, file = here("ms_figures/Fig4.jpg"), width = 22, height = 15)
+ggsave(Fig4, file = here("ms_figures/Fig4.png"), width = 22, height = 15)
+ggsave(Fig4, file = here("ms_figures/Fig4.pdf"), width = 22, height = 15)
 
 
 ############ Figure 5 ################
@@ -621,9 +619,9 @@ fig5 <- ggarrange(try, dd_plot, rdiv_plot, sing_plot, heights = c(3.5, 1.5, 1.2,
 fig5
 
 
-
-ggsave(fig5, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig5.jpg", width=8, height=12)
-ggsave(fig5, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig5.pdf", width=8, height=12)
+ggsave(fig5, file = here("ms_figures/Fig5.jpg"), width = 8, height = 12)
+ggsave(fig5, file = here("ms_figures/Fig5.png"), width = 8, height = 12)
+ggsave(fig5, file = here("ms_figures/Fig5.pdf"), width = 8, height = 12)
 
 ############ Figure 6 ################
 # Fig 6 is generated in the document called "Appendix1_principle and demos.Rmd", line 707
@@ -733,9 +731,9 @@ Fig_7 <- ggarrange(sp1, sp2, heights = c(2,2),
           ncol = 2) 
 Fig_7
 
-
-ggsave(Fig_7, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.7.jpg", width=10, height=8)
-ggsave(Fig_7, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.7.pdf", width=10, height=9)
+ggsave(Fig_7, file = here("ms_figures/Fig7.jpg"), width = 14, height = 8)
+ggsave(Fig_7, file = here("ms_figures/Fig7.png"), width = 14, height = 8)
+ggsave(Fig_7, file = here("ms_figures/Fig7.pdf"), width = 14, height = 8)
 
 ### Preparing Figure 8 - Temperature dominant env variable on species growth rate
 ## define the series of values of the environmental variables. (We also provie the code to visualise the spp responses when we insert an interaction)
@@ -761,7 +759,7 @@ expt <- Make_expt(E1_series, E2_series, pars)
 
 ## Visualise the performance surface of a species
 pc_figs <- Plot_performance_curves(expt[[1]])
-fig1 <- pc_figs[[1]]+ theme_bw() + pc_figs[[2]] + theme_bw()
+fig1 <- pc_figs[[1]]+ theme_classic() + pc_figs[[2]] + theme_classic()
 fig1 
 
 
@@ -784,14 +782,14 @@ expt <- Make_expt(E1_series, E2_series, pars)
 
 ## Visualise the performance surface of a species
 pc_figs <- Plot_performance_curves(expt[[1]])
-fig2 <- pc_figs[[1]]+ theme_bw() + pc_figs[[2]] + theme_bw()
+fig2 <- pc_figs[[1]]+ theme_classic() + pc_figs[[2]] + theme_classic()
 
-fig1 + theme_bw()
+fig1 + theme_classic()
 pp1 <- fig1[[1]] + labs(x = "Temperature", y = "Growth Rate",  tag = "(a)") +
-  theme_bw(base_size = 15) +
+  theme_classic(base_size = 15) +
   guides(color=guide_legend(title="Salinity")) +
   fig1[[2]] +
-  theme_bw(base_size = 15) +
+  theme_classic(base_size = 15) +
   labs(x = "Salinity", y = "Growth Rate", tag = "")+
   guides(color=guide_legend(title="Temperature"))
 
@@ -800,10 +798,10 @@ pp1 <- pp1 +  ggtitle("Temperature dominant environmental variable")+
 
 
 pp2 <- fig2[[1]] +  labs(x = "Temperature", y = "Growth Rate", tag = "(b)") +
-  theme_bw(base_size = 15) +
+  theme_classic(base_size = 15) +
   guides(color=guide_legend(title="Salinity")) +
   fig2[[2]] +
-  theme_bw(base_size = 15) +
+  theme_classic(base_size = 15) +
   labs(x = "Salinity", y = "Growth Rate", tag = "")+
   guides(color=guide_legend(title="Temperature"))
 
@@ -841,7 +839,7 @@ expt[[1]]$E1 <- expt[[1]]$E1 + 273.15
 
 ## Visualise the performance surface of a species
 pc_figs <- Plot_performance_curves(expt[[1]])
-fig1 <- pc_figs[[1]]+ theme_bw() + pc_figs[[2]] + theme_bw()
+fig1 <- pc_figs[[1]]+ theme_classic() + pc_figs[[2]] + theme_classic()
 fig1 
 
 
@@ -864,14 +862,14 @@ expt[[1]]$E1 <- expt[[1]]$E1 + 273.15
 
 ## Visualise the performance surface of a species
 pc_figs <- Plot_performance_curves(expt[[1]])
-fig2 <- pc_figs[[1]]+ theme_bw() + pc_figs[[2]] + theme_bw()
+fig2 <- pc_figs[[1]]+ theme_classic() + pc_figs[[2]] + theme_classic()
 
-fig1 + theme_bw() 
+fig1 + theme_classic() 
 pp2 <- fig1[[1]] + labs(x = "Temperature", y = "Growth Rate",  tag = "(b)") +
-  theme_bw(base_size = 15) +
+  theme_classic(base_size = 15) +
   guides(color=guide_legend(title="Salinity")) +
   fig1[[2]]  +
-  theme_bw(base_size = 15) +
+  theme_classic(base_size = 15) +
   labs(x = "Salinity", y = "Growth Rate", tag = "")+
   guides(color=guide_legend(title="Temperature"))
 
@@ -882,10 +880,10 @@ pp2 <- pp2 +  ggtitle("Equal effect of temperature and salinity")+
 simulation_curves <- pp1/pp2
 simulation_curves
 
-ggsave(simulation_curves, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.8.jpg", width=10, height=8)
-ggsave(simulation_curves, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.8.pdf", width=10, height=9)
 
-
+ggsave(simulation_curves, file = here("ms_figures/Fig8.jpg"), width = 10, height = 8)
+ggsave(simulation_curves, file = here("ms_figures/Fig8.png"), width = 10, height = 8)
+ggsave(simulation_curves, file = here("ms_figures/Fig8.pdf"), width = 10, height = 8)
 
 
 
@@ -1041,8 +1039,10 @@ fig_Optimum_complete <- ggarrange(fig_optimum, optimum_scenarios, final_plot_cor
                                   ncol = 3, align = "hv")  
 fig_Optimum_complete
 
-ggsave(fig_Optimum_complete, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.9.jpg", width=15, height=15)
-ggsave(fig_Optimum_complete, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.9.pdf", width=15, height=15)
+
+ggsave(fig_Optimum_complete, file = here("ms_figures/Fig9.jpg"), width = 15, height = 15)
+ggsave(fig_Optimum_complete, file = here("ms_figures/Fig9.png"), width = 15, height = 15)
+ggsave(fig_Optimum_complete, file = here("ms_figures/Fig9.pdf"), width = 15, height = 15)
 
 
 ############ Figure 10 ################
@@ -1175,11 +1175,10 @@ fig_optimum_color <- comb + plot_layout(guides = "collect")
 mean_value_env_change <- ggarrange(env, fig_optimum_color, ncol = 1, nrow = 2, heights = c(0.3, 0.7), align = "v")
 
 mean_value_env_change
-ggsave(mean_value_env_change, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig10.jpg", width=10, height=9)
-ggsave(mean_value_env_change, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig10.pdf", width=10, height=9)
 
-
-
+ggsave(mean_value_env_change, file = here("ms_figures/Fig10.jpg"), width = 10, height = 9)
+ggsave(mean_value_env_change, file = here("ms_figures/Fig10.png"), width = 10, height = 9)
+ggsave(mean_value_env_change, file = here("ms_figures/Fig10.pdf"), width = 10, height = 9)
 
 
 ############ Figure 11 ################
@@ -1221,13 +1220,10 @@ Absolute_RD_ms <-( Absolute_plot_tot + labs(tag = "(a)"))  /( Absolute_plot_tot_
 Absolute_RD_ms <- Absolute_RD_ms + plot_layout(guides = "collect") + ggtitle("Treatment I:\nEqual effect of temperature and salinity")
 
 Absolute_RD_ms
-ggsave(Absolute_RD_ms, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.11.jpg", width=10, height=10)
-ggsave(Absolute_RD_ms, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig11.pdf", width=10, height=10)
 
-
-
-
-
+ggsave(Absolute_RD_ms, file = here("ms_figures/Fig11.jpg"), width = 10, height = 10)
+ggsave(Absolute_RD_ms, file = here("ms_figures/Fig11.png"), width = 10, height = 10)
+ggsave(Absolute_RD_ms, file = here("ms_figures/Fig11.pdf"), width = 10, height = 10)
 
 
 ############ Figure 12 ################
@@ -1329,14 +1325,12 @@ bottom_plot   <- wrap_elements((diss4 + diss5 + diss6 & theme(legend.position = 
 
 combined_final <- (top_plot / bottom_plot) 
 
-combined_final <-combined_final + plot_layout(guides = "collect") # doesn't actually collect the legend... if you happen to know how to meke it work, please get in touch
+combined_final <-combined_final + plot_layout(guides = "collect") # doesn't actually collect the legend... if you happen to know how to make it work, please get in touch
 combined_final 
 
-
-ggsave(combined_final, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.12.jpg", width=18, height=14)
-ggsave(combined_final, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.12.pdf", width=18, height=14)
-
-
+ggsave(combined_final, file = here("ms_figures/Fig12.jpg"), width = 18, height = 14)
+ggsave(combined_final, file = here("ms_figures/Fig12.png"), width = 18, height = 14)
+ggsave(combined_final, file = here("ms_figures/Fig12.pdf"), width = 18, height = 14)
 
 
 
@@ -1445,7 +1439,6 @@ combined_final <- (top_plot / bottom_plot)
 combined_final <-combined_final + plot_layout(guides = "collect") # doesn't actually collect the legend... if you happen to know how to meke it work, please get in touch
 combined_final 
 
-ggsave(combined_final, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.13.jpg", width=18, height=14)
-ggsave(combined_final, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.13.pdf", width=18, height=14)
-
-
+ggsave(combined_final, file = here("ms_figures/Fig13.jpg"), width = 18, height = 14)
+ggsave(combined_final, file = here("ms_figures/Fig13.png"), width = 18, height = 14)
+ggsave(combined_final, file = here("ms_figures/Fig13.pdf"), width = 18, height = 14)
