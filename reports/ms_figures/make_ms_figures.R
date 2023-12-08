@@ -1,8 +1,22 @@
+# Manuscript figure
 
-rm(list = ls())
+# rm(list = ls())
+
+# packages
+pkgs <- c("here", "dplyr", "ggplot2", "mgcv", "gratia", "scales")
+vapply(pkgs, library, logical(1L), logical.return = TRUE, character.only = TRUE)
+
 source.files <- list.files(here("r"), full.names = TRUE)
 sapply(source.files, source, .GlobalEnv)
-load("/Users/francesco/Documents/GitHub/multifarious_response_diversity/Data/my_work_space.RData")
+
+load(here("Data/my_work_space.RData"))
+# the above loads all these old gratia functions - you should use the dev
+# version of gratia and install the binary from my r-universe
+# Now I delete all the old functions that are stored in the sourced image
+rm(list = ls(getNamespace("gratia"), all.names = TRUE))
+# this will throw warnings if you have a newer versio of gratia installed than
+# is represented by the dump of R functions into the `./r` folder. This is
+# harmless.
 
 ############ Figure 1 ################
 #### Fig 1 normal distribution with two tangent lines ### 
@@ -45,7 +59,7 @@ m <- gam(y ~ s(x), data = df, method = "REML")
 new_data <- data.frame(x = seq(0, 100, length.out = 1000))
 
 # get first derivatives
-d1_m<-derivatives(m, data = new_data)
+d1_m <- gratia::derivatives(m, data = new_data)
 
 d_plot <- ggplot(data = d1_m, mapping = aes(x = data, y = derivative)) +
   theme_classic(base_size = 14) + 
@@ -58,9 +72,14 @@ Fig1 <- p/d_plot
 Fig1
 
 # Save the plot
-ggsave(Fig1, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig1.jpg", width=8, height=8)
-ggsave(Fig1, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig1.pdf", width=8, height=8)
-
+# ggsave(Fig1, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig1.jpg", width=8, height=8)
+# ggsave(Fig1, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig1.pdf", width=8, height=8)
+# Note you don't want JPEGs for images like this - that format is for pictures.
+# You want PNG.
+# Note I also modified the folder so these are dumped into the ms_figures folder
+ggsave(Fig1, file = here("ms_figures/Fig1.jpg"), width = 8, height = 8)
+ggsave(Fig1, file = here("ms_figures/Fig1.png"), width = 8, height = 8)
+ggsave(Fig1, file = here("ms_figures/Fig1.pdf"), width = 8, height = 8)
 
 
 ############ Figure 2 ################
@@ -119,31 +138,50 @@ col <- ifelse(dd1$x_ref==0.46, "A",
 
 dd1$letter <- col
 
-Fig2 <- p1 +
+# need to replace p1 with smooth_estimates data and steal code from the `draw()`
+# method to get the nice colours
+gs_p1 <- smooth_estimates(m) |>
+  ggplot(aes(x = x, y = z)) +
+  geom_raster(aes(fill = .estimate)) +
+  geom_contour(mapping = aes(z = .estimate),
+    colour = "lightgrey", bins = 30, na.rm = TRUE) +
+  scale_fill_distiller(palette = "RdBu", type = "div") +
+  expand_limits(fill = c(-1, 1) * max(abs(gs_p1_df[[".estimate"]]),
+    na.rm = TRUE))
+
+Fig2 <- gs_p1 +
   geom_segment(data = dd1,
-               aes(x = x_ref, y = z_ref,
-                   xend = x_ref + x, yend = z_ref + z,
-                   col = dir_deriv), alpha = 0.7,
-               size=3) +
+    aes(x = x_ref, y = z_ref,
+      xend = x_ref + x, yend = z_ref + z,
+      col = dir_deriv), alpha = 0.9,
+    linewidth = 3) +
   scale_colour_gradient2(low = muted("blue"),
-                         mid = "white",
-                         high = muted("red"),
-                         midpoint = 0) +
+    mid = "white",
+    high = muted("red"),
+    midpoint = 0) +
   geom_point(data = dd1,
-             aes(x = x_ref, y = z_ref,
-                 size = 2))+
+    aes(x = x_ref, y = z_ref,
+      size = 2)) +
   annotate("text", x = 0.10, y = 0.60, label = "A", size = 6) +
   annotate("text", x = 0.60, y = 0.70, label = "B", size = 6) +
-  xlab("Temperature (k)") + ylab("Salinity (ppt)") + 
-  labs(title = "", caption = "", fill = "Growth \n Rate", color = "Directional \n Derivative") + 
+  labs(x = "Temperature (k)", y = "Salinity (ppt)",
+    color = "Directional\nDerivative") +
   theme_classic(base_size = 20) +
-  guides(fill=guide_colourbar(title="Growth \n Rate"), size = "none")
+  # here is the issue - you need guide_colourbar() not guide_legend()
+  guides(fill = guide_colourbar(title="Growth\nRate"), size = "none")
 
 Fig2
 
-ggsave(Fig2, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig2.jpg", width=10, height=8)
-ggsave(Fig2, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig2.pdf", width=10, height=8)
+ggsave(Fig2, file = here("ms_figures/Fig2.jpg"), width = 10, height = 8)
+ggsave(Fig2, file = here("ms_figures/Fig2.png"), width = 10, height = 8)
+ggsave(Fig3, file = here("ms_figures/Fig2.pdf"), width = 10, height = 8)
 
+# notice though that the directional deriative lines are not the same length!
+# this is because the aspect ratio of the plot is not 1
+# this versions fix that
+ggsave(Fig2 + coord_equal(), file = here("ms_figures/Fig2-eq.jpg"), width = 10, height = 8)
+ggsave(Fig2 + coord_equal(), file = here("ms_figures/Fig2-eq.png"), width = 10, height = 8)
+ggsave(Fig3 + coord_equal(), file = here("ms_figures/Fig2-eq.pdf"), width = 10, height = 8)
 
 ############ Figure 3 ################
 # Fig 3 is generated in the document "Appendix1_principles and demos" at line 668
@@ -153,10 +191,17 @@ ggsave(Fig2, file="/Users/francesco/Documents/GitHub/multifarious_response_diver
 
 ############ Figure 4 ################
 # Fig 4 
-rm(list = ls())
 source.files <- list.files(here("r"), full.names = TRUE)
 sapply(source.files, source, .GlobalEnv)
-load("/Users/francesco/Documents/GitHub/multifarious_response_diversity/Data/my_work_space.RData")
+
+load(here("Data/my_work_space.RData"))
+# the above loads all these old gratia functions - you should use the dev
+# version of gratia and install the binary from my r-universe
+# Now I delete all the old functions that are stored in the sourced image
+rm(list = ls(getNamespace("gratia"), all.names = TRUE))
+# this will throw warnings if you have a newer versio of gratia installed than
+# is represented by the dump of R functions into the `./r` folder. This is
+# harmless.
 
 
 ## Fig 4 - first part of the code also used for fig 5
@@ -716,7 +761,7 @@ expt <- Make_expt(E1_series, E2_series, pars)
 
 ## Visualise the performance surface of a species
 pc_figs <- Plot_performance_curves(expt[[1]])
-fig1 <- pc_figs[[1]]+ theme_classic() + pc_figs[[2]] + theme_classic()
+fig1 <- pc_figs[[1]]+ theme_bw() + pc_figs[[2]] + theme_bw()
 fig1 
 
 
@@ -739,14 +784,14 @@ expt <- Make_expt(E1_series, E2_series, pars)
 
 ## Visualise the performance surface of a species
 pc_figs <- Plot_performance_curves(expt[[1]])
-fig2 <- pc_figs[[1]]+ theme_classic() + pc_figs[[2]] + theme_classic()
+fig2 <- pc_figs[[1]]+ theme_bw() + pc_figs[[2]] + theme_bw()
 
-fig1 + theme_classic()
+fig1 + theme_bw()
 pp1 <- fig1[[1]] + labs(x = "Temperature", y = "Growth Rate",  tag = "(a)") +
-  theme_classic(base_size = 15) +
+  theme_bw(base_size = 15) +
   guides(color=guide_legend(title="Salinity")) +
   fig1[[2]] +
-  theme_classic(base_size = 15) +
+  theme_bw(base_size = 15) +
   labs(x = "Salinity", y = "Growth Rate", tag = "")+
   guides(color=guide_legend(title="Temperature"))
 
@@ -755,10 +800,10 @@ pp1 <- pp1 +  ggtitle("Temperature dominant environmental variable")+
 
 
 pp2 <- fig2[[1]] +  labs(x = "Temperature", y = "Growth Rate", tag = "(b)") +
-  theme_classic(base_size = 15) +
+  theme_bw(base_size = 15) +
   guides(color=guide_legend(title="Salinity")) +
   fig2[[2]] +
-  theme_classic(base_size = 15) +
+  theme_bw(base_size = 15) +
   labs(x = "Salinity", y = "Growth Rate", tag = "")+
   guides(color=guide_legend(title="Temperature"))
 
@@ -796,7 +841,7 @@ expt[[1]]$E1 <- expt[[1]]$E1 + 273.15
 
 ## Visualise the performance surface of a species
 pc_figs <- Plot_performance_curves(expt[[1]])
-fig1 <- pc_figs[[1]]+ theme_classic() + pc_figs[[2]] 
+fig1 <- pc_figs[[1]]+ theme_bw() + pc_figs[[2]] + theme_bw()
 fig1 
 
 
@@ -819,14 +864,14 @@ expt[[1]]$E1 <- expt[[1]]$E1 + 273.15
 
 ## Visualise the performance surface of a species
 pc_figs <- Plot_performance_curves(expt[[1]])
-fig2 <- pc_figs[[1]]+ theme_classic() + pc_figs[[2]] + theme_classic()
+fig2 <- pc_figs[[1]]+ theme_bw() + pc_figs[[2]] + theme_bw()
 
-fig1 + theme_classic() 
+fig1 + theme_bw() 
 pp2 <- fig1[[1]] + labs(x = "Temperature", y = "Growth Rate",  tag = "(b)") +
-  theme_classic(base_size = 15) +
+  theme_bw(base_size = 15) +
   guides(color=guide_legend(title="Salinity")) +
   fig1[[2]]  +
-  theme_classic(base_size = 15) +
+  theme_bw(base_size = 15) +
   labs(x = "Salinity", y = "Growth Rate", tag = "")+
   guides(color=guide_legend(title="Temperature"))
 
@@ -839,6 +884,10 @@ simulation_curves
 
 ggsave(simulation_curves, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.8.jpg", width=10, height=8)
 ggsave(simulation_curves, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig.8.pdf", width=10, height=9)
+
+
+
+
 
 
 ############ Figure 9 ################
