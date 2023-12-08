@@ -923,7 +923,7 @@ medium_z1_div <- ggplot(df_medium_z1, aes(x = E1, fill = species)) +
   geom_density(alpha = 0.5) +
   scale_fill_viridis_d() +
   theme_classic() +
-  labs(y = "Growth rate") + ggtitle("Medium interspecific diversity \n in temperature optima") +labs(x = "Temperature", tag = "(b)") +
+  labs(y = "Growth rate") + ggtitle("Medium interspecific diversity \n in temperature optima") +labs(x = "Temperature", tag = "(d)") +
   theme(
     plot.title = element_text(hjust = 0.5))+
   theme_classic(base_size = 12) +
@@ -942,7 +942,7 @@ high_z1_div <- ggplot(df_high_z1, aes(x = E1, fill = species)) +
   geom_density(alpha = 0.5) +
   scale_fill_viridis_d() +
   theme_classic() +
-  labs(y = "Growth rate") + ggtitle("High interspecific diversity \n in temperature optima") +labs(x = "Temperature", tag = "(c)") +
+  labs(y = "Growth rate") + ggtitle("High interspecific diversity \n in temperature optima") +labs(x = "Temperature", tag = "(g)") +
   theme(
     plot.title = element_text(hjust = 0.5))+
   theme_classic(base_size = 12) +
@@ -957,7 +957,7 @@ fig_optimum <- comb + plot_layout(guides = "collect", heights = c(0.5, 0.5, 0.5)
 scenario1 <- optima_scenario1 %>%  ggplot(aes(x = E1, y = E2, col = as.factor(community))) +
   geom_point(size = 8) +
   scale_colour_viridis_d()+
-  labs(x = "Optimum Temperature", y = "Optimum Salinity", tag = '(d)', col = ("community"), title = "Communities vary in only \n the amount of interspecific diversity \n in temperature optima
+  labs(x = "Optimum Temperature", y = "Optimum Salinity", tag = '(b)', col = ("community"), title = "Communities vary in only \n the amount of interspecific diversity \n in temperature optima
 ") +
   theme_classic(base_size = 12) + 
   ylim(0, 50) 
@@ -974,61 +974,61 @@ scenario2 <- optima_scenatio2 %>%  ggplot(aes(x = E1, y = E2, col = as.factor(co
 scenario3 <- optima_scenario3 %>%  ggplot(aes(x = E1, y = E2, col = as.factor(community))) +
   geom_point(size = 8) +
   scale_colour_viridis_d()+
-  labs(x = "Optimum Temperature", y = "Optimum Salinity", tag = '(f)',  col = ("community"), title = "Communities vary in both \n the amount of interspecific diversity \n in temperature and salinity optima \n - Negative correlation") +
+  labs(x = "Optimum Temperature", y = "Optimum Salinity", tag = '(h)',  col = ("community"), title = "Communities vary in both \n the amount of interspecific diversity \n in temperature and salinity optima \n - Negative correlation") +
   theme_classic(12)+ 
   ylim(0, 50) 
 
 
-# Set seed for reproducibility
+# Generating simulated data for three scenarios
 set.seed(123)
 
-# Generate random data for three scenarios: no correlation, positive correlation, negative correlation
-no_corr_data <- data.frame(
-  Temp_Diversity = runif(30, 0, 10),
-  Salinity_Diversity = runif(30, 0, 10)
+# Function to create a scatter plot with a regression line and confidence intervals
+plot_scenario <- function(data) {
+  ggplot(data, aes(x = Salinity, y = Temperature)) +
+    geom_point() +
+    xlim(0, 50) + ylim(293, 330) +  # Set x and y axis limits
+    labs(x = "Salinity", y = "Temperature") +
+    geom_smooth(method = "lm", se = TRUE) +  # Add correlation line with CI
+    theme_minimal()  # Optional: Adjust plot theme as needed
+}
+
+# Scenario 1: No correlation
+scenario_1 <- data.frame(
+  Salinity = runif(30, min = 0, max = 50),
+  Temperature = runif(30, min = 293, max = 330)
 )
 
-pos_corr_data <- data.frame(
-  Temp_Diversity = runif(30, 0, 10),
-  Salinity_Diversity = 0.5 * no_corr_data$Temp_Diversity + runif(30, -1, 1)
+
+# Scenario 2: Positive correlation with adjusted temperature range
+Salinity_2 <- runif(30, min = 0, max = 50)
+scenario_2 <- data.frame(
+  Salinity = Salinity_2,
+  Temperature = Salinity_2 * 0.7 + runif(30, min = 290, max = 310)
 )
 
-neg_corr_data <- data.frame(
-  Temp_Diversity = runif(30, 0, 10),
-  Salinity_Diversity = -0.5 * no_corr_data$Temp_Diversity + runif(30, -1, 1)
+
+# Scenario 3: Negative correlation
+Salinity_3 <- runif(30, min = 0, max = 50)
+scenario_3 <- data.frame(
+  Salinity = Salinity_3,
+  Temperature = -Salinity_3 * 0.7 + runif(30, min = 320, max = 330)
 )
 
-# Create plots for each scenario with regression line and confidence interval
-plot_pos_corr <- ggplot(no_corr_data, aes(x = Temp_Diversity, y = Salinity_Diversity)) +
-  theme_classic(base_size = 12) +
-  theme(
-    plot.title = element_text(hjust = 0.5))+
-  geom_point() +
-  geom_smooth(method = "lm", se = TRUE, color = "blue") +
-  labs(x = "Diversity in optima position for Temperature", y = "Diversity in optima position \n for Salinity",
-       title = "Positive Correlation", tag = '(h)')
-
-plot_neg_corr <- ggplot(pos_corr_data, aes(x = Temp_Diversity, y = Salinity_Diversity)) +
-  theme_classic(base_size = 12) +
-  theme(
-    plot.title = element_text(hjust = 0.5))+
-  geom_point() +
-  geom_smooth(method = "lm", se = TRUE, color = "blue") +
-  labs(x = "Diversity in optima position for Temperature", y = "Diversity in optima position \n for Salinity",
-       title = "Negative Correlation", tag = '(i)')
-
-plot_no_corr <- ggplot(neg_corr_data, aes(x = Temp_Diversity, y = Salinity_Diversity)) +
-  theme_classic(base_size = 12) +
-  theme(
-    plot.title = element_text(hjust = 0.5))+
-  geom_point() +
-  geom_smooth(method = "lm", se = TRUE, color = "blue") +
-  labs(x = "Diversity in optima position for Temperature", y = "Diversity in optima position \n for Salinity",
-       title = "No Correlation", tag = '(g)')
+# Create plots for each scenario
+plot_1 <- plot_scenario(scenario_1) + labs(x = "Diversity in optima position for Temperature", y = "Diversity in optima position \n for Salinity",
+                                           title = "No Correlation", tag = '(c)') + theme(
+                                             plot.title = element_text(hjust = 0.5))
+plot_2 <- plot_scenario(scenario_2) + labs(x = "Diversity in optima position for Temperature", y = "Diversity in optima position \n for Salinity",
+                                          title = "Positive Correlation", tag = '(f)') + theme(
+                                            plot.title = element_text(hjust = 0.5))
+plot_3 <- plot_scenario(scenario_3) +  labs(x = "Diversity in optima position for Temperature", y = "Diversity in optima position \n for Salinity",
+                                            title = "Negative Correlation", tag = '(i)') + theme(
+                                              plot.title = element_text(hjust = 0.5))
 
 # Arrange plots in a column
-final_plot_corr <- plot_no_corr + plot_pos_corr + plot_neg_corr + plot_layout(ncol = 1)
+final_plot_corr <- plot_1 / plot_2 / plot_3
 final_plot_corr
+
 
 
 optimum_scenarios <- scenario1 / scenario2 / scenario3 & theme(legend.position = "bottom")
