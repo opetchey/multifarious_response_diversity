@@ -951,7 +951,7 @@ high_z1_div <- ggplot(df_high_z1, aes(x = E1, fill = species)) +
 high_z1_div
 
 comb <- low_z1_div/ medium_z1_div / high_z1_div & theme(legend.position = "bottom")
-fig_optimum <- comb + plot_layout(guides = "collect", heights = c(0.5, 0.5, 0.5))
+fig_optimum <- comb + patchwork::plot_layout(guides = "collect", heights = c(0.5, 0.5, 0.5))
 
 # Position of the optimum
 scenario1 <- optima_scenario1 %>%  ggplot(aes(x = E1, y = E2, col = as.factor(community))) +
@@ -994,7 +994,7 @@ plot_scenario <- function(data) {
 
 # Scenario 1: No correlation
 scenario_1 <- data.frame(
-  Salinity = runif(30, min = 0, max = 50),
+  Salinity = runif(30, min = 20, max = 30),
   Temperature = runif(30, min = 293, max = 330)
 )
 
@@ -1017,13 +1017,13 @@ scenario_3 <- data.frame(
 # Create plots for each scenario
 plot_1 <- plot_scenario(scenario_1) + labs(x = "Diversity in optima position for Temperature", y = "Diversity in optima position \n for Salinity",
                                            title = "No Correlation", tag = '(c)') + theme(
-                                             plot.title = element_text(hjust = 0.5))
+                                             plot.title = element_text(hjust = 0.5)) + xlim(20, 30) + theme_classic()
 plot_2 <- plot_scenario(scenario_2) + labs(x = "Diversity in optima position for Temperature", y = "Diversity in optima position \n for Salinity",
                                           title = "Positive Correlation", tag = '(f)') + theme(
-                                            plot.title = element_text(hjust = 0.5))
+                                            plot.title = element_text(hjust = 0.5))+ theme_classic()
 plot_3 <- plot_scenario(scenario_3) +  labs(x = "Diversity in optima position for Temperature", y = "Diversity in optima position \n for Salinity",
                                             title = "Negative Correlation", tag = '(i)') + theme(
-                                              plot.title = element_text(hjust = 0.5))
+                                              plot.title = element_text(hjust = 0.5))+  theme_classic()
 
 # Arrange plots in a column
 final_plot_corr <- plot_1 / plot_2 / plot_3
@@ -1032,10 +1032,10 @@ final_plot_corr
 
 
 optimum_scenarios <- scenario1 / scenario2 / scenario3 & theme(legend.position = "bottom")
-optimum_scenarios <- optimum_scenarios + plot_layout(guides = "collect")
+optimum_scenarios <- optimum_scenarios + patchwork::plot_layout(guides = "collect")
 optimum_scenarios
 
-fig_Optimum_complete <- ggarrange(fig_optimum, optimum_scenarios, final_plot_corr, heights = c(2,2,2), 
+fig_Optimum_complete <- ggpubr::ggarrange(fig_optimum, optimum_scenarios, final_plot_corr, heights = c(2,2,2), 
                                   ncol = 3, align = "hv")  
 fig_Optimum_complete
 
