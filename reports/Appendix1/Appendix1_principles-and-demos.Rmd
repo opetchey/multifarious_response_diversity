@@ -2128,6 +2128,8 @@ We can rule out the hypothesis that different types of relationships between two
 # Empirical example
 We use data coming from an experiment where individual ciliates species have been exposed to a gradient of nutrient, light, and their combinations in a factorial design. We first show how to calculate the partial derivatives, then we calculate the directional derivatives based on a simulated time series (in the original experiment, the level of the treatments have been kept constant throughout the expt duration). Finally, we assemble random composed communities and calculate response diversity for each of them.
 
+(The original data and metadata are available at https://doi.org/10.5281/zenodo.8383688)
+
 ### Load data set and look at species responses
 
 
@@ -2683,6 +2685,6 @@ Fig3_comm3 <- rdiv_comm3 %>%
 
 ```{r}
 # Create pdf report
-pagedown::chrome_print(here("reports/Appendix1/Appendix1_principles-and-demos.html"), output = "Appendix1_principle-and-demos.pdf")
+#pagedown::chrome_print(here("reports/Appendix1/Appendix1_principles-and-demos.html"), output = "Appendix1_principle-and-demos.pdf")
 ```
 

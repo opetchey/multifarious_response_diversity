@@ -51,7 +51,7 @@ III.	Mean value of environmental conditions.
 
 Initially, we also hypothesised that the different correlation scenarios of temperature and salinity change over time may be driving response diversity. However, after thinking and discussing the hypothesis, we concluded that there was no reason to believe that. Yet, we used different correlation scenarios in salinity and temperature change in the simulation to show that our results are robust to every kind of environmental change scenario. 
 
-In this document, we first analyse the II and III factors, and then we repeat the analysis in a case where temperature and salinity have exactly the same effect on species growth rate.
+In this document, we first analyse the II and III treatments, and then we repeat the analysis in a case where temperature and salinity have exactly the same effect on species growth rate.
 
 For each community, we calculate first the potential response diversity (with unknown direction of environmental change), and then also response diversity for each environmental change scenario.
 
