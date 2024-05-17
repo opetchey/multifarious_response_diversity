@@ -69,7 +69,11 @@ d_plot <- ggplot(data = d1_m, mapping = aes(x = data, y = derivative)) +
   geom_line()
 
 Fig1 <- p/d_plot
-Fig1
+Fig1 <- Fig1 +
+  labs( caption = "Figure 1") +
+  theme(plot.caption = element_text(hjust = 0, vjust = 1, color = "blue", size = 15))
+
+
 
 # Save the plot
 # ggsave(Fig1, file="/Users/francesco/Documents/GitHub/multifarious_response_diversity/Fig1.jpg", width=8, height=8)
@@ -166,12 +170,15 @@ Fig2 <- p1 +
   annotate("text", x = 0.10, y = 0.60, label = "A", size = 6) +
   annotate("text", x = 0.60, y = 0.70, label = "B", size = 6) +
   labs(x = "Temperature (k)", y = "Salinity (ppt)",
-    color = "Directional\nDerivative") +
+    color = "Directional\nDerivative", title = "") +
   theme_classic(base_size = 20) +
   # here is the issue - you need guide_colourbar() not guide_legend()
   guides(fill = guide_colourbar(title="Growth\nRate"), size = "none")
 
-Fig2
+Fig2 <- Fig2 +
+  labs( caption = "Figure 2") +
+  theme(plot.caption = element_text(hjust = 0, vjust = 1, color = "blue", size = 15))
+
 
 
 # notice though that the directional deriative lines are not the same length!
@@ -182,7 +189,7 @@ ggsave(Fig2 + coord_equal(), file = here("ms_figures/Fig2-eq.png"), width = 10, 
 ggsave(Fig2 + coord_equal(), file = here("ms_figures/Fig2-eq.pdf"), width = 10, height = 8)
 
 ############ Figure 3 ################
-# Fig 3 is generated in the document "Appendix1_principles and demos" at line 668
+# Fig 3 is generated in the document "Appendix1_principles and demos" at line 805
 
 
 
@@ -530,7 +537,8 @@ sp_plot <- sp1 + geom_point(data = refs_ts, mapping = aes(x = E1, y = E2), size 
 
 
 Fig4 <- (p_E1_spline + p_E2_spline + sp_plot) / dir_plot
-Fig4
+Fig4 <- Fig4 + labs( caption = "Figure 4") +
+  theme(plot.caption = element_text(hjust = 0, vjust = 1, color = "blue", size = 15))
 
 
 ggsave(Fig4, file = here("ms_figures/Fig4.jpg"), width = 22, height = 15)
@@ -616,7 +624,9 @@ try <- ggarrange(sp1_nocor, sp2_nocor, sp3_nocor,  sp4_nocor,  nrow = 2, ncol=2,
 
 fig5 <- ggarrange(try, dd_plot, rdiv_plot, sing_plot, heights = c(3.5, 1.5, 1.2, 1), widths = c(c(3.5, 1.5, 1.5, 1.5)),
                   ncol = 1, nrow = 4, align = "v") 
-fig5
+fig5 <- fig5+ 
+  labs( caption = "Figure 5") +
+  theme(plot.caption = element_text(hjust = 0, vjust = 1, color = "blue", size = 15))
 
 
 ggsave(fig5, file = here("ms_figures/Fig5.jpg"), width = 8, height = 12)
@@ -624,7 +634,7 @@ ggsave(fig5, file = here("ms_figures/Fig5.png"), width = 8, height = 12)
 ggsave(fig5, file = here("ms_figures/Fig5.pdf"), width = 8, height = 12)
 
 ############ Figure 6 ################
-# Fig 6 is generated in the document called "Appendix1_principle and demos.Rmd", line 707
+# Fig 6 is generated in the document called "Appendix1_principle and demos.Rmd", line 873
 
 
 
@@ -729,7 +739,9 @@ sp2 <- p1 +
 
 Fig_7 <- ggarrange(sp1, sp2, heights = c(2,2), 
           ncol = 2) 
-Fig_7
+Fig_7 <- Fig_7 +
+  labs( caption = "Figure 7") +
+  theme(plot.caption = element_text(hjust = 0, vjust = 1, color = "blue", size = 15))
 
 ggsave(Fig_7, file = here("ms_figures/Fig7.jpg"), width = 14, height = 8)
 ggsave(Fig_7, file = here("ms_figures/Fig7.png"), width = 14, height = 8)
@@ -874,10 +886,12 @@ pp2 <- fig1[[1]] + labs(x = "Temperature", y = "Growth Rate",  tag = "(b)") +
   guides(color=guide_legend(title="Temperature"))
 
 pp2 <- pp2 +  ggtitle("Equal effect of temperature and salinity")+
-  theme(plot.title = element_text(hjust = 2))
+  theme(plot.title = element_text(hjust = 2)) +
+  labs( caption = "Figure 8") +
+  theme(plot.caption = element_text(hjust = -2.5, vjust = 0.1, color = "blue", size = 15))
 
 
-simulation_curves <- pp1/pp2
+simulation_curves <- pp1/pp2 
 simulation_curves
 
 
@@ -947,7 +961,9 @@ high_z1_div <- ggplot(df_high_z1, aes(x = E1, fill = species)) +
     plot.title = element_text(hjust = 0.5))+
   theme_classic(base_size = 12) +
   theme(
-    plot.title = element_text(hjust = 0.5))
+    plot.title = element_text(hjust = 0.5)) +
+  labs( caption = "Figure 9") +
+  theme(plot.caption = element_text(hjust = 0, vjust = 0.8, color = "blue", size = 15))
 high_z1_div
 
 comb <- low_z1_div/ medium_z1_div / high_z1_div & theme(legend.position = "bottom")
@@ -1037,11 +1053,11 @@ optimum_scenarios
 
 fig_Optimum_complete <- ggpubr::ggarrange(fig_optimum, optimum_scenarios, final_plot_corr, heights = c(2,2,2), 
                                   ncol = 3, align = "hv")  
-fig_Optimum_complete
+fig_Optimum_complete 
 
 
 ggsave(fig_Optimum_complete, file = here("ms_figures/Fig9.jpg"), width = 15, height = 15)
-ggsave(fig_Optimum_complete, file = here("ms_figures/Fig9.png"), width = 15, height = 15)
+ggsave(fig_Optimum_complete, file = here("ms_figures/Fig9.png"), width = 25, height = 15)
 ggsave(fig_Optimum_complete, file = here("ms_figures/Fig9.pdf"), width = 15, height = 15)
 
 
@@ -1164,7 +1180,9 @@ high_z1_div <- ggplot(df_high_z1, aes(x = E1, fill = species)) +
   annotate('rect', xmin=305, xmax=350, ymin=0.0, ymax=0.035, alpha=.2, fill='blue')+
   annotate('text', x=330, y=0.032, label='High mean Temperature') +
   theme(
-    plot.title = element_text(hjust = 0.5))
+    plot.title = element_text(hjust = 0.5)) +
+  labs( caption = "Figure 10") +
+  theme(plot.caption = element_text(hjust = -0.1, vjust = 0.1, color = "blue", size = 15))
 
 
 comb <- low_z1_div / high_z1_div & theme(legend.position = "bottom")
@@ -1219,7 +1237,9 @@ Absolute_plot_tot_same <-  ggplot(Absolute_RD_same, aes(x = correlation, y = val
 Absolute_RD_ms <-( Absolute_plot_tot + labs(tag = "(a)"))  /( Absolute_plot_tot_same + labs(tags = "(b)")) & theme(legend.position = "right")
 Absolute_RD_ms <- Absolute_RD_ms + plot_layout(guides = "collect") + ggtitle("Treatment I:\nEqual effect of temperature and salinity")
 
-Absolute_RD_ms
+Absolute_RD_ms <- Absolute_RD_ms +
+  labs( caption = "Figure 11") +
+  theme(plot.caption = element_text(hjust = -0.1, vjust = 0.1, color = "blue", size = 15))
 
 ggsave(Absolute_RD_ms, file = here("ms_figures/Fig11.jpg"), width = 10, height = 10)
 ggsave(Absolute_RD_ms, file = here("ms_figures/Fig11.png"), width = 10, height = 10)
@@ -1326,7 +1346,10 @@ bottom_plot   <- wrap_elements((diss4 + diss5 + diss6 & theme(legend.position = 
 combined_final <- (top_plot / bottom_plot) 
 
 combined_final <-combined_final + plot_layout(guides = "collect") # doesn't actually collect the legend... if you happen to know how to make it work, please get in touch
-combined_final 
+combined_final <- combined_final +
+  labs( caption = "Figure 12") +
+  theme(plot.caption = element_text(hjust = 0, vjust = 0.3, color = "blue", size = 15))
+
 
 ggsave(combined_final, file = here("ms_figures/Fig12.jpg"), width = 18, height = 14)
 ggsave(combined_final, file = here("ms_figures/Fig12.png"), width = 18, height = 14)
@@ -1437,8 +1460,75 @@ bottom_plot   <- wrap_elements((div4 + div5 + div6 & theme(legend.position = "bo
 combined_final <- (top_plot / bottom_plot) 
 
 combined_final <-combined_final + plot_layout(guides = "collect") # doesn't actually collect the legend... if you happen to know how to meke it work, please get in touch
-combined_final 
+combined_final <- combined_final +
+  labs( caption = "Figure 13") +
+  theme(plot.caption = element_text(hjust = 0, vjust = 0.3, color = "blue", size = 15))
+
 
 ggsave(combined_final, file = here("ms_figures/Fig13.jpg"), width = 18, height = 14)
 ggsave(combined_final, file = here("ms_figures/Fig13.png"), width = 18, height = 14)
 ggsave(combined_final, file = here("ms_figures/Fig13.pdf"), width = 18, height = 14)
+
+
+
+################# Revision ##############
+library(grid)
+library(ggplot2)
+library(gridExtra)
+############### Figure 2 ##############
+refs <- tibble(E1 = 300,
+               E2 = 20)
+
+refs <- get_partials(m1, refs) %>%  rename(E1_ref = E1, E2_ref = E2)
+
+
+p4 <- draw(m1, rug = FALSE) &
+  labs(tag = "(d)") & xlab("E1") & ylab("E2") & 
+  labs(title = "", fill = "Growth", caption = "") & theme_classic(base_size = 15) 
+p4 <- p4+ labs(tag = "(a)") + guides(fill=guide_colourbar(title="Growth \n Rate")) +
+  theme(legend.key.width = unit(0.28, "cm"),  # Adjust width of the legend key
+        legend.key.height = unit(0.28, "cm"))
+
+fig2.a <- p4 + labs(color = "Directional \n  Derivative") +
+  geom_segment(data = dd1,
+               aes(x = E1_ref, y = E2_ref,
+                   xend = E1_ref + E1, yend = E2_ref + E2,
+                   col = dir_deriv), alpha = 0.7,
+               size=1) +  scale_colour_gradient2(low = muted("blue"),
+                                                 mid = "white",
+                                                 high = muted("red"),
+                                                 midpoint = 0)
+fig2.a <- fig2.a +
+  theme(plot.caption = element_text(hjust = 0.1, vjust = 1, color = "blue", size = 15))
+# Combine the legends of fig1 and fig2
+combined_legend <- get_legend(fig6)  # Get legend from fig1
+
+# Modify legend to include elements from fig2
+combined_legend <- cowplot::plot_grid(
+  combined_legend, 
+  ncol = 1
+)
+
+
+combined_plot <- fig6 + fig2.b + plot_layout(ncol = 2)
+
+arrow <- linesGrob(
+  x = unit(c(0.01, 0.9), "npc"),
+  y = unit(c(0.5, 0.5), "npc"),
+  gp = gpar(
+    col = "blue",
+    lwd = 2
+  ),
+  arrow = arrow(type = "open", ends = "last", length = unit(0.2, "inches"))
+)
+
+# Arrange the plots and arrow using grid.arrange
+grid.arrange(
+  fig6,
+  arrow,
+  fig2.b,
+  combined_legend,
+  ncol = 3,
+  widths = c(1, 0.1, 1),
+  heights = unit(c(1, 0.2), c("null", "null"))
+)

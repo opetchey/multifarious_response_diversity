@@ -1,5 +1,5 @@
 ---
-title: "Creating the data for Response diversity in the context of multifarious environmental
+title: "Analysis and creating the data for Response diversity in the context of multifarious environmental
   change"
 author: "Francesco Polazzo"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
@@ -51,9 +51,10 @@ III.	Mean value of environmental conditions.
 
 Initially, we also hypothesised that the different correlation scenarios of temperature and salinity change over time may be driving response diversity. However, after thinking and discussing the hypothesis, we concluded that there was no reason to believe that. Yet, we used different correlation scenarios in salinity and temperature change in the simulation to show that our results are robust to every kind of environmental change scenario. 
 
-In this document, we first analyse the II and III treatments, and then we repeat the analysis in a case where temperature and salinity have exactly the same effect on species growth rate.
+In this document, we first analyse the II and III determinants, and then we repeat the analysis in a case where temperature and salinity have exactly the same effect on species growth rate (determinant I).
 
-For each community, we calculate first the potential response diversity (with unknown direction of environmental change), and then also response diversity for each environmental change scenario.
+For each community, we calculate first response capacity (with unknown direction of environmental change), and then also response diversity for each environmental change scenario.
+We here quantify directional response diversity also as dissimilarity. However, we decided to exclude this measurement of response diversity, as it does not correlate well with community stability, and it also shows to be dependent on the shape of species responses. In the manuscript, thus, we focus on divergence as main metric to measure directional response diversity. 
 
 Within the project "response diversity in the context of multifarious environmental change", we have been simulating species response curves using the Eppley performance curve.
 
@@ -486,7 +487,7 @@ RDiv1_comm3.1 <- tibble(Div_loc_dir2_comm3.1 %>% dplyr::group_by(E1_ref, E2_ref)
 
 ```
 
-### Potential response diversity
+### Response Capacity
 ```{r}
 RDiv1_comm1.1$community <- 1
 RDiv1_comm2.1$community <- 2
@@ -1731,7 +1732,7 @@ RDiv1_comm3.2 <- tibble(Div_loc_dir2_comm3.2 %>% dplyr::group_by(E1_ref, E2_ref)
 
 ```
 
-### Potential response diversity
+### Response Capacity
 ```{r }
 RDiv1_comm1.2$community <- 1
 RDiv1_comm2.2$community <- 2
@@ -2940,7 +2941,7 @@ RDiv1_comm3.3 <- tibble(Div_loc_dir2_comm3.3 %>% dplyr::group_by(E1_ref, E2_ref)
 
 ```
 
-### Potential response diversity
+### Response Capacity
 ```{r}
 RDiv1_comm1.3$community <- 1
 RDiv1_comm2.3$community <- 2
@@ -2956,7 +2957,7 @@ Absolute_RD_3$community <- as.factor(Absolute_RD_3$community)
 ```
 
 
-## Potential response diveristy across scenarios - here we create the data set to campare the potential response diversity in the three different scenarios we created above. That is, we compare potential dissimilarity and divergence in communities changing only in z1, in communities changing in z1 and z2 with positive correlation, and communities changing in z1 and z2 with negative correlation. 
+## Potential response diveristy across scenarios - here we create the data set to campare the Response Capacity in the three different scenarios we created above. That is, we compare potential dissimilarity and divergence in communities changing only in z1, in communities changing in z1 and z2 with positive correlation, and communities changing in z1 and z2 with negative correlation. 
 ```{r }
 # preparing data for overview plotting
 Absolute_RD_1$scenario <- 1
@@ -3765,7 +3766,6 @@ dd_divergence_scenario3 <- dd_plot2
 
 
 
-
 # Equal effect of temperature and salinity on species growth rate. 
 
 Now, we repeat the same steps as in the first part of the analysis, but with temperature and salinity having the same effect on species' growth rate. 
@@ -4194,7 +4194,7 @@ RDiv1_comm3.1 <- tibble(Div_loc_dir2_comm3.1 %>% dplyr::group_by(E1_ref, E2_ref)
 ```
 
 
-### Potential response diversity
+### Response Capacity
 ```{r }
 RDiv1_comm1.1$community <- 1
 RDiv1_comm2.1$community <- 2
@@ -5396,7 +5396,7 @@ RDiv1_comm3.2 <- tibble(Div_loc_dir2_comm3.2 %>% dplyr::group_by(E1_ref, E2_ref)
 
 ```
 
-### Potential response diversity
+### Response Capacity
 ```{r }
 RDiv1_comm1.2$community <- 1
 RDiv1_comm2.2$community <- 2
@@ -6600,7 +6600,7 @@ RDiv1_comm3.3 <- tibble(Div_loc_dir2_comm3.3 %>% dplyr::group_by(E1_ref, E2_ref)
 
 ```
 
-## Potential response diversity
+## Response Capacity
 ```{r }
 RDiv1_comm1.3$community <- 1
 RDiv1_comm2.3$community <- 2
@@ -6616,7 +6616,7 @@ Absolute_RD_3$community <- as.factor(Absolute_RD_3$community)
 
 ```
 
-### Potential response diveristy across scenarios - here we prapre the data set used to campare the potential response diversity in the three different scenarios we created above. That is, we compare potential dissimilarity and divergence in communities changing only in z1, in communities changing in z1 and z2 with positive correlation, and communities changing in z1 and z2 with negative correlation. 
+### Potential response diveristy across scenarios - here we prapre the data set used to campare the Response Capacity in the three different scenarios we created above. That is, we compare potential dissimilarity and divergence in communities changing only in z1, in communities changing in z1 and z2 with positive correlation, and communities changing in z1 and z2 with negative correlation. 
 ```{r }
 Absolute_RD_1$scenario <- 1
 Absolute_RD_2$scenario <- 2
@@ -7431,3 +7431,263 @@ dd_divergence_scenario3_SAME <- dd_plot2
 save.image(file = here("Data/my_work_space.RData"))
 ```
 
+
+# Plotting results
+
+
+### Response capacity
+```{r potentialresponsediversity2, fig.cap='Potential response diversity', fig.align="center", fig.height=6, fig.width=8}
+col2 <- ifelse(Absolute_RD$scenario==1, "None",
+               ifelse(Absolute_RD$scenario==2, "Positive",
+                      ifelse(Absolute_RD$scenario==3, "Negative",
+                                    NA  ))) # all other values map to NA
+
+Absolute_RD$correlation <- col2
+Absolute_RD$correlation <- factor(Absolute_RD$correlation, levels = c("None", "Positive", "Negative"))
+Absolute_plot_tot <-  ggplot(Absolute_RD, aes(x = correlation, y = value, color = community)) +
+  scale_color_uchicago(labels=c('High', 'Medium', 'Low')) + 
+  labs(x = "Correlation in diversity of responses", y = "Response Diversity") + facet_wrap("RDiv",  scales = "free_y") +
+   facet_wrap("RDiv",  scales = "free_y") +
+  geom_jitter( size = 6, alpha = 0.80, width = 0.20) +
+  theme_bw(base_size = 12)  + ggtitle("E1 dominant environmental variable") +
+  guides(color=guide_legend(title="Diversity in responses to E1"))
+
+
+col2 <- ifelse(Absolute_RD_same$scenario==1, "None",
+               ifelse(Absolute_RD_same$scenario==2, "Positive",
+                      ifelse(Absolute_RD_same$scenario==3, "Negative",
+                             NA  ))) # all other values map to NA
+
+Absolute_RD_same$correlation <- col2
+Absolute_RD_same$correlation <- factor(Absolute_RD_same$correlation, levels = c("None", "Positive", "Negative"))
+
+Absolute_plot_tot_same <-  ggplot(Absolute_RD_same, aes(x = correlation, y = value, color = community)) +
+  scale_color_uchicago(labels=c('High', 'Medium', 'Low')) + 
+  labs(x = "Correlation in diversity of responses", y = "Response Diversity") + facet_wrap("RDiv",  scales = "free_y") +
+  facet_wrap("RDiv",  scales = "free_y") +
+  geom_jitter( size = 6, alpha = 0.80, width = 0.20) +
+  theme_bw(base_size = 12) +
+  guides(color=guide_legend(title="Diversity in responses to E1"))
+
+Absolute_RD_ms <-( Absolute_plot_tot + labs(tag = "(a)"))  /( Absolute_plot_tot_same + labs(tags = "(b)")) & theme(legend.position = "right")
+Absolute_RD_ms <- Absolute_RD_ms + plot_layout(guides = "collect") + ggtitle("Equal effect of E1 and E2")
+
+Absolute_RD_ms 
+```
+
+
+
+## Summary plot -  Directional Response diversity as Response Dissimilarity
+
+```{r SummaryPlot3, fig.align="center", fig.height=15, fig.width=22, fig.cap="Summary plot showing the effects of the determinants on directional response diveristy measured as Dissimilarity"}
+
+theme_set(theme_classic(base_size = 15))
+diss1 <-  ggplot(dd_dissimilarity_scenario1, aes(x = z1, y = rdiv, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "E1 optimum diversity", y = "Dissimilarity (derivatives)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(a)")+ 
+  scale_x_discrete(limits = level_order)  + ggtitle("Only variation in E1\n optimum diversity")
+
+
+diss2 <-  ggplot(dd_dissimilarity_scenario2, aes(x = z1, y = rdiv, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "E1 optimum diversity", y = "Dissimilarity (derivatives)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(b)")+ 
+  scale_x_discrete(limits = level_order) + ggtitle("Variation in E1 and E2\noptimum diversity - positive correlation")
+
+diss3 <-  ggplot(dd_dissimilarity_scenario3, aes(x = z1, y = rdiv, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "E1 optimum diversity", y = "Dissimilarity (derivatives)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(c)")+ 
+  scale_x_discrete(limits = level_order) + ggtitle("Variation in E1 and E2\noptimum diversity - negative correlation")
+
+
+diss4 <-  ggplot(dd_dissimilarity_scenario1_SAME, aes(x = z1, y = rdiv, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "E1 optimum diversity", y = "Dissimilarity (derivatives)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(d)")+ 
+  scale_x_discrete(limits = level_order)  + ggtitle("Only variation in E1\n optimum diversity")
+
+
+diss5 <-  ggplot(dd_dissimilarity_scenario2_SAME, aes(x = z1, y = rdiv, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "E1 optimum diversity", y = "Dissimilarity (derivatives)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(e)")+ 
+  scale_x_discrete(limits = level_order) + ggtitle("Variation in E1 and E2\noptimum diversity - positive correlation")
+
+diss6 <-  ggplot(dd_dissimilarity_scenario3_SAME, aes(x = z1, y = rdiv, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "E1 optimum diversity", y = "Dissimilarity (derivatives)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(f)")+ 
+  scale_x_discrete(limits = level_order) + ggtitle("Variation in E1 and E2\noptimum diversity - negative correlation")
+
+
+
+top_plot      <- wrap_elements((diss1 + diss2 + diss3 & theme(legend.position = "bottom") & 
+                                  labs(col = "E1 mean value")) + plot_layout(guides = "collect")+
+                                 plot_annotation(title = "E1 dominant environmental variable",
+                                                 theme = theme(plot.title = element_text(hjust = 0.5))))
+  
+
+bottom_plot   <- wrap_elements((diss4 + diss5 + diss6 & theme(legend.position = "bottom") & 
+                                  labs(col = "E1 mean value")) + plot_layout(guides = "collect")+ 
+                                 plot_annotation(title = "Equal effect of E1 and E2",
+                                                 theme = theme(plot.title = element_text(hjust = 0.5))))
+
+combined_final <- (top_plot / bottom_plot) 
+
+combined_final <-combined_final + plot_layout(guides = "collect") # doesn't actually collect the legend... if you happen to know how to make it work, please get in touch
+combined_final 
+
+
+```
+
+## Summary plot - Directional Response diversity as Response Divergence
+
+```{r SummaryPlot1.4, fig.align="center", fig.height=15, fig.width=22, fig.cap="Summary plot showing the effects of the determinants on directional response diveristy measured as Divergence (same as in the main manuscript"}
+theme_set(theme_classic(base_size = 15))
+div1 <-  ggplot(dd_divergence_scenario1, aes(x = z1, y = sign, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "E1 optimum diversity", y = "Divergence (sign sensitive)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(a)")+ 
+  scale_x_discrete(limits = level_order)  + ggtitle("Only variation in E1\n optimum diversity")
+
+
+div2 <-  ggplot(dd_divergence_scenario2, aes(x = z1, y = sign, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "E1 optimum diversity", y = "Divergence (sign sensitive)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(b)")+ 
+  scale_x_discrete(limits = level_order) + ggtitle("Variation in E1 and E2\noptimum diversity - positive correlation")
+
+div3 <-  ggplot(dd_divergence_scenario3, aes(x = z1, y = sign, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "E1 optimum diversity", y = "Divergence (sign sensitive)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(c)")+ 
+  scale_x_discrete(limits = level_order) + ggtitle("Variation in E1 and E2\noptimum diversity - negative correlation")
+
+
+div4 <-  ggplot(dd_divergence_scenario1_SAME, aes(x = z1, y = sign, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "E1 optimum diversity", y = "Divergence (sign sensitive)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(d)")+ 
+  scale_x_discrete(limits = level_order)   + ggtitle("Only variation in E1\n optimum diversity")
+
+
+div5 <-  ggplot(dd_divergence_scenario2_SAME, aes(x = z1, y = sign, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "E1 optimum diversity", y = "Divergence (sign sensitive)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(e)")+ 
+  scale_x_discrete(limits = level_order) + ggtitle("Variation in E1 and E2\noptimum diversity - positive correlation")
+
+
+div6 <-  ggplot(dd_divergence_scenario3_SAME, aes(x = z1, y = sign, color = E1_mean)) +
+  # scale_y_continuous(limits = c(0.99, 1.005), expand = c(0.02, 0.02)) +
+  scale_color_uchicago() +
+  labs(x = "E1 optimum diversity", y = "Divergence (sign sensitive)") +
+  theme(
+    legend.position = "none",
+    axis.title = element_text(size = 16),
+    panel.grid = element_blank()
+  ) +
+  geom_jitter(size = 2, alpha = 0.25, width = 0.2) +
+  stat_summary(fun = mean, geom = "point", size = 5) + labs(tag = "(f)")+ 
+  scale_x_discrete(limits = level_order) + ggtitle("Variation in E1 and E2\noptimum diversity - negative correlation")
+
+
+
+
+
+top_plot      <- wrap_elements((div1 + div2 + div3 & theme(legend.position = "bottom") & 
+                                  labs(col = "E1 mean value")) + plot_layout(guides = "collect")+
+                                 plot_annotation(title = "E1 dominant environmental variable",
+                                                 theme = theme(plot.title = element_text(hjust = 0.5))))
+
+
+bottom_plot   <- wrap_elements((div4 + div5 + div6 & theme(legend.position = "bottom") & 
+                                  labs(col = "E1 mean value")) + plot_layout(guides = "collect")+ 
+                                 plot_annotation(title = "Equal effect of E1 and E2",
+                                                 theme = theme(plot.title = element_text(hjust = 0.5))))
+
+combined_final <- (top_plot / bottom_plot) 
+
+combined_final <-combined_final + plot_layout(guides = "collect") # doesn't actually collect the legend... if you happen to know how to meke it work, please get in touch
+combined_final 
+
+```
