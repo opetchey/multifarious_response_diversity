@@ -111,7 +111,7 @@ directional derivatives on a surface.
 currently a keynote illustration.
 
 ```{r surface-sketch, echo = FALSE,  include=TRUE, fig.cap='(ref:surface-sketch)', fig.align="center", fig.height=6, fig.width=6}
-knitr::include_graphics(here("reports/assets/illustration_of_directional_derivatives.png"))
+knitr::include_graphics(here("Second version/assets/illustration_of_directional_derivatives.png"))
 ```
 
 # A simulated empirical example
@@ -788,9 +788,6 @@ fig3 <- fig3 +
   theme(plot.caption = element_text(hjust = 0, vjust = 1, color = "blue", size = 25))
 
 
-ggsave(fig3, file = here("ms_figures/fig3.jpg"), width = 20, height = 12)
-ggsave(fig3, file = here("ms_figures/fig3.png"), width = 20, height = 12)
-ggsave(fig3, file = here("ms_figures/fig3.pdf"), width = 20, height = 12)
 ```
 
 # Directional derivatives
@@ -859,9 +856,6 @@ fig6 <- fig6 +
   labs( caption = "Figure 6") +
   theme(plot.caption = element_text(hjust = 0.1, vjust = 1, color = "blue", size = 15))
 
-ggsave(fig6 + coord_equal(), file = here("ms_figures/fig6.jpg"), width = 6, height = 4)
-ggsave(fig6 + coord_equal(), file = here("ms_figures/fig6.png"), width = 6, height = 4)
-ggsave(fig6 + coord_equal(), file = here("ms_figures/fig6.pdf"), width = 6, height = 4)
 
 
 ```
@@ -2846,5 +2840,5 @@ Fig3_comm3 <- rdiv_comm3 %>%
 
 ```{r}
 #Create pdf report
- pagedown::chrome_print(here("reports/Appendix1/Appendix1_principles-and-demos.html"), output = "Appendix1_principle-and-demos.pdf")
+ pagedown::chrome_print(here("Second version/Appendix1_principles-and-demos_v2.html"), output = "Appendix1_principle-and-demos.pdf")
 ```
